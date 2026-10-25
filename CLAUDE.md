@@ -36,6 +36,9 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
    En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em (Playfair: x1,36), lo convierte `metricas()`.
    Mayúscula al empezar cada oración. En la llamada a la acción los subtítulos suben y el botón va abajo.
 9. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh).
+10. **Transición de Sebastián**: película quemada (overlay en modo Trama, mezclado en RGB) + sonido "transicion",
+    en los cambios de sección, no en cada corte.
+11. **Música**: de fondo, ~16 dB bajo la voz y con ducking. Avisar del riesgo de derechos de autor si es comercial.
 4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
    "acción" con margen, y revisar los primeros 300 ms de cada corte.
 5. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
