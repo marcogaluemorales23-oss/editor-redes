@@ -26,4 +26,14 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 
 ## Reglas aprendidas (correcciones de Sebastián)
 
-_(vacío: se llena con cada corrección)_
+1. **Zonas seguras de Instagram/TikTok** (1080x1920): nada importante (botones, subtítulos, logos) en los
+   250 px de arriba, en los 480 px de abajo (usuario, descripción, música) ni en los 140 px de la derecha
+   desde y=1000 (iconos de like, comentar, compartir). Revisar cada elemento contra esa zona antes de entregar.
+2. **Subtítulos sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
+3. **Subtítulos grandes**: lo de 66/80 px quedó pequeño. Medir el tamaño de la referencia de Sebastián.
+4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
+   "acción" con margen, y revisar los primeros 300 ms de cada corte.
+5. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
+6. **El gancho (primeros 3–4 s) lleva más trabajo**: más movimiento, acercamientos y ritmo que el resto.
+7. **Fluidez**: Sebastián quiere más fluidez que 23,976 fps. Probar interpolación y que él decida viendo la prueba.
+8. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.
