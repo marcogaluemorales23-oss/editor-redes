@@ -44,11 +44,13 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 9. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh).
 10. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
     mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
-    Va entre ideas del guion: gancho→problema, oferta 1→oferta 2, oferta 2→llamada a la acción.
+    Va en **cada cambio de clip bruto** (`"en_cada_clip"` en transiciones.json la calcula sola desde edl.json).
 11. **Música**: de fondo, ~16 dB bajo la voz y con ducking. Avisar del riesgo de derechos de autor si es comercial.
 4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
    "acción" con margen, y revisar los primeros 300 ms de cada corte.
 5. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
 6. **El gancho (primeros 3–4 s) lleva más trabajo**: más movimiento, acercamientos y ritmo que el resto.
 7. **Fluidez**: Sebastián quiere más fluidez que 23,976 fps. Probar interpolación y que él decida viendo la prueba.
+12. **Encuadre**: zoom base 12 % y cara centrada en x=540, centro de la cara a y≈930 (montar.py la detecta).
+    Alterna con un plano 15 % más cerrado. Si la cara está muy corrida, sube el zoom lo justo para centrarla.
 8. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.

@@ -31,10 +31,22 @@ def main():
     base = trabajo / a.base
     total = duracion(base)
 
+    transiciones = conf.get("transiciones", [])
+    if "en_cada_clip" in conf:
+        # Regla de Sebas: la transición va en cada cambio de clip bruto. Se calcula sola desde edl.json.
+        molde = conf["en_cada_clip"]
+        cortes = json.loads((trabajo / "edl.json").read_text())["cortes"]
+        t, transiciones = 0.0, []
+        for previo, c in zip(cortes, cortes[1:]):
+            t += previo["out"] - previo["in"]
+            if c["clip"] != previo["clip"]:
+                transiciones.append({**molde, "t": round(t, 3)})
+        print("transiciones en:", ", ".join(f'{x["t"]:.2f}s' for x in transiciones))
+
     entradas = ["-i", str(base)]
     filtros, video, audios = [], "[0:v]", []
     n = 1
-    for k, tr in enumerate(conf.get("transiciones", [])):
+    for k, tr in enumerate(transiciones):
         inicio = tr["t"] - tr["pico"]
         entradas += ["-ss", str(tr["desde"]), "-t", str(tr["dur"]), "-i", str(reel / tr["overlay"])]
         filtros.append(f"[{n}:v]scale=1080:1920,fps=24000/1001,format=gbrp,"

@@ -1,14 +1,26 @@
 #!/usr/bin/env python3
 """Monta la base sin textos a partir de edl.json: 1080x1920, fps del crudo, audio a -14 LUFS.
 
-Uso: python3 nucleo/montar.py <reel> [--zoom 1.0,1.18,...]
---zoom: acercamiento por corte (se repite en ciclo). Por defecto alterna plano normal y cerrado,
-recortando hacia la parte de arriba para que la cara quede en el tercio superior.
+Uso: python3 nucleo/montar.py <reel> [--zoom 1.12,1.28] [--sin-centrar]
+--zoom: acercamiento por corte (se repite en ciclo). Por defecto zoom base de 12 % (pedido de Sebas) y
+alterna con un plano 15 % más cerrado.
+Encuadre: detecta la cara en cada corte y la centra en horizontal, con el centro de la cara a y≈930
+(como en la edición de Sebas). Si la cara está muy corrida, sube el zoom lo justo para poder centrarla.
 """
 import argparse
 import json
 import subprocess
 from pathlib import Path
+
+CARA_Y = 930        # altura del centro de la cara en el cuadro final (Sebas: 870-1000)
+TOLERANCIA_X = 25   # px que se acepta la cara fuera del centro antes de subir el zoom
+ZOOM_MAX = 1.35
+
+
+def zoom_para_centrar(cx):
+    """Zoom mínimo que deja recorrer lo suficiente para poner la cara (cx en el crudo a 1080 de ancho) en x=540."""
+    dx = abs(cx - 540)
+    return 1.0 if dx <= TOLERANCIA_X else min(ZOOM_MAX, (540 - TOLERANCIA_X) / (540 - dx))
 
 
 def fps_de(clip):
@@ -21,7 +33,8 @@ def fps_de(clip):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("reel")
-    ap.add_argument("--zoom", default="1.0,1.18")
+    ap.add_argument("--zoom", default="1.12,1.28")
+    ap.add_argument("--sin-centrar", action="store_true")
     a = ap.parse_args()
     reel = Path(a.reel)
     trabajo = reel / "trabajo"
@@ -40,6 +53,15 @@ def main():
     for k, c in enumerate(cortes):
         z = zooms[k % len(zooms)]
         d = c["out"] - c["in"]
+        crudo = reel / "crudos" / f'{c["clip"]}.MP4'
+        cx, cy = 540.0, CARA_Y * 1.0
+        if not a.sin_centrar:
+            from caras import caras
+            vistas = [x for x in caras(crudo, [c["in"] + 0.2, c["in"] + d / 2, c["out"] - 0.2]) if x[1] is not None]
+            if vistas:
+                cx = sorted(x[1] for x in vistas)[len(vistas) // 2]
+                cy = sorted(x[2] for x in vistas)[len(vistas) // 2]
+                z = max(z, zoom_para_centrar(cx))
         mov = movimientos.get(str(k))
         if mov:
             # zoompan sobre el crudo 4K (2x la salida): el zoom se calcula en cada cuadro y no tiembla.
@@ -47,12 +69,15 @@ def main():
                      f"*ld(0)*(3-2*ld(0))") if "golpe_en" in mov else ""
             zexpr = f"{z}*(1+{mov.get('empuje', 0)}*it/{d:.3f}{golpe})"
             vf = (f"scale=2160:3840:flags=lanczos,fps={fps},"
-                  f"zoompan=z='{zexpr}':x='(iw-iw/zoom)/2':y='(ih-ih/zoom)*0.25':d=1:s=1080x1920:fps={fps},"
+                  f"zoompan=z='{zexpr}':x='max(0,min(iw-iw/zoom,{cx * 2:.1f}-iw/zoom/2))'"
+                  f":y='max(0,min(ih-ih/zoom,{cy * 2:.1f}-ih/zoom*{CARA_Y / 1920:.4f}))':d=1:s=1080x1920:fps={fps},"
                   f"format=yuv420p")
         else:
             w, h = round(1080 * z / 2) * 2, round(1920 * z / 2) * 2
-            # Recorte centrado en horizontal y con la cara en el tercio superior (y = 25 % del sobrante).
-            vf = f"scale={w}:{h}:flags=lanczos,crop=1080:1920:(iw-1080)/2:(ih-1920)*0.25,fps={fps},format=yuv420p"
+            # Recorte con la cara centrada en x y a la altura CARA_Y, sin salirse del cuadro.
+            x = max(0, min(w - 1080, cx * z - 540))
+            y = max(0, min(h - 1920, cy * z - CARA_Y))
+            vf = f"scale={w}:{h}:flags=lanczos,crop=1080:1920:{x:.0f}:{y:.0f},fps={fps},format=yuv420p"
         af = f"afade=t=in:d=0.01,afade=t=out:st={d - 0.012:.3f}:d=0.012"
         salida = tramos / f"{k:02d}.mp4"
         subprocess.run(
@@ -62,7 +87,7 @@ def main():
              str(salida.with_suffix(".mov"))], check=True,
         )
         lista.append(f"file '{salida.with_suffix('.mov').name}'")
-        print(f"tramo {k + 1}/{len(cortes)} listo (zoom {z})")
+        print(f"tramo {k + 1}/{len(cortes)} listo: zoom {z:.2f}, cara en el crudo x={cx:.0f} y={cy:.0f}")
     (tramos / "lista.txt").write_text("\n".join(lista) + "\n")
 
     base = trabajo / "base.mp4"

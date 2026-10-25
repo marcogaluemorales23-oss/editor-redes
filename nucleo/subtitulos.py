@@ -196,7 +196,7 @@ def main():
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
     escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir, a.y_arriba,
-                 conf.get("badge", {}).get("desde_palabra"))
+                 conf.get("arriba_desde_palabra", conf.get("badge", {}).get("desde_palabra")))
 
     salida = Path(a.reel) / "salida"
     salida.mkdir(exist_ok=True)
