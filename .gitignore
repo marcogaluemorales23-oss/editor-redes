@@ -5,3 +5,5 @@ out/
 *.mov
 *.wav
 __pycache__/
+nucleo/modelos/
+motion/out/

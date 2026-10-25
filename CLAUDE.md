@@ -36,8 +36,8 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 3. **El gancho (primeros 3–4 s) lleva más trabajo**: más movimiento, acercamientos y ritmo que el resto.
 4. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
 5. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.
-6. **Fluidez**: Sebastián prefiere la versión interpolada a 60 fps (minterpolate). Entregar la de 24 para revisar
-   rápido y la de 60 como final.
+6. **Fps de entrega = fps de grabación.** Nada de interpolar a 60 fps: Sebastián lo probó y a 24 fps se ve más
+   natural y profesional.
 7. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
    mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
    En video-01 va en cada cambio de clip bruto (`"en_cada_clip"`). **Pero no es regla fija**: muchos videos
