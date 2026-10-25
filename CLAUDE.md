@@ -54,7 +54,9 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 12. **Encuadre**: zoom base 12 % y cara centrada en x=540, centro de la cara a y≈930 (montar.py la detecta).
     Alterna con un plano 15 % más cerrado. Si la cara está muy corrida, sube el zoom lo justo para centrarla.
 13. **Sincronía voz-labios**: cada tramo se monta en cuadros enteros con el audio del mismo largo exacto; si no,
-    la voz se adelanta y se acumula (~200 ms a mitad de video-01). Verificar buscando la voz del crudo en el final.
+    la voz se adelanta y se acumula (~200 ms a mitad de video-01). Además el inicio de cada corte cae en un cuadro
+    exacto del crudo (si no, queda hasta medio cuadro de desfase). Verificar con apertura de boca vs crudo
+    (precisión ~±20 ms). Si Sebastián ve desfase a ojo en un clip, `trabajo/sincronia.json` corre su audio en ms.
 14. **Whoosh** ("wosh suave", -4,4 dB) en cada cambio de encuadre dentro del mismo clip y al entrar un b-roll;
     "zoom in" en cada golpe de zoom.
 15. **Subtítulos abajo centrados en x=540**; pueden pasarse un poco de la zona segura. Si la amarilla se pasa
