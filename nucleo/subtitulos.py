@@ -32,22 +32,65 @@ def ass_color(hex6):
 # Zona segura de Instagram en la banda de subtítulos (y 1000-1590): x de ~110 a ~850 px, porque a la derecha
 # van likes, comentarios y compartir. Se centra el texto en ese hueco, no en el cuadro.
 CENTRO_X = 480
-ANCHO_SEGURO = 700
+ANCHO_SEGURO = 760
+
+# Medidas de Sebastián en Premiere (secuencia 1440x2560), pasadas a 1080x1920 (x 0,75). Se pueden cambiar
+# por marca en marca.json -> "subtitulos".
+ESTILO = {
+    "l1_px": 83,             # Regular 111
+    "l2_px": 106,            # Bold 142
+    "tracking": -0.049,      # tracking -49 (milésimas de em)
+    "interlineado": 87,      # de línea base a línea base
+    "sombra_opacidad": 0.71,
+    "sombra_distancia": 2.2,  # 3 a 135° -> abajo a la derecha
+    "sombra_tamano": 4.5,    # 6
+    "sombra_desenfoque": 9,  # 126 en Premiere es una sombra muy suave
+}
 
 
-def tamano_que_cabe(texto, fuente, px):
+def metricas(fuente):
+    """(alto de celda ASS por px de em, descendente por px de em). En ASS el tamaño es ascendente+descendente,
+    no el em: con Playfair, 'Fontsize 83' en ASS da una letra de 61 px. Hay que convertir."""
+    f = ImageFont.truetype(str(fuente), 1000)
+    asc, desc = f.getmetrics()
+    return (asc + desc) / 1000, desc / 1000
+
+
+def ancho(texto, fuente, px, tracking):
+    return ImageFont.truetype(str(fuente), round(px)).getlength(texto) + tracking * px * (len(texto) - 1)
+
+
+def tamano_que_cabe(texto, fuente, px, tracking):
     """Baja el tamaño de letra hasta que la línea quepa en la zona segura (ASS no corta líneas con WrapStyle 2)."""
-    while px > 40 and ImageFont.truetype(str(fuente), px).getlength(texto) > ANCHO_SEGURO:
-        px -= 2
+    while px > 40 and ancho(texto, fuente, px, tracking) > ANCHO_SEGURO:
+        px -= 1
     return px
 
 
-def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, l1_px=74, l2_px=118):
+def linea(capa, t0, t1, estilo, x, y, px, celda, est, texto, pop, sombra):
+    fs = round(px * celda, 1)
+    fsp = round(est["tracking"] * px, 2)
+    if sombra:
+        alfa = f"&H{round(255 * (1 - est['sombra_opacidad'])):02X}&"
+        d = est["sombra_distancia"]
+        return (f"Dialogue: {capa},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
+                f"{{\\pos({x + d:.1f},{y + d:.1f})\\fs{fs}\\fsp{fsp}\\1c&H000000&\\3c&H000000&\\1a{alfa}\\3a{alfa}"
+                f"\\bord{est['sombra_tamano']}\\blur{est['sombra_desenfoque']}}}{pop}{texto}")
+    return (f"Dialogue: {capa},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
+            f"{{\\pos({x},{y:.1f})\\fs{fs}\\fsp{fsp}\\bord0\\shad0}}{pop}{texto}")
+
+
+def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None):
+    """y = línea base de la frase blanca. Los bloques desde la palabra `desde_arriba` (la llamada a la acción)
+    suben a y_arriba para dejar la banda de abajo libre para el botón."""
+    est = {**ESTILO, **marca.get("subtitulos", {})}
     fam = marca["fuentes"]["subtitulos"]["familia"]
     blanco = ass_color(marca["colores"]["texto"])
     acento = ass_color(marca["colores"]["acento"])
     f_l1 = marca_dir / marca["fuentes"]["subtitulos"]["archivo"]
     f_l2 = marca_dir / marca["fuentes"]["palabras_clave"]["archivo"]
+    celda1, desc1 = metricas(f_l1)
+    celda2, desc2 = metricas(f_l2)
     cab = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -56,26 +99,30 @@ WrapStyle: 2
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: L1,{fam},{l1_px},{blanco},{blanco},&H00000000,&H78000000,0,0,0,0,100,100,0,0,1,0,4,2,60,60,0,1
-Style: L2,{fam},{l2_px},{acento},{acento},&H00000000,&H78000000,1,0,0,0,100,100,0,0,1,0,4,8,60,60,0,1
+Style: L1,{fam},80,{blanco},{blanco},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,0,0,0,1
+Style: L2,{fam},100,{acento},{acento},&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,2,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-    pop = r"{\fad(70,50)\fscx88\fscy88\t(0,140,\fscx100\fscy100)}"
+    pop = r"{\fad(70,50)\fscx92\fscy92\t(0,120,\fscx100\fscy100)}"
     lineas = []
     for k, b in enumerate(bloques):
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
+        base = y_arriba if desde_arriba is not None and b["l1"][0] >= desde_arriba else y
         a, _, texto = b["l1"]
-        fs1 = tamano_que_cabe(texto, f_l1, l1_px)
-        lineas.append(f"Dialogue: 0,{ass_tiempo(w[a]['inicio'])},{ass_tiempo(fin)},L1,,0,0,0,,"
-                      f"{{\\pos({CENTRO_X},{y})\\fs{fs1}}}{pop}{texto}")
+        px1 = tamano_que_cabe(texto, f_l1, est["l1_px"], est["tracking"])
+        y1 = base + desc1 * px1  # \an2 ancla el borde de abajo de la celda: línea base + descendente
+        for capa, sombra in ((0, True), (1, False)):
+            lineas.append(linea(capa, w[a]["inicio"], fin, "L1", CENTRO_X, y1, px1, celda1, est, texto, pop, sombra))
         if "l2" in b:
             a2, _, texto2 = b["l2"]
-            fs2 = tamano_que_cabe(texto2, f_l2, l2_px)
-            lineas.append(f"Dialogue: 0,{ass_tiempo(w[a2]['inicio'])},{ass_tiempo(fin)},L2,,0,0,0,,"
-                          f"{{\\pos({CENTRO_X},{y + 4})\\fs{fs2}}}{pop}{texto2}")
+            px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"])
+            y2 = base + est["interlineado"] + desc2 * px2
+            for capa, sombra in ((0, True), (1, False)):
+                lineas.append(linea(capa, w[a2]["inicio"], fin, "L2", CENTRO_X, y2, px2, celda2, est, texto2,
+                                    pop, sombra))
     destino.write_text(cab + "\n".join(lineas) + "\n", encoding="utf-8")
 
 
@@ -119,7 +166,8 @@ def main():
     ap.add_argument("reel")
     ap.add_argument("marca")
     ap.add_argument("--tiempos", default="corte_check.json")
-    ap.add_argument("--y", type=int, default=1330, help="línea entre L1 y L2 (banda segura 1210-1550)")
+    ap.add_argument("--y", type=int, default=1243, help="línea base de la frase blanca (banda 1210-1550)")
+    ap.add_argument("--y-arriba", type=int, default=400, help="línea base en la llamada a la acción")
     ap.add_argument("--base", default="base.mp4", help="base.mp4 o base_broll.mp4")
     a = ap.parse_args()
     trabajo = Path(a.reel) / "trabajo"
@@ -131,7 +179,8 @@ def main():
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
-    escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir)
+    escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir, a.y_arriba,
+                 conf.get("badge", {}).get("desde_palabra"))
 
     salida = Path(a.reel) / "salida"
     salida.mkdir(exist_ok=True)
@@ -143,12 +192,18 @@ def main():
         # Animación con transparencia hecha por Sebas (ProRes 4444 / QuickTime Animation), con su sonido.
         b = conf["badge"]
         t0 = w[b["desde_palabra"]]["inicio"] + b.get("ajuste_s", 0)
-        entradas += ["-itsoffset", f"{t0:.3f}", "-i", str(Path(a.reel) / b["animacion"])]
-        vol = b.get("volumen", 0.6)
+        entradas += ["-i", str(Path(a.reel) / b["animacion"])]
+        # Efectos de sonido a -4,4 dB, como los baja Sebas en Premiere.
+        vol = b.get("volumen_db", -4.4)
         esc = b.get("escala", 1.0)
+        ms = round(t0 * 1000)
+        # El retraso se aplica a imagen (setpts) y sonido (adelay) por separado: con -itsoffset el sonido
+        # del botón no llegaba a la mezcla.
         filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
-                  f"[1:v]format=rgba,scale=iw*{esc}:-1[b];[s][b]overlay={CENTRO_X}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
-                  f"[1:a]volume={vol}[ba];[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
+                  f"[1:v]format=rgba,scale=iw*{esc}:-1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b];"
+                  f"[s][b]overlay={CENTRO_X}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[1:a]aresample=48000,adelay={ms}|{ms},volume={vol}dB[ba];"
+                  f"[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
         audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
     elif "badge" in conf:
         badge = trabajo / "badge.png"

@@ -31,7 +31,11 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
    x=950 hasta y=1000 y **x=850 desde y=1000 hasta abajo** (likes, comentar, compartir). Los subtítulos y botones
    de la banda inferior se centran en x≈480, no en 540. Revisar cada elemento con la zona dibujada encima.
 2. **Subtítulos sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
-3. **Subtítulos grandes**: lo de 66/80 px quedó pequeño. Medir el tamaño de la referencia de Sebastián.
+3. **Subtítulos como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
+   amarilla, tracking -49, líneas casi pegadas, sombra 71 % / 135° / dist. 3 / tamaño 6 / desenfoque 126.
+   En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em (Playfair: x1,36), lo convierte `metricas()`.
+   Mayúscula al empezar cada oración. En la llamada a la acción los subtítulos suben y el botón va abajo.
+9. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh).
 4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
    "acción" con margen, y revisar los primeros 300 ms de cada corte.
 5. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
