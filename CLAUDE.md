@@ -27,8 +27,9 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 ## Reglas aprendidas (correcciones de Sebastián)
 
 1. **Zonas seguras de Instagram/TikTok** (1080x1920): nada importante (botones, subtítulos, logos) en los
-   250 px de arriba, en los 480 px de abajo (usuario, descripción, música) ni en los 140 px de la derecha
-   desde y=1000 (iconos de like, comentar, compartir). Revisar cada elemento contra esa zona antes de entregar.
+   245 px de arriba ni en los 330 px de abajo (usuario, descripción, música). A la derecha el borde seguro es
+   x=950 hasta y=1000 y **x=850 desde y=1000 hasta abajo** (likes, comentar, compartir). Los subtítulos y botones
+   de la banda inferior se centran en x≈480, no en 540. Revisar cada elemento con la zona dibujada encima.
 2. **Subtítulos sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
 3. **Subtítulos grandes**: lo de 66/80 px quedó pequeño. Medir el tamaño de la referencia de Sebastián.
 4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del

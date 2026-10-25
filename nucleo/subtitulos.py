@@ -29,7 +29,10 @@ def ass_color(hex6):
     return f"&H00{b}{g}{r}".upper()
 
 
-ANCHO_SEGURO = 820  # zona segura de Instagram: x de ~110 a ~950 px, con algo de aire
+# Zona segura de Instagram en la banda de subtítulos (y 1000-1590): x de ~110 a ~850 px, porque a la derecha
+# van likes, comentarios y compartir. Se centra el texto en ese hueco, no en el cuadro.
+CENTRO_X = 480
+ANCHO_SEGURO = 700
 
 
 def tamano_que_cabe(texto, fuente, px):
@@ -67,12 +70,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         a, _, texto = b["l1"]
         fs1 = tamano_que_cabe(texto, f_l1, l1_px)
         lineas.append(f"Dialogue: 0,{ass_tiempo(w[a]['inicio'])},{ass_tiempo(fin)},L1,,0,0,0,,"
-                      f"{{\\pos(540,{y})\\fs{fs1}}}{pop}{texto}")
+                      f"{{\\pos({CENTRO_X},{y})\\fs{fs1}}}{pop}{texto}")
         if "l2" in b:
             a2, _, texto2 = b["l2"]
             fs2 = tamano_que_cabe(texto2, f_l2, l2_px)
             lineas.append(f"Dialogue: 0,{ass_tiempo(w[a2]['inicio'])},{ass_tiempo(fin)},L2,,0,0,0,,"
-                          f"{{\\pos(540,{y + 4})\\fs{fs2}}}{pop}{texto2}")
+                          f"{{\\pos({CENTRO_X},{y + 4})\\fs{fs2}}}{pop}{texto2}")
     destino.write_text(cab + "\n".join(lineas) + "\n", encoding="utf-8")
 
 
@@ -144,7 +147,7 @@ def main():
         vol = b.get("volumen", 0.6)
         esc = b.get("escala", 1.0)
         filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
-                  f"[1:v]format=rgba,scale=iw*{esc}:-1[b];[s][b]overlay=(W-w)/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[1:v]format=rgba,scale=iw*{esc}:-1[b];[s][b]overlay={CENTRO_X}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
                   f"[1:a]volume={vol}[ba];[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
         audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
     elif "badge" in conf:
