@@ -26,39 +26,50 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 
 ## Reglas aprendidas (correcciones de Sebastián)
 
+### Imagen
 1. **Zonas seguras de Instagram/TikTok** (1080x1920): nada importante (botones, subtítulos, logos) en los
    245 px de arriba ni en los 330 px de abajo (usuario, descripción, música). A la derecha el borde seguro es
-   x=950 hasta y=1000 y **x=850 desde y=1000 hasta abajo** (likes, comentar, compartir). Los subtítulos y botones
-   de la banda inferior se centran en x≈480, no en 540. Revisar cada elemento con la zona dibujada encima.
-2. **Subtítulos sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
-3. **Subtítulos como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
-   amarilla, tracking -49, líneas casi pegadas, sombra 71 % / 135° / dist. 3 / tamaño 6 / desenfoque 126.
-   En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em (Playfair: x1,36), lo convierte `metricas()`.
-   Copiar cómo parte las frases Sebastián (ver video-01/trabajo/subtitulos.json como ejemplo):
+   x=950 hasta y=1000 y **x=850 desde y=1000 hasta abajo** (likes, comentar, compartir). Revisar cada elemento
+   con la zona dibujada encima.
+2. **Encuadre**: zoom base 12 % y cara centrada en x=540, centro de la cara a y≈930 (montar.py la detecta).
+   Alterna con un plano 15 % más cerrado. Si la cara está muy corrida, sube el zoom lo justo para centrarla.
+3. **El gancho (primeros 3–4 s) lleva más trabajo**: más movimiento, acercamientos y ritmo que el resto.
+4. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
+5. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.
+6. **Fluidez**: Sebastián prefiere la versión interpolada a 60 fps (minterpolate). Entregar la de 24 para revisar
+   rápido y la de 60 como final.
+7. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
+   mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
+   En video-01 va en cada cambio de clip bruto (`"en_cada_clip"`). **Pero no es regla fija**: muchos videos
+   (sobre todo los minimalistas) van solo con cortes simples. La transición se piensa según el momento del
+   video; si no hay un cambio de idea o de energía que la justifique, corte simple. Preguntar si hay duda.
+
+### Subtítulos
+8. **Sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
+9. **Como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
+   amarilla, tracking -49, líneas casi pegadas. En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em
+   (Playfair: x1,36), lo convierte `metricas()`. Copiar cómo parte las frases (ver video-01/trabajo/subtitulos.json):
    - Entrada deslizando con desenfoque de movimiento (~0,2 s) y salida borrosa; nada de "pop" de escala.
    - Amarillo solo en la idea fuerte. Frases de transición ("Aquí eso no pasa", "Ya tienes experiencia") van
      solo en blanco.
    - En listas, la blanca se queda fija y la amarilla va cambiando ("sino disponible" + duda/problema/cierre).
    - Sombra: resplandor muy difuso (45 %, desenfoque 22), nunca un contorno pegado a la letra.
-   - En la llamada a la acción los subtítulos suben (línea base ~345, centrados) y el botón va abajo.
-9. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh).
-10. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
-    mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
-    Va en **cada cambio de clip bruto** (`"en_cada_clip"` en transiciones.json la calcula sola desde edl.json).
-11. **Música**: de fondo, ~16 dB bajo la voz y con ducking. Avisar del riesgo de derechos de autor si es comercial.
-4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
-   "acción" con margen, y revisar los primeros 300 ms de cada corte.
-5. **B-rolls con nitidez**: aplicar enfoque suave al escalar b-rolls de baja resolución.
-6. **El gancho (primeros 3–4 s) lleva más trabajo**: más movimiento, acercamientos y ritmo que el resto.
-7. **Fluidez**: Sebastián quiere más fluidez que 23,976 fps. Probar interpolación y que él decida viendo la prueba.
-12. **Encuadre**: zoom base 12 % y cara centrada en x=540, centro de la cara a y≈930 (montar.py la detecta).
-    Alterna con un plano 15 % más cerrado. Si la cara está muy corrida, sube el zoom lo justo para centrarla.
-13. **Sincronía voz-labios**: cada tramo se monta en cuadros enteros con el audio del mismo largo exacto; si no,
+10. **Posición**: abajo centrados en x=540; pueden pasarse un poco de la zona segura. Si la amarilla se pasa
+    mucho, se achica solo ella. En la llamada a la acción suben (línea base ~345) y el botón va abajo en x=480.
+
+### Sonido
+11. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). El inicio de cada toma se busca con
+    el umbral de la voz principal y 80 ms de voz sostenida (cortar.py), y se revisan los primeros 300 ms.
+12. **Sincronía voz-labios**: cada tramo se monta en cuadros enteros con el audio del mismo largo exacto; si no,
     la voz se adelanta y se acumula (~200 ms a mitad de video-01). Además el inicio de cada corte cae en un cuadro
     exacto del crudo (si no, queda hasta medio cuadro de desfase). Verificar con apertura de boca vs crudo
     (precisión ~±20 ms). Si Sebastián ve desfase a ojo en un clip, `trabajo/sincronia.json` corre su audio en ms.
-14. **Whoosh** ("wosh suave", -4,4 dB) en cada cambio de encuadre dentro del mismo clip y al entrar un b-roll;
+13. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh, ding).
+14. **Whoosh** ("wosh suave") en cada cambio de encuadre dentro del mismo clip y al entrar un b-roll;
     "zoom in" en cada golpe de zoom.
-15. **Subtítulos abajo centrados en x=540**; pueden pasarse un poco de la zona segura. Si la amarilla se pasa
-    mucho, se achica solo ella. El botón sí va en x=480.
-8. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.
+15. **Efectos en palabras clave** (al aparecer la palabra amarilla): ding en ideas fuertes, dinero en
+    plata/comisiones, pop en cada elemento de una lista. Con criterio: no en todas, y nunca pegado (<0,5 s)
+    a una transición u otro efecto.
+16. **Música**: de fondo, ~15 dB bajo la voz y con ducking. Puede ir en tramos: tensión en el gancho y una pista
+    con ritmo desde la primera transición, con un golpe de compás alineado a esa transición (`"musicas"`).
+    Avisar del riesgo de derechos de autor si es comercial.

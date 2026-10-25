@@ -79,6 +79,10 @@ def main():
             mov_f = trabajo / "movimientos.json"
             movs = json.loads(mov_f.read_text()) if mov_f.exists() else {}
             tiempos = [inicios[int(k)] + m["golpe_en"] for k, m in movs.items() if "golpe_en" in m]
+        elif ef["en"] == "palabras":
+            # Palabras clave: el golpe del sonido cae al empezar la palabra (índices de corte_check.json).
+            palabras = json.loads((trabajo / "corte_check.json").read_text())["palabras"]
+            tiempos = [palabras[i]["inicio"] for i in ef["palabras"]]
         elif ef["en"] == "brolls":
             palabras = json.loads((trabajo / "corte_check.json").read_text())["palabras"]
             brolls = json.loads((trabajo / "brolls.json").read_text())["brolls"]
@@ -95,17 +99,31 @@ def main():
         print(f"{Path(ef['archivo']).name} en: " + ", ".join(f"{x:.2f}s" for x in tiempos))
 
     voz = "[0:a]"
-    if "musica" in conf:
-        m = conf["musica"]
-        entradas += ["-ss", str(m.get("inicio", 0)), "-t", f"{total:.3f}", "-i", str(reel / m["archivo"])]
+    # Música: una pista ("musica") o varias por tramos ("musicas"), p. ej. tensión en el gancho y ritmo después.
+    # Cada tramo: {"archivo", "inicio" (segundo de la pista), "desde"/"hasta" (segundos del video), "db",
+    # "entrada"/"salida" (fundidos en s)}. "golpe_en_pista"+"golpe_en_video" alinean un golpe de compás de la
+    # pista con un segundo del video (p. ej. la primera transición).
+    musicas = conf.get("musicas") or ([{**conf["musica"], "desde": 0, "hasta": total}] if "musica" in conf else [])
+    if musicas:
+        partes = []
+        for m in musicas:
+            desde, hasta = m.get("desde", 0), min(m.get("hasta", total), total)
+            inicio = m.get("inicio", 0)
+            if "golpe_en_pista" in m:
+                inicio = m["golpe_en_pista"] - (m["golpe_en_video"] - desde)
+            ent, sal = m.get("entrada", 0.6), m.get("salida", 1.5)
+            entradas += ["-ss", f"{inicio:.3f}", "-t", f"{hasta - desde:.3f}", "-i", str(reel / m["archivo"])]
+            ms = round(desde * 1000)
+            filtros.append(f"[{n}:a]aresample=48000,volume={m.get('db', -20)}dB,afade=t=in:d={ent},"
+                           f"afade=t=out:st={max(0, hasta - desde - sal):.3f}:d={sal},adelay={ms}|{ms}[mus{n}]")
+            partes.append(f"[mus{n}]")
+            n += 1
+        filtros.append(f"{''.join(partes)}amix=inputs={len(partes)}:duration=longest:normalize=0[mus]")
         filtros.append(f"[0:a]asplit=2[voz][clave]")
-        filtros.append(f"[{n}:a]aresample=48000,volume={m.get('db', -20)}dB,afade=t=in:d=0.6,"
-                       f"afade=t=out:st={total - 1.5:.3f}:d=1.5[mus]")
         # Ducking: la música baja cuando ella habla y sube en las pausas.
         filtros.append("[mus][clave]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=300[musd]")
         voz = "[voz]"
         audios.append("[musd]")
-        n += 1
     mezcla = f"{voz}{''.join(audios)}amix=inputs={1 + len(audios)}:duration=first:normalize=0,"
     filtros.append(mezcla + "loudnorm=I=-14:TP=-1.5:LRA=11[a]")
 
