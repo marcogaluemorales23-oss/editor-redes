@@ -29,7 +29,7 @@ Referencia: grabación de la tarjeta "Reel de negocio" de EditorPro (7 s, analiz
 - Cambio de plano en cada corte, con planos de ~1,5 a 3 s. No repetir el mismo plano dos cortes seguidos.
 - Ciclo de la referencia: A → B → C → A.
 
-## Adaptación a la marca de Sebastián
+## Adaptación a la marca del cliente inmobiliaria (video-01)
 - Título y palabra clave: Playfair Display Bold (la palabra clave, en cursiva) en #FFDE44.
   La referencia usa cursiva serif en la palabra clave, así que encaja con Playfair.
 - Subtítulos: Playfair Display Regular blanco (probar legibilidad; si falla, SemiBold con sombra).

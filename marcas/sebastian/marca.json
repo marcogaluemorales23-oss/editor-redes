@@ -1,16 +1,16 @@
 {
   "nombre": "Sebastián Morales",
   "colores": {
-    "acento": "#FFDE44",
+    "acento": "PENDIENTE (azul: falta el código exacto)",
     "texto": "#FFFFFF",
     "fondo_tarjeta": "#000000",
     "sombra": "rgba(0,0,0,0.6)"
   },
   "fuentes": {
-    "subtitulos": { "familia": "Playfair Display", "archivo": "fuentes/PlayfairDisplay-Regular.ttf", "alternativa": "fuentes/PlayfairDisplay-SemiBold.ttf" },
-    "titulos": { "familia": "Playfair Display", "archivo": "fuentes/PlayfairDisplay-Bold.ttf" },
-    "palabras_clave": { "familia": "Playfair Display", "archivo": "fuentes/PlayfairDisplay-Bold.ttf", "color": "acento" }
+    "subtitulos": { "familia": "Inter", "archivo": "fuentes/Inter-SemiBold.ttf" },
+    "titulos": { "familia": "Inter", "archivo": "fuentes/Inter-Bold.ttf" },
+    "palabras_clave": { "familia": "Inter", "archivo": "fuentes/Inter-Black.ttf", "color": "acento" }
   },
   "logos": [],
-  "notas": "Si los subtítulos en Regular no se leen bien en el teléfono, pasar a SemiBold o agregar sombra. Decidir viendo la prueba."
+  "notas": "Estilo cercano al de los formatos de referencia. Si le gusta el resultado elegante del cliente (Playfair), puede cambiar a ese."
 }

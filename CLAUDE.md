@@ -15,7 +15,9 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 ## Reglas técnicas
 
 - Trabajar cada reel en `reels/<nombre>/` (crudos/, trabajo/, salida/). Los crudos y renders NO van a git.
-- Entrega vertical: 1080x1920, H.264, AAC, 30 fps, -14 LUFS integrado, pico máximo -1 dBTP.
+- Entrega vertical: 1080x1920, H.264, AAC, -14 LUFS integrado, pico máximo -1 dBTP.
+- Mantener los fps del crudo (ej.: 23,976 en la cámara Sony). Convertir a 30 produce saltos.
+- Material de clientes: nunca sale del servidor ni se publica sin permiso. Borrarlo al terminar la prueba.
 - Zooms siempre suaves, anclados en los ojos. Como mucho un zoom rápido por plano, sobre la palabra fuerte.
 - Nada congelado más de 2 s sin razón. Ninguna pausa muerta.
 - Subtítulos: ortografía corregida (tildes, nombres propios). Revisar contra la transcripción.
