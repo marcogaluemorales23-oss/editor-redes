@@ -154,7 +154,8 @@ const Barras: React.FC = () => {
       </div>
       {filas.map((fila, i) => {
         const e = ent(f, fila.s, 0.9);
-        const aparece = ent(f, fila.s - 0.2, 0.25);
+        // La barra vacía ya está desde que entra el panel; se llena cuando ella nombra cada cosa.
+        const aparece = ent(f, desde + 0.35 + i * 0.12, 0.35);
         return (
           <div key={i} style={{ position: "absolute", top: 600 + i * 150, left: 140, width: 800, opacity: aparece }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontFamily: "Inter", fontWeight: 700, fontSize: 34, color: COLORES.texto, marginBottom: 16 }}>
