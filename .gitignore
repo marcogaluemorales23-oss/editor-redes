@@ -1,0 +1,7 @@
+reels/*/
+node_modules/
+out/
+*.mp4
+*.mov
+*.wav
+__pycache__/
