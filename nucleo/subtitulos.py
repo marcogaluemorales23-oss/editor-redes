@@ -29,10 +29,22 @@ def ass_color(hex6):
     return f"&H00{b}{g}{r}".upper()
 
 
-def escribir_ass(bloques, w, marca, destino, y, fin_video):
+ANCHO_SEGURO = 820  # zona segura de Instagram: x de ~110 a ~950 px, con algo de aire
+
+
+def tamano_que_cabe(texto, fuente, px):
+    """Baja el tamaño de letra hasta que la línea quepa en la zona segura (ASS no corta líneas con WrapStyle 2)."""
+    while px > 40 and ImageFont.truetype(str(fuente), px).getlength(texto) > ANCHO_SEGURO:
+        px -= 2
+    return px
+
+
+def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, l1_px=74, l2_px=118):
     fam = marca["fuentes"]["subtitulos"]["familia"]
     blanco = ass_color(marca["colores"]["texto"])
     acento = ass_color(marca["colores"]["acento"])
+    f_l1 = marca_dir / marca["fuentes"]["subtitulos"]["archivo"]
+    f_l2 = marca_dir / marca["fuentes"]["palabras_clave"]["archivo"]
     cab = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
@@ -41,8 +53,8 @@ WrapStyle: 2
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: L1,{fam},66,{blanco},{blanco},&H00000000,&H78000000,0,0,0,0,100,100,0,0,1,0,3,2,60,60,0,1
-Style: L2,{fam},80,{acento},{acento},&H00000000,&H78000000,1,0,0,0,100,100,0,0,1,0,3,8,60,60,0,1
+Style: L1,{fam},{l1_px},{blanco},{blanco},&H00000000,&H78000000,0,0,0,0,100,100,0,0,1,0,4,2,60,60,0,1
+Style: L2,{fam},{l2_px},{acento},{acento},&H00000000,&H78000000,1,0,0,0,100,100,0,0,1,0,4,8,60,60,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -53,12 +65,14 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
         a, _, texto = b["l1"]
+        fs1 = tamano_que_cabe(texto, f_l1, l1_px)
         lineas.append(f"Dialogue: 0,{ass_tiempo(w[a]['inicio'])},{ass_tiempo(fin)},L1,,0,0,0,,"
-                      f"{{\\pos(540,{y})}}{pop}{texto}")
+                      f"{{\\pos(540,{y})\\fs{fs1}}}{pop}{texto}")
         if "l2" in b:
             a2, _, texto2 = b["l2"]
+            fs2 = tamano_que_cabe(texto2, f_l2, l2_px)
             lineas.append(f"Dialogue: 0,{ass_tiempo(w[a2]['inicio'])},{ass_tiempo(fin)},L2,,0,0,0,,"
-                          f"{{\\pos(540,{y + 8})}}{pop}{texto2}")
+                          f"{{\\pos(540,{y + 4})\\fs{fs2}}}{pop}{texto2}")
     destino.write_text(cab + "\n".join(lineas) + "\n", encoding="utf-8")
 
 
@@ -102,7 +116,7 @@ def main():
     ap.add_argument("reel")
     ap.add_argument("marca")
     ap.add_argument("--tiempos", default="corte_check.json")
-    ap.add_argument("--y", type=int, default=1150)
+    ap.add_argument("--y", type=int, default=1330, help="línea entre L1 y L2 (banda segura 1210-1550)")
     ap.add_argument("--base", default="base.mp4", help="base.mp4 o base_broll.mp4")
     a = ap.parse_args()
     trabajo = Path(a.reel) / "trabajo"
@@ -114,7 +128,7 @@ def main():
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
-    escribir_ass(conf["bloques"], w, marca, ass, a.y, dur)
+    escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir)
 
     salida = Path(a.reel) / "salida"
     salida.mkdir(exist_ok=True)
@@ -128,8 +142,9 @@ def main():
         t0 = w[b["desde_palabra"]]["inicio"] + b.get("ajuste_s", 0)
         entradas += ["-itsoffset", f"{t0:.3f}", "-i", str(Path(a.reel) / b["animacion"])]
         vol = b.get("volumen", 0.6)
+        esc = b.get("escala", 1.0)
         filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
-                  f"[1:v]format=rgba[b];[s][b]overlay=0:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[1:v]format=rgba,scale=iw*{esc}:-1[b];[s][b]overlay=(W-w)/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
                   f"[1:a]volume={vol}[ba];[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
         audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
     elif "badge" in conf:

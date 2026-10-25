@@ -37,6 +37,12 @@ def umbral(env):
     return max(piso + 8, voz - 28)
 
 
+def umbral_fuerte(env):
+    """Nivel de la voz principal (la de cámara). Los bordes de toma se buscan con este umbral: el camarógrafo
+    ("ya", "acción") y las respiraciones suenan más bajo y superan el umbral normal, pero no este."""
+    return np.percentile(env, 90) - 16
+
+
 def tipo_pausa(palabra):
     if palabra.endswith((".", "?", "!")):
         return "punto"
@@ -60,11 +66,11 @@ def silencio(env, th, t0, t1):
     return (mejor[0] * PASO, mejor[1] * PASO) if mejor else None
 
 
-def arranque(env, th, t, antes=0.15, despues=0.3):
-    """Primer instante con voz sostenida (30 ms) cerca del inicio que dio Whisper.
+def arranque(env, th, t, antes=0.15, despues=0.3, sostenida=3):
+    """Primer instante con voz sostenida (`sostenida` x 10 ms) cerca del inicio que dio Whisper.
     La ventana mira poco hacia atrás: más allá suele estar la respiración previa, que supera el umbral."""
-    for k in range(max(0, int((t - antes) / PASO)), min(len(env) - 3, int((t + despues) / PASO))):
-        if (env[k:k + 3] > th).all():
+    for k in range(max(0, int((t - antes) / PASO)), min(len(env) - sostenida, int((t + despues) / PASO))):
+        if (env[k:k + sostenida] > th).all():
             return k * PASO
     return t
 
@@ -80,14 +86,18 @@ def caida(env, th, t, desde, despues=0.15):
 
 def cortar_toma(env, th, w, d, h):
     tramos = []
-    t_in = max(0.0, arranque(env, th, w[d]["inicio"]) - 0.06)
+    # Whisper puede adelantar el inicio de la primera palabra hasta medio segundo (C6766: dijo 3,24 s y la voz
+    # empieza en 3,74 s), así que la ventana mira bastante hacia delante y con el umbral de la voz principal.
+    fuerte = umbral_fuerte(env)
+    # 80 ms sostenidos: un "ya" del camarógrafo dura ~60 ms por encima del umbral, la voz de cámara no.
+    t_in = max(0.0, arranque(env, fuerte, w[d]["inicio"], antes=0.15, despues=0.7, sostenida=8) - 0.08)
     for i in range(d, h):
         meta = PAUSAS[tipo_pausa(w[i]["texto"])]
         s = silencio(env, th, w[i]["fin"] - 0.15, w[i + 1]["inicio"] + 0.15)
         if s and s[1] - s[0] > max(meta + 0.05, 0.12):
             tramos.append((t_in, s[0] + meta * 0.55))
             t_in = s[1] - meta * 0.45
-    fin = caida(env, th, w[h]["fin"], w[h]["inicio"]) + 0.12
+    fin = caida(env, fuerte, w[h]["fin"], w[h]["inicio"]) + 0.12
     tramos.append((t_in, min(fin, len(env) * PASO)))
     return [(round(a, 3), round(b, 3)) for a, b in tramos if b - a > 0.05]
 

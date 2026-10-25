@@ -30,7 +30,7 @@ def main():
         entradas += ["-ss", str(b.get("inicio_clip", 0)), "-t", f"{t1 - t0:.3f}", "-i", str(reel / b["archivo"])]
         # Cubrir 1080x1920 sin deformar y desplazar el clip a su segundo en la línea de tiempo.
         filtros.append(f"[{k}:v]scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,"
-                       f"crop=1080:1920,setsar=1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b{k}]")
+                       f"crop=1080:1920,unsharp=5:5:0.9:5:5:0.0,setsar=1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b{k}]")
         filtros.append(f"{previo}[b{k}]overlay=eof_action=pass:enable='between(t,{t0:.3f},{t1:.3f})'[v{k}]")
         previo = f"[v{k}]"
         print(f"b-roll {k}: {b['archivo']} de {t0:.2f}s a {t1:.2f}s")
