@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Máscara de la persona (blanco = persona, negro = fondo) para poner gráficos DETRÁS de ella.
 
-Uso: python3 nucleo/silueta.py <video> <salida.mkv> <desde-hasta> [<desde-hasta> ...] [--zona]
-Ej.: python3 nucleo/silueta.py trabajo/base.mp4 trabajo/silueta.mkv 3.71-6.30 10.59-12.30
+Uso: python3 nucleo/silueta.py <video> <salida.mkv> <desde-hasta[@y_escritorio]> [...] [--zona]
+Ej.: python3 nucleo/silueta.py trabajo/base.mp4 trabajo/silueta.mkv 3.71-6.30@1765 10.59-12.30@1735 21.7-26.5
+@y_escritorio: todo lo que está debajo de esa altura (el escritorio y lo que tiene encima) se cuenta como frente,
+así persona, sillón y escritorio quedan como un solo bloque y los gráficos solo tapan la pared del fondo.
 Fuera de los tramos pedidos la máscara queda negra (no se calcula, para ahorrar tiempo).
 
 Modelo: Robust Video Matting (MobileNetV3, ONNX). Es un modelo de "matting": da un alfa suave con pelo, brazos
@@ -51,7 +53,11 @@ def main(video, destino, tramos_txt, usar_zona=False):
     import mediapipe as mp
     import onnxruntime as ort
     from mediapipe.tasks.python import BaseOptions, vision
-    tramos = [tuple(float(x) for x in t.split("-")) for t in tramos_txt]
+    tramos = []
+    for t in tramos_txt:
+        rango, _, suelo = t.partition("@")
+        a, b = (float(x) for x in rango.split("-"))
+        tramos.append((a, b, float(suelo) if suelo else None))
     ancho, alto, fps, fps_txt = info(video)
     sesion = ort.InferenceSession(str(MODELO), providers=["CPUExecutionProvider"])
     seg = vision.ImageSegmenter.create_from_options(vision.ImageSegmenterOptions(
@@ -73,7 +79,8 @@ def main(video, destino, tramos_txt, usar_zona=False):
         if len(crudo) < tam:
             break
         t = i / fps
-        en_tramo = any(a - CALENTAR_S <= t <= b + 0.1 for a, b in tramos)
+        tramo = next(((a, b, y) for a, b, y in tramos if a - CALENTAR_S <= t <= b + 0.1), None)
+        en_tramo = tramo is not None
         if en_tramo:
             img = np.frombuffer(crudo, np.uint8).reshape(alto, ancho, 3)
             src = (img.astype(np.float32) / 255).transpose(2, 0, 1)[None]
@@ -83,6 +90,9 @@ def main(video, destino, tramos_txt, usar_zona=False):
             final = np.clip(alfa[0, 0], 0, 1)
             if usar_zona:
                 final = final * np.clip(zona_persona(seg, img, int(t * 1000), mp, cv2), 0, 1)
+            if tramo[2] is not None:  # escritorio: rampa suave de 30 px hacia abajo
+                filas = np.arange(alto, dtype=np.float32)[:, None]
+                final = np.maximum(final, np.clip((filas - (tramo[2] - 30)) / 30, 0, 1))
             escritor.stdin.write((final * 255).astype(np.uint8).tobytes())
             calculados += 1
         else:

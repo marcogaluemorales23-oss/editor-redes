@@ -70,6 +70,7 @@ export const Icono: React.FC<IconoProps> = ({ nombre, tam = 56, color = COLORES.
 };
 
 /** Fondo de panel de la mitad de arriba (planos B y C). */
+// El fondo aparece de golpe con el corte (si se funde, asoma el relleno del video bajado); el contenido sí se funde.
 export const PanelArriba: React.FC<{ opacidad: number; children: React.ReactNode }> = ({ opacidad, children }) => (
   <div
     style={{
@@ -78,12 +79,11 @@ export const PanelArriba: React.FC<{ opacidad: number; children: React.ReactNode
       top: 0,
       width: 1080,
       height: 960,
-      opacity: opacidad,
       background: `radial-gradient(120% 90% at 50% 0%, ${COLORES.panel2} 0%, ${COLORES.panel1} 70%)`,
       boxShadow: "0 30px 60px rgba(0,0,0,0.45)",
       overflow: "hidden",
     }}
   >
-    {children}
+    <div style={{ position: "absolute", inset: 0, opacity: opacidad }}>{children}</div>
   </div>
 );

@@ -93,7 +93,8 @@ def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra):
             f"{{\\move({x - dx:.1f},{y:.1f},{x:.1f},{y:.1f},0,{e})\\fs{fs}\\fsp{fsp}{estilo_txt}{anim}}}{texto}")
 
 
-def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None):
+def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None,
+                 y_por_tramo=()):
     """y = línea base de la frase blanca. Los bloques desde la palabra `desde_arriba` (la llamada a la acción)
     suben a y_arriba para dejar la banda de abajo libre para el botón.
     "l2" puede ser una lista de frases clave: la blanca se queda fija y la amarilla va cambiando (listas como
@@ -126,6 +127,11 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
         arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
         base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, ZONA_ABAJO)
+        # Formatos con pantalla partida: en esos tramos el subtítulo va en la línea que divide la pantalla.
+        t_bloque = w[b["l1"][0]]["inicio"]
+        tramo = next((tr for tr in y_por_tramo if tr["desde"] - 0.05 <= t_bloque < tr["hasta"]), None)
+        if tramo and not arriba:
+            base = tramo["y"]
         a, _, texto = b["l1"]
         px1 = tamano_que_cabe(texto, f_l1, est["l1_px"], est["tracking"], zona["ancho"])
         y1 = base + desc1 * px1  # \an2 ancla el borde de abajo de la celda: línea base + descendente
@@ -197,7 +203,8 @@ def main():
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
     escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir, a.y_arriba,
-                 conf.get("arriba_desde_palabra", conf.get("badge", {}).get("desde_palabra")))
+                 conf.get("arriba_desde_palabra", conf.get("badge", {}).get("desde_palabra")),
+                 conf.get("y_por_tramo", []))
 
     salida = Path(a.reel) / "salida"
     salida.mkdir(exist_ok=True)

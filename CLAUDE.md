@@ -44,6 +44,11 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
    (sobre todo los minimalistas) van solo con cortes simples. La transición se piensa según el momento del
    video; si no hay un cambio de idea o de energía que la justifique, corte simple. Preguntar si hay duda.
 
+### Formato Reel de negocio
+17. **Recorte para gráficos detrás** (`nucleo/silueta.py`, Robust Video Matting): persona, muebles pegados a ella
+    (sillón) y escritorio con lo que tiene encima van juntos como un solo frente (`@y_escritorio` por tramo);
+    los gráficos solo tapan la pared del fondo. Revisar el recorte sobre fondo azul antes de animar.
+
 ### Subtítulos
 8. **Sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
 9. **Como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
