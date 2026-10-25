@@ -64,6 +64,36 @@ def main():
             audios.append(f"[sx{k}]")
             n += 1
 
+    # Efectos sueltos (whoosh en cambios de encuadre, "zoom in" en acercamientos rápidos...). Cada uno dice dónde va:
+    # "cortes_mismo_clip" = cortes que no cambian de clip, "brolls" = entrada de cada b-roll, "golpes" = los golpes
+    # de zoom de movimientos.json. El "pico" del sonido cae justo en ese segundo.
+    cortes = json.loads((trabajo / "edl.json").read_text())["cortes"]
+    inicios, t = [], 0.0
+    for c in cortes:
+        inicios.append(t)
+        t += c["out"] - c["in"]
+    for ef in conf.get("efectos", []):
+        if ef["en"] == "cortes_mismo_clip":
+            tiempos = [inicios[k] for k in range(1, len(cortes)) if cortes[k]["clip"] == cortes[k - 1]["clip"]]
+        elif ef["en"] == "golpes":
+            mov_f = trabajo / "movimientos.json"
+            movs = json.loads(mov_f.read_text()) if mov_f.exists() else {}
+            tiempos = [inicios[int(k)] + m["golpe_en"] for k, m in movs.items() if "golpe_en" in m]
+        elif ef["en"] == "brolls":
+            palabras = json.loads((trabajo / "corte_check.json").read_text())["palabras"]
+            brolls = json.loads((trabajo / "brolls.json").read_text())["brolls"]
+            tiempos = [palabras[b["desde"]]["inicio"] - 0.05 for b in brolls]
+        else:
+            tiempos = ef.get("tiempos", [])
+        for t in tiempos:
+            ms = max(0, round((t - ef["pico"]) * 1000))
+            entradas += ["-t", str(ef.get("dur", 10)), "-i", str(reel / ef["archivo"])]
+            filtros.append(f"[{n}:a]aresample=48000,afade=t=out:st={max(0, ef.get('dur', 10) - 0.2)}:d=0.2,"
+                           f"adelay={ms}|{ms},volume={ef.get('db', -4.4)}dB[ef{n}]")
+            audios.append(f"[ef{n}]")
+            n += 1
+        print(f"{Path(ef['archivo']).name} en: " + ", ".join(f"{x:.2f}s" for x in tiempos))
+
     voz = "[0:a]"
     if "musica" in conf:
         m = conf["musica"]

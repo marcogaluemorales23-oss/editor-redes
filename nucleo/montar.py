@@ -30,6 +30,39 @@ def fps_de(clip):
     ).stdout.strip().strip(",")
 
 
+def cuadrar_linea_de_tiempo(trabajo, cortes, num, den):
+    """Deja edl.json en cuadros enteros y mueve los tiempos de corte_check.json (subtítulos, b-roll, botón) a la
+    nueva línea de tiempo, tramo por tramo, para que no quede un desfase de unos ms que se acumule."""
+    viejos, nuevos, t0, t1 = [], [], 0.0, 0.0
+    for c in cortes:
+        d_vieja = c["out"] - c["in"]
+        d_nueva = max(1, round(d_vieja * num / den)) * den / num
+        viejos.append((t0, t0 + d_vieja))
+        nuevos.append(t1)
+        t0, t1 = t0 + d_vieja, t1 + d_nueva
+        c["out"] = round(c["in"] + d_nueva, 6)
+    edl = json.loads((trabajo / "edl.json").read_text())
+    edl["cortes"], edl["duracion"] = cortes, round(t1, 6)
+    (trabajo / "edl.json").write_text(json.dumps(edl, indent=1))
+
+    check = trabajo / "corte_check.json"
+    original = trabajo / "corte_check_sin_cuadrar.json"  # tiempos tal como salen de cortar.py
+    if not check.exists():
+        return
+    if not original.exists():
+        original.write_text(check.read_text())
+    datos = json.loads(original.read_text())
+
+    def mover(t):
+        k = next((i for i, (a, b) in enumerate(viejos) if t < b), len(viejos) - 1)
+        return round(t - viejos[k][0] + nuevos[k], 3)
+
+    for p in datos["palabras"]:
+        p["inicio"], p["fin"] = mover(p["inicio"]), mover(p["fin"])
+    check.write_text(json.dumps(datos, ensure_ascii=False, indent=1))
+    print(f"línea de tiempo cuadrada a cuadros enteros: {t0:.3f}s -> {t1:.3f}s")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("reel")
@@ -49,10 +82,15 @@ def main():
     archivo_mov = trabajo / "movimientos.json"
     movimientos = json.loads(archivo_mov.read_text()) if archivo_mov.exists() else {}
 
+    num, den = (int(x) for x in fps.split("/")) if "/" in fps else (float(fps), 1)
     lista = []
     for k, c in enumerate(cortes):
         z = zooms[k % len(zooms)]
-        d = c["out"] - c["in"]
+        # Duración exacta en cuadros enteros, igual para imagen y sonido. Si el video se redondea a cuadros y el
+        # audio no, cada tramo queda unos ms más largo en imagen y al unirlos la voz se adelanta a los labios
+        # (en video-01 llegó a ~200 ms a mitad del reel).
+        cuadros = max(1, round((c["out"] - c["in"]) * num / den))
+        d = cuadros * den / num
         crudo = reel / "crudos" / f'{c["clip"]}.MP4'
         cx, cy = 540.0, CARA_Y * 1.0
         if not a.sin_centrar:
@@ -78,17 +116,19 @@ def main():
             x = max(0, min(w - 1080, cx * z - 540))
             y = max(0, min(h - 1920, cy * z - CARA_Y))
             vf = f"scale={w}:{h}:flags=lanczos,crop=1080:1920:{x:.0f}:{y:.0f},fps={fps},format=yuv420p"
-        af = f"afade=t=in:d=0.01,afade=t=out:st={d - 0.012:.3f}:d=0.012"
+        af = (f"aresample=48000,apad,atrim=0:{d:.6f},asetpts=PTS-STARTPTS,"
+              f"afade=t=in:d=0.01,afade=t=out:st={d - 0.012:.6f}:d=0.012")
         salida = tramos / f"{k:02d}.mp4"
         subprocess.run(
-            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(c["in"]), "-t", f"{d:.3f}",
-             "-i", str(reel / "crudos" / f'{c["clip"]}.MP4'), "-vf", vf, "-af", af,
+            ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-ss", str(c["in"]), "-t", f"{d + 0.2:.3f}",
+             "-i", str(reel / "crudos" / f'{c["clip"]}.MP4'), "-vf", vf, "-af", af, "-frames:v", str(cuadros),
              "-c:v", "libx264", "-preset", "medium", "-crf", "17", "-c:a", "pcm_s16le", "-ar", "48000",
              str(salida.with_suffix(".mov"))], check=True,
         )
         lista.append(f"file '{salida.with_suffix('.mov').name}'")
         print(f"tramo {k + 1}/{len(cortes)} listo: zoom {z:.2f}, cara en el crudo x={cx:.0f} y={cy:.0f}")
     (tramos / "lista.txt").write_text("\n".join(lista) + "\n")
+    cuadrar_linea_de_tiempo(trabajo, cortes, num, den)
 
     base = trabajo / "base.mp4"
     subprocess.run(

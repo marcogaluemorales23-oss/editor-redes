@@ -29,11 +29,12 @@ def ass_color(hex6):
     return f"&H00{b}{g}{r}".upper()
 
 
-# Zona segura de Instagram en la banda de subtítulos (y 1000-1590): x de ~110 a ~850 px, porque a la derecha
-# van likes, comentarios y compartir. Se centra el texto en ese hueco, no en el cuadro. Arriba (llamada a la
-# acción) no hay iconos: se centra en el cuadro y cabe más ancho, como en la edición de Sebas.
-ZONA_ABAJO = {"x": 480, "ancho": 760}
-ZONA_ARRIBA = {"x": 540, "ancho": 860}
+# Subtítulos centrados en el cuadro (x=540), como pidió Sebas. Abajo la zona segura termina en x≈850 (likes,
+# comentarios, compartir): se acepta pasarse un poco; si la línea amarilla se pasa mucho, se achica solo ella.
+# Arriba (llamada a la acción) no hay iconos y cabe más ancho.
+ZONA_ABAJO = {"x": 540, "ancho": 780, "ancho_l2": 720}
+ZONA_ARRIBA = {"x": 540, "ancho": 860, "ancho_l2": 860}
+BOTON_X = 480  # el botón sí va corrido a la izquierda para no meterse bajo los iconos
 
 # Medidas de Sebastián en Premiere (secuencia 1440x2560), pasadas a 1080x1920 (x 0,75). Se pueden cambiar
 # por marca en marca.json -> "subtitulos".
@@ -135,7 +136,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
             claves = [claves]
         for j, (a2, _, texto2) in enumerate(claves):
             fin2 = w[claves[j + 1][0]]["inicio"] - 0.02 if j + 1 < len(claves) else fin
-            px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"], zona["ancho"])
+            px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"], zona["ancho_l2"])
             y2 = base + est["interlineado"] + desc2 * px2
             for sombra in (True, False):
                 lineas.append(linea(w[a2]["inicio"], fin2, "L2", zona["x"], y2, px2, celda2, est, texto2, sombra))
@@ -217,7 +218,7 @@ def main():
         # del botón no llegaba a la mezcla.
         filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
                   f"[1:v]format=rgba,scale=iw*{esc}:-1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b];"
-                  f"[s][b]overlay={ZONA_ABAJO['x']}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[s][b]overlay={BOTON_X}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
                   f"[1:a]aresample=48000,adelay={ms}|{ms},volume={vol}dB[ba];"
                   f"[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
         audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
