@@ -47,8 +47,8 @@ const Gancho: React.FC = () => {
   const sinRespuesta = f >= cuadro(MOMENTOS.llamar);
   const pulso = 1 + 0.08 * Math.sin((f / 24) * Math.PI * 2 * 1.4);
   const notis = [
-    { s: MOMENTOS.solo, color: COLORES.rojo, icono: "telefono", titulo: "Llamada perdida", texto: "Tu broker no contestó" },
-    { s: MOMENTOS.transaccion, color: "#25D366", icono: "persona", titulo: "Mensaje sin leer", texto: "¿Me ayudas con el cierre?" },
+    { s: MOMENTOS.notiLlamada, color: COLORES.rojo, icono: "telefono", titulo: "Llamada perdida", texto: "Tu broker no contestó" },
+    { s: MOMENTOS.notiMensaje, color: "#25D366", icono: "persona", titulo: "Mensaje sin leer", texto: "¿Me ayudas con el cierre?" },
     { s: MOMENTOS.sinNadie, color: "#F5A623", icono: "reloj", titulo: "Cliente esperando", texto: "La firma sigue pendiente" },
   ];
   return (

@@ -16,7 +16,8 @@ export const COLORES = {
 
 // Planos: C = animación arriba, A = completa con tarjetas detrás, B = partida con interfaz arriba.
 export const PLANOS = {
-  gancho: { tipo: "C", desde: 0, hasta: 3.712 },
+  foco: { tipo: "A", desde: 0, hasta: 1.844 },
+  gancho: { tipo: "C", desde: 1.844, hasta: 3.712 },
   a1: { tipo: "A", desde: 3.712, hasta: 6.298 },
   chat: { tipo: "B", desde: 6.298, hasta: 10.594 },
   a2: { tipo: "A", desde: 10.594, hasta: 11.694 },
@@ -30,6 +31,8 @@ export const MOMENTOS = {
   solo: 0.984,
   transaccion: 1.844,
   sinNadie: 2.754,
+  notiLlamada: 2.0,
+  notiMensaje: 2.4,
   llamar: 3.294,
   disponible: 7.825,
   duda: 8.325,

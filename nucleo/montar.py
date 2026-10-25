@@ -91,7 +91,7 @@ def main():
     zooms = [float(z) for z in a.zoom.split(",")]
     fps = fps_de(str(reel / "crudos" / f'{cortes[0]["clip"]}.MP4'))
 
-    # Movimientos por tramo (opcional): {"0": {"empuje": 0.08, "golpe_en": 0.95, "golpe": 0.12}}
+    # Movimientos por tramo (opcional): {"0": {"empuje": 0.08, "golpe_en": 0.95, "golpe": 0.12, "abre": 0.3}}
     # empuje = acercamiento suave a lo largo del tramo; golpe = acercamiento rápido (150 ms) en un segundo dado.
     archivo_mov = trabajo / "movimientos.json"
     movimientos = json.loads(archivo_mov.read_text()) if archivo_mov.exists() else {}
@@ -122,7 +122,9 @@ def main():
             # zoompan sobre el crudo 4K (2x la salida): el zoom se calcula en cada cuadro y no tiembla.
             golpe = (f"+{mov.get('golpe', 0)}*st(0,clip((it-{mov.get('golpe_en', 0)})/0.15,0,1))"
                      f"*ld(0)*(3-2*ld(0))") if "golpe_en" in mov else ""
-            zexpr = f"{z}*(1+{mov.get('empuje', 0)}*it/{d:.3f}{golpe})"
+            # "abre": arranca más cerca y se abre en 0,3 s (interrupción de patrón en el primer cuadro).
+            abre = (f"+{mov['abre']}*(1-st(1,clip(it/0.3,0,1))*ld(1)*(3-2*ld(1)))") if "abre" in mov else ""
+            zexpr = f"{z}*(1+{mov.get('empuje', 0)}*it/{d:.3f}{golpe}{abre})"
             vf = (f"scale=2160:3840:flags=lanczos,fps={fps},"
                   f"zoompan=z='{zexpr}':x='max(0,min(iw-iw/zoom,{cx * 2:.1f}-iw/zoom/2))'"
                   f":y='max(0,min(ih-ih/zoom,{cy * 2:.1f}-ih/zoom*{CARA_Y / 1920:.4f}))':d=1:s=1080x1920:fps={fps},"
