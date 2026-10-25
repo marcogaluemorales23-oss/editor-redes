@@ -30,9 +30,10 @@ def ass_color(hex6):
 
 
 # Zona segura de Instagram en la banda de subtítulos (y 1000-1590): x de ~110 a ~850 px, porque a la derecha
-# van likes, comentarios y compartir. Se centra el texto en ese hueco, no en el cuadro.
-CENTRO_X = 480
-ANCHO_SEGURO = 760
+# van likes, comentarios y compartir. Se centra el texto en ese hueco, no en el cuadro. Arriba (llamada a la
+# acción) no hay iconos: se centra en el cuadro y cabe más ancho, como en la edición de Sebas.
+ZONA_ABAJO = {"x": 480, "ancho": 760}
+ZONA_ARRIBA = {"x": 540, "ancho": 860}
 
 # Medidas de Sebastián en Premiere (secuencia 1440x2560), pasadas a 1080x1920 (x 0,75). Se pueden cambiar
 # por marca en marca.json -> "subtitulos".
@@ -41,10 +42,15 @@ ESTILO = {
     "l2_px": 106,            # Bold 142
     "tracking": -0.049,      # tracking -49 (milésimas de em)
     "interlineado": 87,      # de línea base a línea base
-    "sombra_opacidad": 0.71,
+    # Sombra: en su edición es un resplandor oscuro muy difuso que casi no se ve, sin contorno pegado a la letra.
+    "sombra_opacidad": 0.45,
     "sombra_distancia": 2.2,  # 3 a 135° -> abajo a la derecha
-    "sombra_tamano": 4.5,    # 6
-    "sombra_desenfoque": 9,  # 126 en Premiere es una sombra muy suave
+    "sombra_tamano": 0,
+    "sombra_desenfoque": 22,
+    # Animación: entra deslizando con desenfoque de movimiento y sale borrosa.
+    "entrada_ms": 180,
+    "salida_ms": 140,
+    "deslizar_px": 60,
 }
 
 
@@ -60,29 +66,37 @@ def ancho(texto, fuente, px, tracking):
     return ImageFont.truetype(str(fuente), round(px)).getlength(texto) + tracking * px * (len(texto) - 1)
 
 
-def tamano_que_cabe(texto, fuente, px, tracking):
+def tamano_que_cabe(texto, fuente, px, tracking, limite):
     """Baja el tamaño de letra hasta que la línea quepa en la zona segura (ASS no corta líneas con WrapStyle 2)."""
-    while px > 40 and ancho(texto, fuente, px, tracking) > ANCHO_SEGURO:
+    while px > 40 and ancho(texto, fuente, px, tracking) > limite:
         px -= 1
     return px
 
 
-def linea(capa, t0, t1, estilo, x, y, px, celda, est, texto, pop, sombra):
+def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra):
     fs = round(px * celda, 1)
     fsp = round(est["tracking"] * px, 2)
+    dur = round((t1 - t0) * 1000)
+    e, sal, dx = est["entrada_ms"], min(est["salida_ms"], dur // 3), est["deslizar_px"]
     if sombra:
-        alfa = f"&H{round(255 * (1 - est['sombra_opacidad'])):02X}&"
         d = est["sombra_distancia"]
-        return (f"Dialogue: {capa},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
-                f"{{\\pos({x + d:.1f},{y + d:.1f})\\fs{fs}\\fsp{fsp}\\1c&H000000&\\3c&H000000&\\1a{alfa}\\3a{alfa}"
-                f"\\bord{est['sombra_tamano']}\\blur{est['sombra_desenfoque']}}}{pop}{texto}")
-    return (f"Dialogue: {capa},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
-            f"{{\\pos({x},{y:.1f})\\fs{fs}\\fsp{fsp}\\bord0\\shad0}}{pop}{texto}")
+        alfa = f"&H{round(255 * (1 - est['sombra_opacidad'])):02X}&"
+        x, y = x + d, y + d
+        estilo_txt = (f"\\1c&H000000&\\3c&H000000&\\1a{alfa}\\3a{alfa}\\bord{est['sombra_tamano']}"
+                      f"\\blur{est['sombra_desenfoque']}")
+        anim = f"\\fad({e},{sal})"
+    else:
+        estilo_txt = "\\bord0\\shad0\\blur14"
+        anim = f"\\fad({e},{sal})\\t(0,{e},\\blur0)\\t({dur - sal},{dur},\\blur10)"
+    return (f"Dialogue: {0 if sombra else 1},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
+            f"{{\\move({x - dx:.1f},{y:.1f},{x:.1f},{y:.1f},0,{e})\\fs{fs}\\fsp{fsp}{estilo_txt}{anim}}}{texto}")
 
 
 def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None):
     """y = línea base de la frase blanca. Los bloques desde la palabra `desde_arriba` (la llamada a la acción)
-    suben a y_arriba para dejar la banda de abajo libre para el botón."""
+    suben a y_arriba para dejar la banda de abajo libre para el botón.
+    "l2" puede ser una lista de frases clave: la blanca se queda fija y la amarilla va cambiando (listas como
+    "para cada duda / cada problema / cada cierre")."""
     est = {**ESTILO, **marca.get("subtitulos", {})}
     fam = marca["fuentes"]["subtitulos"]["familia"]
     blanco = ass_color(marca["colores"]["texto"])
@@ -105,24 +119,26 @@ Style: L2,{fam},100,{acento},{acento},&H00000000,&H00000000,1,0,0,0,100,100,0,0,
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
-    pop = r"{\fad(70,50)\fscx92\fscy92\t(0,120,\fscx100\fscy100)}"
     lineas = []
     for k, b in enumerate(bloques):
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
-        base = y_arriba if desde_arriba is not None and b["l1"][0] >= desde_arriba else y
+        arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
+        base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, ZONA_ABAJO)
         a, _, texto = b["l1"]
-        px1 = tamano_que_cabe(texto, f_l1, est["l1_px"], est["tracking"])
+        px1 = tamano_que_cabe(texto, f_l1, est["l1_px"], est["tracking"], zona["ancho"])
         y1 = base + desc1 * px1  # \an2 ancla el borde de abajo de la celda: línea base + descendente
-        for capa, sombra in ((0, True), (1, False)):
-            lineas.append(linea(capa, w[a]["inicio"], fin, "L1", CENTRO_X, y1, px1, celda1, est, texto, pop, sombra))
-        if "l2" in b:
-            a2, _, texto2 = b["l2"]
-            px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"])
+        for sombra in (True, False):
+            lineas.append(linea(w[a]["inicio"], fin, "L1", zona["x"], y1, px1, celda1, est, texto, sombra))
+        claves = b.get("l2", [])
+        if claves and not isinstance(claves[0], list):
+            claves = [claves]
+        for j, (a2, _, texto2) in enumerate(claves):
+            fin2 = w[claves[j + 1][0]]["inicio"] - 0.02 if j + 1 < len(claves) else fin
+            px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"], zona["ancho"])
             y2 = base + est["interlineado"] + desc2 * px2
-            for capa, sombra in ((0, True), (1, False)):
-                lineas.append(linea(capa, w[a2]["inicio"], fin, "L2", CENTRO_X, y2, px2, celda2, est, texto2,
-                                    pop, sombra))
+            for sombra in (True, False):
+                lineas.append(linea(w[a2]["inicio"], fin2, "L2", zona["x"], y2, px2, celda2, est, texto2, sombra))
     destino.write_text(cab + "\n".join(lineas) + "\n", encoding="utf-8")
 
 
@@ -167,7 +183,7 @@ def main():
     ap.add_argument("marca")
     ap.add_argument("--tiempos", default="corte_check.json")
     ap.add_argument("--y", type=int, default=1243, help="línea base de la frase blanca (banda 1210-1550)")
-    ap.add_argument("--y-arriba", type=int, default=400, help="línea base en la llamada a la acción")
+    ap.add_argument("--y-arriba", type=int, default=345, help="línea base en la llamada a la acción")
     ap.add_argument("--base", default="base.mp4", help="base.mp4 o base_broll.mp4")
     a = ap.parse_args()
     trabajo = Path(a.reel) / "trabajo"
@@ -201,7 +217,7 @@ def main():
         # del botón no llegaba a la mezcla.
         filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
                   f"[1:v]format=rgba,scale=iw*{esc}:-1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b];"
-                  f"[s][b]overlay={CENTRO_X}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[s][b]overlay={ZONA_ABAJO['x']}-w/2:{b.get('mover_y', 0)}:eof_action=pass[v];"
                   f"[1:a]aresample=48000,adelay={ms}|{ms},volume={vol}dB[ba];"
                   f"[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
         audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]

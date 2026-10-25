@@ -34,10 +34,17 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 3. **Subtítulos como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
    amarilla, tracking -49, líneas casi pegadas, sombra 71 % / 135° / dist. 3 / tamaño 6 / desenfoque 126.
    En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em (Playfair: x1,36), lo convierte `metricas()`.
-   Mayúscula al empezar cada oración. En la llamada a la acción los subtítulos suben y el botón va abajo.
+   Copiar cómo parte las frases Sebastián (ver video-01/trabajo/subtitulos.json como ejemplo):
+   - Entrada deslizando con desenfoque de movimiento (~0,2 s) y salida borrosa; nada de "pop" de escala.
+   - Amarillo solo en la idea fuerte. Frases de transición ("Aquí eso no pasa", "Ya tienes experiencia") van
+     solo en blanco.
+   - En listas, la blanca se queda fija y la amarilla va cambiando ("sino disponible" + duda/problema/cierre).
+   - Sombra: resplandor muy difuso (45 %, desenfoque 22), nunca un contorno pegado a la letra.
+   - En la llamada a la acción los subtítulos suben (línea base ~345, centrados) y el botón va abajo.
 9. **Efectos de sonido a -4,4 dB** (botón, transiciones, whoosh).
-10. **Transición de Sebastián**: película quemada (overlay en modo Trama, mezclado en RGB) + sonido "transicion",
-    en los cambios de sección, no en cada corte.
+10. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
+    mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
+    Va entre ideas del guion: gancho→problema, oferta 1→oferta 2, oferta 2→llamada a la acción.
 11. **Música**: de fondo, ~16 dB bajo la voz y con ducking. Avisar del riesgo de derechos de autor si es comercial.
 4. **Voz del camarógrafo**: nunca debe oírse ("acción", "otra vez", "va"). Empezar cada toma después del
    "acción" con margen, y revisar los primeros 300 ms de cada corte.
