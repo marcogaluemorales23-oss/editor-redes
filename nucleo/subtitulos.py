@@ -103,13 +103,14 @@ def main():
     ap.add_argument("marca")
     ap.add_argument("--tiempos", default="corte_check.json")
     ap.add_argument("--y", type=int, default=1150)
+    ap.add_argument("--base", default="base.mp4", help="base.mp4 o base_broll.mp4")
     a = ap.parse_args()
     trabajo = Path(a.reel) / "trabajo"
     marca_dir = RAIZ / "marcas" / a.marca
     marca = json.loads((marca_dir / "marca.json").read_text())
     conf = json.loads((trabajo / "subtitulos.json").read_text())
     w = json.loads((trabajo / a.tiempos).read_text())["palabras"]
-    base = trabajo / "base.mp4"
+    base = trabajo / a.base
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
@@ -120,7 +121,18 @@ def main():
     final = salida / "final.mp4"
     filtro = f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[v]"
     entradas = ["-i", str(base)]
-    if "badge" in conf:
+    audio = ["-map", "0:a", "-c:a", "copy"]
+    if "animacion" in conf.get("badge", {}):
+        # Animación con transparencia hecha por Sebas (ProRes 4444 / QuickTime Animation), con su sonido.
+        b = conf["badge"]
+        t0 = w[b["desde_palabra"]]["inicio"] + b.get("ajuste_s", 0)
+        entradas += ["-itsoffset", f"{t0:.3f}", "-i", str(Path(a.reel) / b["animacion"])]
+        vol = b.get("volumen", 0.6)
+        filtro = (f"[0:v]subtitles={ass}:fontsdir={marca_dir / 'fuentes'}[s];"
+                  f"[1:v]format=rgba[b];[s][b]overlay=0:{b.get('mover_y', 0)}:eof_action=pass[v];"
+                  f"[1:a]volume={vol}[ba];[0:a][ba]amix=inputs=2:duration=first:normalize=0[a]")
+        audio = ["-map", "[a]", "-c:a", "aac", "-b:a", "192k"]
+    elif "badge" in conf:
         badge = trabajo / "badge.png"
         crear_badge(RAIZ / conf["badge"]["logo"], conf["badge"]["handle"], badge)
         t0 = w[conf["badge"]["desde_palabra"]]["inicio"]
@@ -129,8 +141,8 @@ def main():
                   f"[1:v]format=rgba,fade=t=in:st={t0:.2f}:d=0.25:alpha=1[b];"
                   f"[s][b]overlay=(W-w)/2:1480:enable='gte(t,{t0:.2f})':shortest=1[v]")
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *entradas, "-filter_complex", filtro,
-                    "-map", "[v]", "-map", "0:a", "-c:v", "libx264", "-preset", "slow", "-crf", "18",
-                    "-pix_fmt", "yuv420p", "-c:a", "copy", "-movflags", "+faststart", str(final)], check=True)
+                    "-map", "[v]", *audio, "-c:v", "libx264", "-preset", "slow", "-crf", "18",
+                    "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(final)], check=True)
     print(f"final -> {final}")
 
 
