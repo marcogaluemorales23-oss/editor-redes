@@ -32,7 +32,7 @@ CALENTAR_S = 0.6       # empieza a procesar un poco antes del tramo para que la 
 REDUCCION = 0.5        # máscara a media resolución (0,25 dejaba el pelo borroso)
 CHOKE = (0.12, 0.88)   # el alfa entre estos valores se estira a 0-1: borde firme, sin fantasma
 DIFUMINADO = 0.8       # px de suavizado del borde después del choke
-NUCLEO = (0.85, 1.0)   # donde el alfa es más que esto se usa el pixel original (más detalle que el de RVM)
+NUCLEO = (0.35, 0.7)   # donde el alfa es más que esto se usa el pixel original (más detalle que el de RVM)
 MODELO_ZONA = Path(__file__).with_name("modelos") / "selfie_multiclass.tflite"
 MARGEN_ZONA = 22       # px que se ensancha la zona de MediaPipe (en 1080 de ancho); más, y entra el sillón
 
