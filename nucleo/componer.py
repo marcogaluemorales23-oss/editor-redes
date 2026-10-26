@@ -4,7 +4,7 @@
 Uso: python3 nucleo/componer.py <reel> [--hasta SEGUNDOS]
 Lee de <reel>/trabajo/:
     base.mp4         video cortado y encuadrado (sin textos)
-    silueta.mkv      máscara de la persona (nucleo/silueta.py)
+    persona.mov      la persona recortada con transparencia y borde limpio (nucleo/silueta.py)
     detras.mov       capa transparente que va detrás de la persona (Remotion: NegocioDetras)
     delante.mov      capa transparente que va delante (Remotion: NegocioDelante)
     planos.json      {"planos": [{"tipo": "A"|"B"|"C", "desde": s, "hasta": s}, ...]}
@@ -38,20 +38,19 @@ def main():
     completos = [(p["desde"], p["hasta"]) for p in planos if p["tipo"] == "A"]
     limite = ["-t", str(a.hasta)] if a.hasta else []
     filtro = ";".join([
-        "[0:v]split=3[v][paraBajar][paraPersona]",
+        "[0:v]split=2[v][paraBajar]",
         f"[paraBajar]crop=1080:{1920 - BAJAR_PX}:0:0,pad=1080:1920:0:{BAJAR_PX}:0x0D0F13[bajado]",
         f"[v][bajado]overlay=0:0:enable='{entre(partidos)}'[v1]",
         "[2:v]format=rgba[detras]",
         f"[v1][detras]overlay=0:0:enable='{entre(completos)}'[v2]",
-        "[1:v]format=gray[mascara]",
-        "[paraPersona][mascara]alphamerge[persona]",
+        "[1:v]format=rgba[persona]",
         f"[v2][persona]overlay=0:0:enable='{entre(completos)}'[v3]",
         "[3:v]format=rgba[delante]",
         "[v3][delante]overlay=0:0,format=yuv420p[out]",
     ])
     salida = t / "base_compuesta.mp4"
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *limite, "-i", str(t / "base.mp4"),
-                    *limite, "-i", str(t / "silueta.mkv"), *limite, "-i", str(t / "detras.mov"),
+                    *limite, "-i", str(t / "persona.mov"), *limite, "-i", str(t / "detras.mov"),
                     *limite, "-i", str(t / "delante.mov"), "-filter_complex", filtro,
                     "-map", "[out]", "-map", "0:a", "-c:v", "libx264", "-preset", "medium", "-crf", "17",
                     "-c:a", "copy", *limite, str(salida)], check=True)
