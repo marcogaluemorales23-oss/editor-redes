@@ -26,12 +26,14 @@ Los dos se pelean: lo que retiene (movimiento, efectos, gráficos) también pued
 
 | Herramienta | Para qué (el porqué) | Cuidado con |
 |---|---|---|
-| Zoom de entrada / salida | Renueva la atención sin cortar; marca cambio de idea | Por qué entrada y por qué salida: **pendiente que Sebas lo explique** |
-| Zoom en palabra importante | Le dice al cerebro "esto importa" en el momento exacto | Si todo tiene zoom, nada importa |
+| Zoom (de entrada o de salida) | **Genera tensión en el personaje.** Se usa en palabras clave, en una afirmación fuerte, y al inicio y al final del video | **Solo cuando el personaje habla a cámara.** En videos solo de b-roll o de motion graphics no va |
 | Marcar palabra en subtítulos | Lo mismo, por la vista: la idea clave se lee aunque no haya sonido | Solo la idea fuerte |
 | Efectos de sonido | Emoción y énfasis; conectan con la persona | Pendiente: cuándo sí y cuándo es ruido |
-| Música | La emoción de fondo que hace que el video "se sienta" | Que no tape la voz |
-| B-roll | Muestra lo que la persona dice: hace el mensaje más fácil de entender | Debe ilustrar la frase exacta, no decorar |
+| Música | **Que se sienta entretenido y que la persona conecte con lo que se dice**, para que lo vea hasta el final | **Tiene que pertenecer al tema y a su cultura.** Pan de jamón y hallacas en Maracaibo → gaita, no una canción navideña gringa. North West (hija de Kanye) → nada de Taylor Swift. Que no tape la voz |
+| B-roll | **Refuerza lo que se dice representando la acción** ("me siento en la computadora" → toma de él sentándose en la computadora). También **tapa tomas defectuosas** (ej.: él mirando el teléfono mientras habla) | Debe ilustrar la frase exacta, no decorar. Sebas va a armar una carpeta de b-rolls con título cada uno |
+
+**Lo que Sebas más odia en un reel: que sea aburrido y que esté sobrecargado.** Le gusta lo simple.
+El equilibrio: suficiente movimiento para que no aburra, nunca tanto que se sienta cargado.
 
 ## 4. Estructura del guion y qué lleva cada parte
 
@@ -58,7 +60,7 @@ Sebastián quiere quedarse con **5 formatos** y afinarlos uno por uno. Pendiente
 
 ## Preguntas abiertas para Sebastián
 
-1. ¿Qué es un zoom de entrada y uno de salida para ti, y cuándo usas cada uno?
-2. ¿Qué emoción buscas con la música en un video típico? ¿Cambia por formato?
-3. ¿Cuántos b-rolls por cada 10 segundos te parecen bien? ¿Cuánto dura cada uno?
-4. ¿Qué es lo que más odias ver en un reel?
+(Respondidas el 27-10: zoom, música, b-roll y lo que odia → ya están arriba.)
+
+1. ¿Cuánto dura cada b-roll y cuántos seguidos como máximo antes de volver a la cara? (se mide en su video)
+2. Zoom de entrada vs. de salida: ¿alguna diferencia de cuándo usar uno u otro? (se mide en su video)
