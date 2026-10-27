@@ -33,7 +33,16 @@ Los dos se pelean: lo que retiene (movimiento, efectos, gráficos) también pued
 | Música | La emoción de fondo que hace que el video "se sienta" | Que no tape la voz |
 | B-roll | Muestra lo que la persona dice: hace el mensaje más fácil de entender | Debe ilustrar la frase exacta, no decorar |
 
-## 4. Checklist de un video que funciona
+## 4. Estructura del guion y qué lleva cada parte
+
+Referencia principal de Sebastián: **Víctor Eras (Eras Media)**, su base para la viralidad en Instagram.
+Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpos → moraleja**.
+
+- **Cuerpo (desarrollo)**: sin adornos. Nada de tarjetas ni motion graphics decorativos. Lo que acompaña es
+  **b-roll de apoyo que ayude a entender el mensaje**.
+- Gancho, CTA y moraleja: pendiente que Sebas explique qué lleva cada uno (se analiza con su video de referencia).
+
+## 5. Checklist de un video que funciona
 
 (Borrador: Sebastián lo va a completar.)
 
@@ -43,7 +52,7 @@ Los dos se pelean: lo que retiene (movimiento, efectos, gráficos) también pued
 - [ ] ¿La música y los efectos hacen sentir algo coherente con lo que se dice?
 - [ ] ¿Algo distrae de la cara o de la frase importante?
 
-## 5. Formatos
+## 6. Formatos
 
 Sebastián quiere quedarse con **5 formatos** y afinarlos uno por uno. Pendiente: cuáles 5 y una referencia de cada uno.
 
