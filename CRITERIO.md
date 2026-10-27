@@ -37,6 +37,10 @@ El equilibrio: suficiente movimiento para que no aburra, nunca tanto que se sien
 
 ## 4. Estructura del guion y qué lleva cada parte
 
+**El gancho es lo más importante.** Primero hay que retener a la mayor cantidad de gente posible en el inicio;
+después se trabaja para que los que se quedaron entretenidos terminen el video. Al analizar referencias,
+el gancho se estudia con más detalle que todo lo demás: qué hace la edición en los primeros segundos para que no se vayan.
+
 Referencia principal de Sebastián: **Víctor Eras (Eras Media)**, su base para la viralidad en Instagram.
 Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpos → moraleja**.
 
@@ -56,7 +60,14 @@ Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpo
 
 ## 6. Formatos
 
-Sebastián quiere quedarse con **5 formatos** y afinarlos uno por uno. Pendiente: cuáles 5 y una referencia de cada uno.
+Sebastián quiere quedarse con **5 formatos** y afinarlos uno por uno. Cada uno tiene su propio estilo de edición.
+Referencias: carpeta de Drive "estilos de edición", 3 videos virales (500 mil a 1 millón de vistas) por formato.
+
+1. Dinámico
+2. Hablando a cámara (el primero que se analiza)
+3. POV / toma en perspectiva
+4. Personaje / entrevista (son el mismo estilo de edición, con pequeñas diferencias)
+5. Pendiente (Sebas lo deja desglosado en la carpeta)
 
 ## Preguntas abiertas para Sebastián
 
