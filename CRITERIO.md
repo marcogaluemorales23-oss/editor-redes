@@ -41,8 +41,8 @@ El equilibrio: suficiente movimiento para que no aburra, nunca tanto que se sien
 después se trabaja para que los que se quedaron entretenidos terminen el video. Al analizar referencias,
 el gancho se estudia con más detalle que todo lo demás: qué hace la edición en los primeros segundos para que no se vayan.
 
-Referencia principal de Sebastián: **Víctor Eras (Eras Media)**, su base para la viralidad en Instagram.
-Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpos → moraleja**.
+Referencia principal de Sebastián: **Víctor Heras (@herasmedia)**, su base para la viralidad en Instagram.
+estructura tipo Heras Media: **gancho → cuerpo 1 → primer CTA → más cuerpos → moraleja**.
 
 - **Cuerpo (desarrollo)**: sin adornos. Nada de tarjetas ni motion graphics decorativos. Lo que acompaña es
   **b-roll de apoyo que ayude a entender el mensaje**.
@@ -65,7 +65,7 @@ Sebastián dice cuál formato usar en cada video; esta es la función de cada un
 
 | Formato | Para qué sirve | Qué entrega Sebas | Cómo se edita |
 |---|---|---|---|
-| **Dynamic** (prioridad) → `estilos/dynamic.md` | Hablando a cámara con mucho dinamismo para entretener al nivel de conciencia más bajo, **sin pasarse de dopamina**: primero que el mensaje se entienda | Video hablando a cámara | **Estilo Víctor Eras**: guion "versión lírica" (no todo explicativo), apoyado sobre todo en **tomas** (b-roll propio). Gráficos, pantallazos y música solo cuando ayudan a sostener la atención. No hace falta humor ni pasar vergüenza para entretener |
+| **Dynamic** (prioridad) → `estilos/dynamic.md` | Hablando a cámara con mucho dinamismo para entretener al nivel de conciencia más bajo, **sin pasarse de dopamina**: primero que el mensaje se entienda | Video hablando a cámara | **Estilo Víctor Heras (@herasmedia)**: guion "versión lírica" (no todo explicativo), apoyado sobre todo en **tomas** (b-roll propio). Gráficos, pantallazos y música solo cuando ayudan a sostener la atención. No hace falta humor ni pasar vergüenza para entretener |
 | **Pantalla dividida** (prioridad) → `estilos/pantalla_dividida.md` | Clases y tutoriales: convertir una clase grabada (presentaciones en Miro) en video educativo, o **reaccionar a videos** de otros. Cuando hay que verlo a él y a la pantalla | Video de él + grabación de pantalla / video al que reacciona | Arriba la pantalla, abajo él |
 | **Yapping** | Hablando a cámara muy cercano, como un FaceTime con un amigo de toda la vida | Video hablando a cámara | Súper simple: lo que dice + **título al inicio que se queda todo el video** + imágenes de apoyo, casi sin animación |
 | **B-roll / motion graphics** | Voz en off, para las semanas en que no puede grabarse a cámara y no perder constancia | Audio + sus b-rolls (con título) + instrucciones | B-roll: elegir de sus tomas las que concuerden con cada frase del audio. Motion graphics: para tutoriales/explicaciones sin cara |
