@@ -1,4 +1,48 @@
-# Notas de trabajo: dynamic (visual, antes del audio)
+# Formato dynamic: auditoría de 5 referencias
+
+Auditoría del 28-10-2026 (mismas herramientas y límites que `pantalla_dividida.md`).
+
+## Qué es "dynamic" según estas 5 referencias
+
+No es "muchos cortes": 3 de 5 tienen menos de 10 cortes por minuto (vd5 es una sola toma). **El dinamismo es que la imagen
+cambia de estado todo el tiempo** sin que la persona deje de hablar: cara completa ↔ gráfico encima de la cara ↔ gráfico a
+pantalla completa ↔ tarjeta de capítulo ↔ prompt sobre fondo desenfocado. Las otras dos referencias son dinámicas por la puesta
+en escena (sketch con cámara en mano, juego con varias personas).
+
+## Principios del formato
+
+1. **Cada acción dicha tiene su animación** (crea una carpeta → aparece la carpeta; súbele todo → caen los archivos; "esto
+   significa…" → el gráfico cambia mientras él señala). La mano del presentador y el gráfico están sincronizados.
+2. **Índice visible**: barra de pasos (01·02·03·04), chips "Prompts · Pasos · Recursos", círculos 1–5 con "?". El espectador
+   sabe cuánto falta y se queda a ver lo que sigue.
+3. **Gancho con dos capas**: lo que se dice (conflicto: "todos lo hacen pero nadie te dice cómo") + lo que se escribe fijo arriba
+   (promesa: "Todo lo que necesitas para editar tus videos con IA"). Y prueba social visual en los primeros 2 s.
+4. **Tarjetas de capítulo** a pantalla completa (color de marca, entra como cortina en 0,7 s) para separar pasos: renuevan la
+   atención como un corte de escena.
+5. **Subtítulos de dos tamaños**: relleno pequeño y la idea clave enorme (serif con resplandor en vd5, color de marca en vd2/vd4).
+6. **Tensión con planos**: primerísimo plano, ojos en blanco y negro (vd1), destello rojo al fallar (vd3).
+7. **Prueba antes del CTA**: contador de vistas que sube, "después de ganar 3 millones…". CTA a mitad y al final cuando el video
+   es largo (vd2).
+
+## Sonido
+
+| | Música vs. voz | Música | Efectos | Uso |
+|---|---|---|---|---|
+| vd1 sketch | ~9 dB abajo | ambiente del carro al inicio; **la música entra en "¿Por qué?"** cuando aparece el conflicto | 32 | efecto cómico fuerte en "qué guapo"; golpe agudo de tensión en "¿Por qué?" |
+| vd2 tutorial | **sin música** | — | 6 | solo whoosh al entrar cada tarjeta "Paso". El silencio deja toda la atención en la explicación |
+| vd3 juego | voz y fondo casi igual | la música **baja a casi nada mientras esperan** la respuesta | 55 (10 cada 10 s) | sonido de acierto/error (acorde brillante) en cada revelación; es un concurso de TV |
+| vd4 tutorial | ~16 dB abajo | constante, se apaga en el último segundo | 10 | whoosh en cada animación grande (baraja de miniaturas, chips, "Este es todo el workflow") |
+| vd5 una toma | ~24 dB abajo, casi imperceptible al inicio | **música melódica entra después del gancho** (5,7 s, tras "CTA es mala" con golpe grave) | 22 | golpe en cada cambio de gráfico |
+
+**Patrones de sonido:**
+- **La música entra cuando empieza la historia**, no siempre en el cuadro 0: en el conflicto (vd1), después del gancho (vd5),
+  en la primera palabra clave (pantalla dividida vd2). El arranque con poca música hace que la voz del gancho pegue más.
+- **Suspenso = quitar sonido**: antes de una revelación la música baja (vd3) y el acierto/error suena fuerte.
+- **Whoosh solo en cambios de estado grandes** (tarjeta de capítulo, abanico de miniaturas), no en cada subtítulo.
+- **Tutorial puro puede ir sin música** (vd2) si los gráficos son muy ricos; el sketch y el juego necesitan mucho efecto.
+
+## Las 5 referencias, una por una
+
 
 vd1 (vendedor intenso en el carro, 52,9 s, 22 cortes/min): sketch grabado con celular, cámara en mano desde el punto de vista de la
 novia (POV). Barra de texto nativa de IG/TikTok arriba del todo "Cita con vendedor intenso 😳" = contexto de la escena en los

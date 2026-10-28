@@ -60,14 +60,14 @@ Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpo
 
 ## 6. Formatos
 
-Sebastián quiere quedarse con **5 formatos** y afinarlos uno por uno. Cada uno tiene su propio estilo de edición.
-Referencias: carpeta de Drive "estilos de edición", 3 videos virales (500 mil a 1 millón de vistas) por formato.
+Para la cuenta personal de Sebastián (solo su marca, sin clientes por ahora) se trabajan **4 formatos**:
+1. **Pantalla dividida** (prioridad) → auditoría en `estilos/pantalla_dividida.md`
+2. **Dynamic** (prioridad) → auditoría en `estilos/dynamic.md`
+3. Yapping
+4. Motion graphics
 
-1. Dinámico
-2. Hablando a cámara (el primero que se analiza)
-3. POV / toma en perspectiva
-4. Personaje / entrevista (son el mismo estilo de edición, con pequeñas diferencias)
-5. Pendiente (Sebas lo deja desglosado en la carpeta)
+Referencias en Drive "Estilos de edicion" (3–5 videos virales por formato). Vlog/POV queda pendiente.
+Personaje/entrevista, VS, comparación y ranking quedan fuera por ahora.
 
 ## Preguntas abiertas para Sebastián
 
