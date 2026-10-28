@@ -7,7 +7,8 @@ Necesita <carpeta del video>/<nombre>/palabras.json (nucleo/auditar.py). Escribe
     sonido_N.png         tiras de 10 s: espectrograma del fondo, nivel de voz y de fondo, y las palabras encima.
                          Un whoosh se ve como un barrido de ruido que sube; un golpe, una raya vertical
                          fuerte con graves; un ding, una línea horizontal aguda que se apaga.
-    sonido.json         nivel de fondo cada 0,1 s (dB) y los golpes (picos bruscos del fondo) con su palabra
+    sonido.json         nivel de fondo y voz cada 0,1 s (dB), golpes (picos bruscos del fondo) con su palabra,
+                        pulso de la música (BPM) y momentos en que la música cambia de carácter
 """
 import json
 import subprocess
@@ -65,6 +66,29 @@ def golpes(fondo, palabras):
     return eventos
 
 
+def ritmo(fondo):
+    """Pulso de la música (BPM) por autocorrelación de los ataques del fondo, y los momentos en que la
+    música cambia de carácter (salto grande del espectro promedio entre ventanas de 2 s)."""
+    n = 512
+    tramas = fondo[: len(fondo) // n * n].reshape(-1, n)
+    esp = np.abs(np.fft.rfft(tramas * np.hanning(n), axis=1))
+    flujo = np.maximum(np.diff(np.log1p(esp), axis=0), 0).sum(1)
+    flujo -= flujo.mean()
+    fps = SR / n
+    ac = np.correlate(flujo, flujo, "full")[len(flujo) - 1:]
+    lo, hi = int(fps * 60 / 180), int(fps * 60 / 60)
+    bpm = round(60 * fps / (lo + int(np.argmax(ac[lo:hi]))), 1) if hi < len(ac) else None
+    paso = int(2 * fps)
+    perfiles = [np.log1p(esp[i:i + paso].mean(0)) for i in range(0, len(esp) - paso, paso // 2)]
+    cambios = []
+    for i in range(1, len(perfiles)):
+        a, b = perfiles[i - 1], perfiles[i]
+        d = 1 - a @ b / (np.linalg.norm(a) * np.linalg.norm(b) + 1e-9)
+        cambios.append((round(i * paso / 2 / fps, 1), float(d)))
+    umbral = np.median([d for _, d in cambios]) * 3 if cambios else 1
+    return bpm, [t for t, d in cambios if d > umbral]
+
+
 def dibujar(fondo, voz, palabras, eventos, dest):
     total = len(fondo) / SR
     nv, nf = nivel_db(voz), nivel_db(fondo)
@@ -104,11 +128,12 @@ def main():
     separar(video, dest)
     fondo, voz = leer(dest / "fondo.wav"), leer(dest / "voz.wav")
     eventos = golpes(fondo, palabras)
-    (dest / "sonido.json").write_text(json.dumps({
+    bpm, cambios = ritmo(fondo)
+    (dest / "sonido.json").write_text(json.dumps({"bpm": bpm, "cambios_musica": cambios,
         "paso_s": PASO_S, "fondo_db": [round(float(v), 1) for v in nivel_db(fondo)],
         "voz_db": [round(float(v), 1) for v in nivel_db(voz)], "golpes": eventos}, ensure_ascii=False))
     dibujar(fondo, voz, palabras, eventos, dest)
-    print(f"{video.name}: {len(eventos)} golpes en el fondo -> {dest}")
+    print(f"{video.name}: {len(eventos)} golpes, ~{bpm} BPM, cambios de música en {cambios} -> {dest}")
 
 
 if __name__ == "__main__":
