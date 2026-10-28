@@ -60,11 +60,15 @@ Estructura tipo Eras Media: **gancho → cuerpo 1 → primer CTA → más cuerpo
 
 ## 6. Formatos
 
-Para la cuenta personal de Sebastián (solo su marca, sin clientes por ahora) se trabajan **4 formatos**:
-1. **Pantalla dividida** (prioridad) → auditoría en `estilos/pantalla_dividida.md`
-2. **Dynamic** (prioridad) → auditoría en `estilos/dynamic.md`
-3. Yapping
-4. Motion graphics
+Para la cuenta personal de Sebastián (solo su marca, sin clientes por ahora). Graba con el celular.
+Sebastián dice cuál formato usar en cada video; esta es la función de cada uno:
+
+| Formato | Para qué sirve | Qué entrega Sebas | Cómo se edita |
+|---|---|---|---|
+| **Dynamic** (prioridad) → `estilos/dynamic.md` | Hablando a cámara con mucho dinamismo para entretener al nivel de conciencia más bajo, **sin pasarse de dopamina**: primero que el mensaje se entienda | Video hablando a cámara | **Estilo Víctor Eras**: guion "versión lírica" (no todo explicativo), apoyado sobre todo en **tomas** (b-roll propio). Gráficos, pantallazos y música solo cuando ayudan a sostener la atención. No hace falta humor ni pasar vergüenza para entretener |
+| **Pantalla dividida** (prioridad) → `estilos/pantalla_dividida.md` | Clases y tutoriales: convertir una clase grabada (presentaciones en Miro) en video educativo, o **reaccionar a videos** de otros. Cuando hay que verlo a él y a la pantalla | Video de él + grabación de pantalla / video al que reacciona | Arriba la pantalla, abajo él |
+| **Yapping** | Hablando a cámara muy cercano, como un FaceTime con un amigo de toda la vida | Video hablando a cámara | Súper simple: lo que dice + **título al inicio que se queda todo el video** + imágenes de apoyo, casi sin animación |
+| **B-roll / motion graphics** | Voz en off, para las semanas en que no puede grabarse a cámara y no perder constancia | Audio + sus b-rolls (con título) + instrucciones | B-roll: elegir de sus tomas las que concuerden con cada frase del audio. Motion graphics: para tutoriales/explicaciones sin cara |
 
 Referencias en Drive "Estilos de edicion" (3–5 videos virales por formato). Vlog/POV queda pendiente.
 Personaje/entrevista, VS, comparación y ranking quedan fuera por ahora.
