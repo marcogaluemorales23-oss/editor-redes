@@ -141,12 +141,12 @@ const ClaseGratis: React.FC = () => {
 
 const Perfil: React.FC = () => {
   const f = useCurrentFrame();
-  const W = 600, escala = W / 1179;
+  const W = 540, escala = W / 1179;
   const marca = interpolate(f, [c(23.42), c(23.77)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: CURVA });
   const { visible, estilo } = useSuave(22.62, 24.3, 0.12);
   if (!visible) return null;
   return (
-    <div style={{ position: "absolute", top: 330, left: (1080 - W) / 2, width: W, height: 780 * escala, borderRadius: 28, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.95)", boxShadow: "0 18px 44px rgba(60,40,20,0.18)", ...estilo }}>
+    <div style={{ position: "absolute", top: 300, left: (1080 - W) / 2, width: W, height: 780 * escala, borderRadius: 28, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.95)", boxShadow: "0 18px 44px rgba(60,40,20,0.18)", ...estilo }}>
       <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
       <div style={{ position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala, border: `4px solid ${ACENTO}`, borderRadius: 16,
         opacity: marca, transform: `scale(${1.3 - 0.3 * marca})`, boxShadow: `0 0 18px ${ACENTO}88` }} />

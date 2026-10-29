@@ -85,11 +85,12 @@ def main():
     actual, k = "[c0]", 1
     claro = c.get("tema", "oscuro") == "claro"
     # Tema claro (el que eligió Sebas, como vd2): el desenfoque se lava hacia crema. Oscuro: vidrio ahumado.
+    # En blend la opacidad es de la PRIMERA entrada (la de arriba): la crema va primero, si no se lava al revés.
     tinte_arriba = ("[{e}]gblur=sigma=26[{e}b];color=c=0xF4F0E8:s=1080x1920:r=60[{e}c];"
-                    "[{e}b][{e}c]blend=all_mode=normal:all_opacity=0.70:shortest=1,format=rgba") if claro else \
+                    "[{e}c][{e}b]blend=all_mode=normal:all_opacity=0.70:shortest=1,format=rgba") if claro else \
                    "[{e}]gblur=sigma=26,colorchannelmixer=rr=0.42:gg=0.42:bb=0.45,format=rgba"
     tinte_pantalla = ("[{e}]gblur=sigma=40[{e}b];color=c=0xF4F0E8:s=1080x1920:r=60[{e}c];"
-                      "[{e}b][{e}c]blend=all_mode=normal:all_opacity=0.88:shortest=1,format=rgba") if claro else \
+                      "[{e}c][{e}b]blend=all_mode=normal:all_opacity=0.88:shortest=1,format=rgba") if claro else \
                      "[{e}]gblur=sigma=40,colorchannelmixer=rr=0.22:gg=0.22:bb=0.24,format=rgba"
     for i, (a0, b0) in enumerate(arriba):
         g += [tinte_arriba.format(e=f"c{k}") + f"[bz{i}]",
