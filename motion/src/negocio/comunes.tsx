@@ -43,9 +43,7 @@ type IconoProps = { nombre: string; tam?: number; color?: string };
 /** Íconos de trazo simple, dibujados en SVG (sin dependencias). */
 export const Icono: React.FC<IconoProps> = ({ nombre, tam = 56, color = COLORES.acento }) => {
   const p = { fill: "none", stroke: color, strokeWidth: 2.2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-  if (nombre === "logo") {
-    return <Img src={staticFile("logo-sdr.webp")} style={{ width: tam * 1.6, height: tam * 1.6, objectFit: "contain" }} />;
-  }
+  if (nombre === "logo") nombre = "estrella"; // el logo del cliente se borró al terminar la prueba
   const trazos: Record<string, React.ReactNode> = {
     persona: <><circle cx="12" cy="8" r="4" {...p} /><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" {...p} /></>,
     reloj: <><circle cx="12" cy="12" r="9" {...p} /><path d="M12 7v5l3 2" {...p} /></>,
