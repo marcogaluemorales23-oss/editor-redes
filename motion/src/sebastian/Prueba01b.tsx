@@ -14,10 +14,10 @@ const AMARILLO = "#FCF304";
 const FONDO = "#0E0E10";
 
 export const PANELES = [
-  { id: "ig", desde: 1.5, hasta: 3.8 },
+  { id: "ig", desde: 1.2, hasta: 3.8 },
   { id: "reloj", desde: 10.45, hasta: 13.7 },
-  { id: "perfil", desde: 22.93, hasta: 24.3 },
-  { id: "comentario", desde: 30.4, hasta: 32.6 },
+  { id: "perfil", desde: 22.62, hasta: 24.3 },
+  { id: "comentario", desde: 29.85, hasta: 32.6 },
 ];
 export const PANTALLAS = [
   { id: "tres", desde: 15.83, hasta: 16.5 },
@@ -76,7 +76,7 @@ const Titulo: React.FC<{ apoyo: string; clave: string; y: number; t: number }> =
 };
 
 const LogoInstagram: React.FC = () => {
-  const s = useAparece(1.62);
+  const s = useAparece(1.45);
   return (
     <div style={{ position: "absolute", top: 250, width: 1080, display: "flex", justifyContent: "center", transform: `scale(${0.6 + 0.4 * s}) rotate(${(1 - s) * -12}deg)`, opacity: s }}>
       <svg width={360} height={360} viewBox="0 0 100 100" style={{ filter: "drop-shadow(0 20px 50px rgba(214,36,159,0.45))" }}>
@@ -153,7 +153,7 @@ const ClaseGratis: React.FC = () => {
 /** La captura real (23 seguidores), limpia como en la v1, dentro del panel de arriba. */
 const Perfil: React.FC = () => {
   const f = useCurrentFrame();
-  const s = useAparece(23.05);
+  const s = useAparece(22.8);
   const W = 860, escala = W / 1179;
   const marca = interpolate(f, [c(23.42), c(23.77)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SALIDA });
   return (
@@ -194,7 +194,7 @@ const Contador: React.FC = () => {
 
 const Comentario: React.FC = () => {
   const f = useCurrentFrame();
-  const s = useAparece(30.5);
+  const s = useAparece(30.0);
   const letras = Math.floor(interpolate(f, [c(30.55), c(31.0)], [0, 5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
   const enviado = interpolate(f, [c(31.2), c(31.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const cursor = Math.floor(f / 18) % 2 === 0 && letras < 5;
