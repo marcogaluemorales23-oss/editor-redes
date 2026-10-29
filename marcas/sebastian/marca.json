@@ -14,14 +14,21 @@
   "fuentes": {
     "subtitulos": {
       "familia": "Inter",
-      "nota": "texto de apoyo en blanco, peso medio"
+      "archivo": "fuentes/Inter-SemiBold.ttf",
+      "nota": "apoyo pequeño en blanco"
+    },
+    "titulos": {
+      "familia": "Inter",
+      "archivo": "fuentes/Inter-BlackItalic.ttf"
     },
     "palabras_clave": {
       "familia": "Inter",
-      "estilo": "Black/ExtraBold Italic",
+      "archivo": "fuentes/Inter-BlackItalic.ttf",
+      "peso": 900,
+      "italica": true,
       "mayusculas": true,
       "color": "acento",
-      "nota": "como la referencia Pixel 11 Pro: palabra clave enorme en MAYÚSCULA itálica amarilla, apoyo pequeño blanco encima"
+      "nota": "palabra clave enorme en MAYÚSCULA itálica amarilla, apoyo pequeño blanco encima (referencia Pixel 11 Pro)"
     }
   },
   "referencia_titulos": "Gancho de video de tecnología (Pixel 11 Pro): '¿De verdad decepcionó el' blanco pequeño + 'PIXEL 11 PRO?' grande amarillo itálica mayúscula, sombra muy difuminada",
@@ -33,5 +40,14 @@
   "pendiente": [
     "fuente Inter Italic (descargar)",
     "foto de perfil para el avatar de CTA"
-  ]
+  ],
+  "subtitulos": {
+    "l1_px": 54,
+    "l2_px": 118,
+    "tracking": -0.03,
+    "interlineado": 108,
+    "sombra_opacidad": 0.55,
+    "sombra_desenfoque": 24,
+    "sombra_distancia": 3
+  }
 }

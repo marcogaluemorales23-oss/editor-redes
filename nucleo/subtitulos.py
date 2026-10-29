@@ -101,6 +101,11 @@ def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=N
     "para cada duda / cada problema / cada cierre")."""
     est = {**ESTILO, **marca.get("subtitulos", {})}
     fam = marca["fuentes"]["subtitulos"]["familia"]
+    clave = marca["fuentes"]["palabras_clave"]
+    fam2 = clave.get("familia", fam)
+    # Peso e itálica de la frase clave por marca (Sebas: Inter Black Italic). Con "peso" el estilo L2 usa \\b<peso>.
+    negrita2 = clave.get("peso", 1)
+    italica2 = 1 if clave.get("italica") else 0
     blanco = ass_color(marca["colores"]["texto"])
     acento = ass_color(marca["colores"]["acento"])
     f_l1 = marca_dir / marca["fuentes"]["subtitulos"]["archivo"]
@@ -116,7 +121,7 @@ WrapStyle: 2
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
 Style: L1,{fam},80,{blanco},{blanco},&H00000000,&H00000000,0,0,0,0,100,100,0,0,1,0,0,2,0,0,0,1
-Style: L2,{fam},100,{acento},{acento},&H00000000,&H00000000,1,0,0,0,100,100,0,0,1,0,0,2,0,0,0,1
+Style: L2,{fam2},100,{acento},{acento},&H00000000,&H00000000,{negrita2},{italica2},0,0,100,100,0,0,1,0,0,2,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
