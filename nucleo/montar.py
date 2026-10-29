@@ -131,6 +131,8 @@ def main():
                 if encuadre and "zoom" not in movimientos.get(str(k), {}):
                     z = min(encuadre.get("zoom_max", 2.0), max(1.0, encuadre["ancho_cara"] / fw))
                 z = max(z, zoom_para_centrar(cx))
+                if encuadre:  # Sebas: "estás aumentando demasiado la escala": nunca más que zoom_max, aunque
+                    z = min(z, encuadre.get("zoom_max", 2.0))  # la cara quede un poco corrida
         mov = movimientos.get(str(k))
         if mov:
             # zoompan sobre el crudo 4K (2x la salida): el zoom se calcula en cada cuadro y no tiembla.

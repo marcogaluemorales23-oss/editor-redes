@@ -34,3 +34,13 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
 9. **Posición fija bajo la barbilla** (`trabajo/encuadre.json`): la persona del mismo tamaño y a la misma altura en
    todos los planos y el subtítulo justo debajo de la barbilla. Títulos compuestos: el apoyo se acomoda alrededor de
    la clave (en línea si cabe, si no arriba); si el fondo no deja leer, la clave va en caja negra con letra amarilla.
+10. **Nunca escalar de más ni tapar la cara** (corrección v6): zoom máximo 15 % (`encuadre.json` → `zoom_max: 1.15`,
+    aunque la cara quede algo corrida). Lo que va a la altura de la cara se resuelve como dynamic vd2/vd4
+    (`nucleo/componer_dynamic.py` + `motion/src/sebastian/Prueba01b.tsx`):
+    - **Panel** que baja desde arriba (860 px, fondo oscuro) y el video baja 420 px: la cara queda abajo y el
+      subtítulo va en la costura.
+    - **Pantalla completa** de fondo sólido que sube desde abajo y sale hacia arriba, con la voz sonando.
+    - **Tarjeta de capítulo amarilla** (como "Paso 1 · Proyecto" de vd2) para un número o idea corta.
+    - Whoosh en cada entrada y salida.
+11. **Voz**: si Sebas la pasa por Adobe Podcast, se le manda la voz cortada en WAV (mismo largo que el video) y la
+    devuelve igual de larga: se reemplaza sin tocar la sincronía.
