@@ -74,7 +74,7 @@ def tamano_que_cabe(texto, fuente, px, tracking, limite):
     return px
 
 
-def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra):
+def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra, alinear=2):
     fs = round(px * celda, 1)
     fsp = round(est["tracking"] * px, 2)
     dur = round((t1 - t0) * 1000)
@@ -90,7 +90,54 @@ def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra):
         estilo_txt = "\\bord0\\shad0\\blur14"
         anim = f"\\fad({e},{sal})\\t(0,{e},\\blur0)\\t({dur - sal},{dur},\\blur10)"
     return (f"Dialogue: {0 if sombra else 1},{ass_tiempo(t0)},{ass_tiempo(t1)},{estilo},,0,0,0,,"
-            f"{{\\move({x - dx:.1f},{y:.1f},{x:.1f},{y:.1f},0,{e})\\fs{fs}\\fsp{fsp}{estilo_txt}{anim}}}{texto}")
+            f"{{\\an{alinear}\\move({x - dx:.1f},{y:.1f},{x:.1f},{y:.1f},0,{e})\\fs{fs}\\fsp{fsp}{estilo_txt}{anim}}}{texto}")
+
+
+def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, desc2):
+    """Modo "compuesto" (Sebas, prueba-01): la frase clave manda. Va enorme (hasta l2_px) y, si no cabe, se parte
+    en dos líneas ("QUEMANDO|TU TIEMPO"). El apoyo va chico encima: pegado al borde izquierdo de la clave si es
+    corto (como "que tienes un / MAL GANCHO"), centrado si es largo. Sin clave, el apoyo va centrado y algo más grande.
+    `base` es la línea base de la ÚLTIMA línea de la clave."""
+    out = []
+    ancho_max = est["ancho_clave"]
+    claves = b.get("l2", [])
+    if claves and not isinstance(claves[0], list):
+        claves = [claves]
+    a1, _, texto1 = b["l1"]
+    t1 = w[a1]["inicio"]
+    if not claves:
+        px = tamano_que_cabe(texto1, f_l1, est["solo_px"], est["tracking"], est["ancho_apoyo"])
+        y = base + desc1 * px
+        for sombra in (True, False):
+            out.append(linea(t1, fin, "L1", 540, y, px, celda1, est, texto1, sombra))
+        return out
+    for j, (a2, _, texto2) in enumerate(claves):
+        fin2 = w[claves[j + 1][0]]["inicio"] - 0.02 if j + 1 < len(claves) else fin
+        partes = texto2.split("|")
+        px2 = est["l2_px"]
+        while px2 > 60 and max(ancho(t, f_l2, px2, est["tracking"]) for t in partes) > ancho_max:
+            px2 -= 2
+        ancho2 = max(ancho(t, f_l2, px2, est["tracking"]) for t in partes)
+        alto = px2 * est["interlinea_clave"]
+        for n, t in enumerate(partes):
+            y = base - (len(partes) - 1 - n) * alto + desc2 * px2
+            for sombra in (True, False):
+                out.append(linea(w[a2]["inicio"], fin2, "L2", 540, y, px2, celda2, est, t, sombra))
+        if j == 0:
+            px1 = est["l1_px"]
+            w1 = ancho(texto1, f_l1, px1, est["tracking"])
+            tope = base - (len(partes) - 1) * alto - px2 * 0.78  # borde de arriba de la clave
+            y1 = tope - est["aire_apoyo"] + desc1 * px1
+            # La clave en itálica se inclina a la derecha: el apoyo se corre un poco para alinear con la letra.
+            if w1 < ancho2 * est["corto"]:
+                x1 = 540 - ancho2 / 2 + px2 * 0.08
+                for sombra in (True, False):
+                    out.append(linea(t1, fin, "L1", x1, y1, px1, celda1, est, texto1, sombra, alinear=1))
+            else:
+                px1 = tamano_que_cabe(texto1, f_l1, px1, est["tracking"], est["ancho_apoyo"])
+                for sombra in (True, False):
+                    out.append(linea(t1, fin, "L1", 540, y1, px1, celda1, est, texto1, sombra))
+    return out
 
 
 def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None,
@@ -130,6 +177,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     for k, b in enumerate(bloques):
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
+        if est.get("modo") == "compuesto":
+            lineas += bloque_compuesto(b, w, fin, y, est, f_l1, f_l2, celda1, desc1, celda2, desc2)
+            continue
         arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
         base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, {**ZONA_ABAJO, **marca.get("zona_abajo", {})})
         # Formatos con pantalla partida: en esos tramos el subtítulo va en la línea que divide la pantalla.

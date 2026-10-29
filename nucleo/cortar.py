@@ -18,6 +18,8 @@ from pathlib import Path
 import numpy as np
 
 PAUSAS = {"nada": 0.06, "coma": 0.14, "punto": 0.28, "fin": 0.35}
+COLA = 0.12  # aire que queda después de la última palabra de una toma
+# Formatos con más ritmo (dynamic) piden pausas más cortas: tomas.json puede traer "pausas" y "cola".
 PASO = 0.01  # resolución de la energía: 10 ms
 
 
@@ -40,7 +42,9 @@ def umbral(env):
 def umbral_fuerte(env):
     """Nivel de la voz principal (la de cámara). Los bordes de toma se buscan con este umbral: el camarógrafo
     ("ya", "acción") y las respiraciones suenan más bajo y superan el umbral normal, pero no este."""
-    return np.percentile(env, 90) - 16
+    # En un cuarto con ruido (prueba-01: piso ~-37 dB) p90-16 cae dentro del ruido y el corte deja hasta 0,6 s
+    # muertos al inicio de la toma: nunca por debajo del umbral normal (piso + 8 dB).
+    return max(np.percentile(env, 90) - 16, umbral(env))
 
 
 def tipo_pausa(palabra):
@@ -97,14 +101,18 @@ def cortar_toma(env, th, w, d, h):
         if s and s[1] - s[0] > max(meta + 0.05, 0.12):
             tramos.append((t_in, s[0] + meta * 0.55))
             t_in = s[1] - meta * 0.45
-    fin = caida(env, fuerte, w[h]["fin"], w[h]["inicio"]) + 0.12
+    fin = caida(env, fuerte, w[h]["fin"], w[h]["inicio"]) + COLA
     tramos.append((t_in, min(fin, len(env) * PASO)))
     return [(round(a, 3), round(b, 3)) for a, b in tramos if b - a > 0.05]
 
 
 def main(reel):
     trabajo = Path(reel) / "trabajo"
-    tomas = json.loads((trabajo / "tomas.json").read_text())["tomas"]
+    global COLA
+    conf = json.loads((trabajo / "tomas.json").read_text())
+    tomas = conf["tomas"]
+    PAUSAS.update(conf.get("pausas", {}))
+    COLA = conf.get("cola", COLA)
     cortes, energias = [], {}
     for n, tm in enumerate(tomas):
         clip = tm["clip"]

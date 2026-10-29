@@ -6,7 +6,7 @@ import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentF
 // (reels/prueba-01/trabajo/corte_check.json). Todo flota ARRIBA de la cabeza (y < 700): la cara (y≈930) y
 // los subtítulos (y≈1250-1360) quedan libres. Zona segura de arriba: nada antes de y=245.
 export const FPS = 60;
-export const DURACION_S = 38.017;
+export const DURACION_S = 37.167;
 const AMARILLO = "#FCF304";
 
 export const cargarFuentesSebastian = () =>
@@ -45,7 +45,7 @@ const Caja: React.FC<{ y: number; children: React.ReactNode; estilo: React.CSSPr
 );
 
 const LogoInstagram: React.FC = () => {
-  const { visible, estilo } = useFlotante(1.5, 4.1);
+  const { visible, estilo } = useFlotante(1.5, 3.95);
   if (!visible) return null;
   return (
     <Caja y={262} estilo={estilo}>
@@ -71,10 +71,10 @@ const LogoInstagram: React.FC = () => {
 /** Reloj de arena que se vacía: "quemando tu tiempo". */
 const RelojDeArena: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(11.5, 14.9);
+  const { visible, estilo } = useFlotante(11.25, 14.35);
   if (!visible) return null;
-  const p = interpolate(f, [c(11.6), c(14.6)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const giro = interpolate(f, [c(11.5), c(11.9)], [-20, 0], { extrapolateRight: "clamp", easing: SUAVE });
+  const p = interpolate(f, [c(11.35), c(14.1)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const giro = interpolate(f, [c(11.25), c(11.65)], [-20, 0], { extrapolateRight: "clamp", easing: SUAVE });
   return (
     <Caja y={255} estilo={estilo}>
       <svg width={170} height={232} viewBox="0 0 100 136" style={{ transform: `rotate(${giro}deg)`, filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.5))" }}>
@@ -98,13 +98,13 @@ const RelojDeArena: React.FC = () => {
 const TresCosas: React.FC = () => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { visible, estilo } = useFlotante(16.9, 17.75);
+  const { visible, estilo } = useFlotante(16.42, 17.0);
   if (!visible) return null;
   return (
     <Caja y={330} estilo={estilo}>
       <div style={{ display: "flex", gap: 40 }}>
         {[1, 2, 3].map((n, i) => {
-          const s = spring({ frame: f - c(16.9) - i * 5, fps, config: { damping: 12, stiffness: 220 } });
+          const s = spring({ frame: f - c(16.42) - i * 5, fps, config: { damping: 12, stiffness: 220 } });
           return (
             <div key={n} style={{
               width: 170, height: 170, borderRadius: 85, background: n === 3 ? AMARILLO : "rgba(20,20,20,0.82)",
@@ -119,86 +119,90 @@ const TresCosas: React.FC = () => {
   );
 };
 
-/** Tarjeta de la clase gratis, con los 3 pasos que se marcan en "tres pasos". */
+const punteado: React.CSSProperties = {
+  background: "rgba(12,12,14,0.74)",
+  border: "3px dashed rgba(255,255,255,0.92)",
+  boxShadow: "0 0 22px rgba(255,255,255,0.35), 0 24px 60px rgba(0,0,0,0.45)",
+  borderRadius: 34,
+};
+
+/** Clase gratis: miniatura de video con play + título, en tarjeta punteada (estilo dynamic vd5). */
 const ClaseGratis: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(18.4, 23.85);
+  const { visible, estilo } = useFlotante(17.7, 23.3);
   if (!visible) return null;
-  const pasos = ["Paso 1", "Paso 2", "Paso 3"];
+  const pasos = interpolate(f, [c(20.95), c(21.4)], [0, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <Caja y={260} estilo={estilo}>
-      <div style={{
-        width: 760, borderRadius: 40, padding: "34px 40px", background: "rgba(16,16,18,0.88)",
-        border: "2px solid rgba(255,255,255,0.14)", boxShadow: sombra, fontFamily: "Inter", color: "#fff",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-          <div style={{ width: 110, height: 110, borderRadius: 55, background: AMARILLO, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="46" height="52" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill="#111" /></svg>
-          </div>
-          <div>
-            <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 64, lineHeight: 1 }}>CLASE GRATIS</div>
-            <div style={{ fontWeight: 600, fontSize: 32, opacity: 0.7, marginTop: 8 }}>ya grabada · empieza hoy</div>
+    <Caja y={258} estilo={estilo}>
+      <div style={{ ...punteado, width: 600, padding: 22, display: "flex", gap: 22, alignItems: "center", fontFamily: "Inter", color: "#fff" }}>
+        <div style={{ width: 150, height: 200, borderRadius: 22, background: "linear-gradient(160deg,#2a2a2e,#111)", border: "2px solid rgba(255,255,255,0.25)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div style={{ width: 72, height: 72, borderRadius: 36, background: AMARILLO, display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <svg width="30" height="34" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill="#111" /></svg>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 18, marginTop: 28 }}>
-          {pasos.map((p, i) => {
-            const on = interpolate(f, [c(21.7) + i * 6, c(21.7) + i * 6 + 8], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-            return (
-              <div key={p} style={{
-                flex: 1, height: 74, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center",
-                fontWeight: 700, fontSize: 32, color: on > 0.5 ? "#111" : "#fff",
-                background: `rgba(252,243,4,${0.12 + 0.88 * on})`,
-              }}>{p}</div>
-            );
-          })}
+        <div style={{ flex: 1 }}>
+          <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 54, lineHeight: 1 }}>CLASE<br />GRATIS</div>
+          <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+            {[0, 1, 2].map((i) => (
+              <div key={i} style={{ width: 54, height: 54, borderRadius: 27, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontStyle: "italic", fontSize: 30,
+                background: pasos > i ? AMARILLO : "rgba(255,255,255,0.14)", color: pasos > i ? "#111" : "#fff" }}>{i + 1}</div>
+            ))}
+            <div style={{ alignSelf: "center", fontWeight: 600, fontSize: 26, opacity: 0.75, marginLeft: 4 }}>pasos</div>
+          </div>
         </div>
       </div>
     </Caja>
   );
 };
 
-/** Captura real del perfil con 23 seguidores; se marca el número en "23". */
+/** Captura real del perfil con 23 seguidores, más chica e inclinada para no tapar la cara; se marca el número. */
 const Perfil: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(23.9, 28.2);
+  const { visible, estilo } = useFlotante(23.3, 27.1);
   if (!visible) return null;
-  const W = 820, escala = W / 1179;
-  const marca = interpolate(f, [c(24.9), c(25.25)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SUAVE });
+  const W = 600, escala = W / 1179;
+  const marca = interpolate(f, [c(23.8), c(24.15)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SUAVE });
   return (
-    <Caja y={250} estilo={estilo}>
-      <div style={{ position: "relative", width: W, height: 780 * escala, borderRadius: 36, overflow: "hidden", boxShadow: sombra, border: "3px solid rgba(255,255,255,0.9)" }}>
-        <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
-        <div style={{
-          position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala,
-          border: `6px solid ${AMARILLO}`, borderRadius: 24, opacity: marca, transform: `scale(${1.3 - 0.3 * marca})`,
-          boxShadow: `0 0 30px ${AMARILLO}`,
-        }} />
+    <Caja y={250} estilo={{ ...estilo, transform: `${estilo.transform} rotate(-3deg)` }}>
+      <div style={{ ...punteado, padding: 10, borderRadius: 30 }}>
+        <div style={{ position: "relative", width: W, height: 780 * escala, borderRadius: 22, overflow: "hidden" }}>
+          <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
+          <div style={{
+            position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala,
+            border: `5px solid ${AMARILLO}`, borderRadius: 18, opacity: marca, transform: `scale(${1.4 - 0.4 * marca})`,
+            boxShadow: `0 0 26px ${AMARILLO}`,
+          }} />
+        </div>
       </div>
     </Caja>
   );
 };
 
-/** Contador 23 → 10.000 en "llegar a los 10.000 seguidores". */
+/** De 23 a 10K: curva que crece con brillo amarillo y número grande (como la curva de retención de vd5). */
 const Contador: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(28.2, 31.8);
+  const { visible, estilo } = useFlotante(27.1, 30.7);
   if (!visible) return null;
-  const p = interpolate(f, [c(29.6), c(31.0)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.7, 0, 0.2, 1) });
+  const p = interpolate(f, [c(28.4), c(29.9)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.7, 0, 0.2, 1) });
   const n = Math.round(23 + (10000 - 23) * p);
-  const meta = p >= 1;
+  const W = 560, H = 170;
+  // curva exponencial de 23 a 10K, se dibuja hasta p
+  const pts = Array.from({ length: 41 }, (_, i) => i / 40).filter((x) => x <= p + 1e-6)
+    .map((x) => `${(x * W).toFixed(1)},${(H - 8 - (H - 20) * Math.pow(x, 2.6)).toFixed(1)}`);
   return (
-    <Caja y={300} estilo={estilo}>
-      <div style={{ width: 760, borderRadius: 40, padding: "30px 44px", background: "rgba(16,16,18,0.88)", border: "2px solid rgba(255,255,255,0.14)", boxShadow: sombra, fontFamily: "Inter", color: "#fff" }}>
-        <div style={{ fontWeight: 600, fontSize: 34, opacity: 0.7 }}>seguidores</div>
-        <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 150, lineHeight: 1.05, color: meta ? AMARILLO : "#fff" }}>
-          {n.toLocaleString("es-VE")}
+    <Caja y={262} estilo={estilo}>
+      <div style={{ ...punteado, width: 600, padding: "20px 20px 16px", fontFamily: "Inter", color: "#fff" }}>
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 76, lineHeight: 1, color: p >= 1 ? AMARILLO : "#fff" }}>{n.toLocaleString("es-VE")}</div>
+          <div style={{ fontWeight: 600, fontSize: 26, opacity: 0.75 }}>seguidores</div>
         </div>
-        <div style={{ height: 22, borderRadius: 11, background: "rgba(255,255,255,0.15)", marginTop: 18, overflow: "hidden" }}>
-          <div style={{ width: `${Math.max(1.5, p * 100)}%`, height: "100%", background: AMARILLO, borderRadius: 11 }} />
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontWeight: 700, fontSize: 30, marginTop: 12, opacity: 0.8 }}>
-          <span>hoy: 23</span><span>meta: 10K</span>
-        </div>
+        <svg width={W} height={H} style={{ marginTop: 6, overflow: "visible" }}>
+          <line x1="0" y1={H - 8} x2={W} y2={H - 8} stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeDasharray="6 8" />
+          <line x1="0" y1="12" x2={W} y2="12" stroke="rgba(255,255,255,0.25)" strokeWidth="2" strokeDasharray="6 8" />
+          <text x={W} y={H - 20} textAnchor="end" fill="rgba(255,255,255,0.7)" fontFamily="Inter" fontWeight="700" fontSize="22">meta 10K</text>
+          <polyline points={pts.join(" ")} fill="none" stroke={AMARILLO} strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"
+            style={{ filter: `drop-shadow(0 0 10px ${AMARILLO})` }} />
+        </svg>
       </div>
     </Caja>
   );
@@ -207,10 +211,10 @@ const Contador: React.FC = () => {
 /** Caja de comentario que escribe RELOJ y se envía. */
 const Comentario: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(31.9, 38.017);
+  const { visible, estilo } = useFlotante(30.75, 37.167);
   if (!visible) return null;
-  const letras = Math.floor(interpolate(f, [c(32.8), c(33.3)], [0, 5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
-  const enviado = interpolate(f, [c(33.6), c(33.8)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const letras = Math.floor(interpolate(f, [c(31.62), c(32.1)], [0, 5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
+  const enviado = interpolate(f, [c(32.35), c(32.55)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const cursor = Math.floor(f / 18) % 2 === 0 && letras < 5;
   return (
     <Caja y={330} estilo={estilo}>

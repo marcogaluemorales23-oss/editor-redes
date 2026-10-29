@@ -42,13 +42,23 @@
     "foto de perfil para el avatar de CTA"
   ],
   "subtitulos": {
-    "l1_px": 60,
-    "l2_px": 112,
+    "modo": "compuesto",
+    "l1_px": 50,
+    "solo_px": 62,
+    "l2_px": 158,
     "tracking": -0.03,
-    "interlineado": 108,
+    "interlinea_clave": 0.92,
+    "aire_apoyo": 10,
+    "corto": 0.62,
+    "ancho_clave": 640,
+    "ancho_apoyo": 700,
     "sombra_opacidad": 0.85,
-    "sombra_desenfoque": 16,
-    "sombra_distancia": 2
+    "sombra_desenfoque": 18,
+    "sombra_distancia": 2,
+    "sombra_tamano": 0,
+    "entrada_ms": 160,
+    "salida_ms": 120,
+    "deslizar_px": 40
   },
   "zona_abajo": {
     "ancho": 640,
