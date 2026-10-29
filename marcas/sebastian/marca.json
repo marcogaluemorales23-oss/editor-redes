@@ -1,16 +1,37 @@
 {
   "nombre": "Sebastián Morales",
+  "usuario": "@sebastianmorall_",
+  "sensacion": [
+    "inspirador",
+    "cercano",
+    "profesional"
+  ],
   "colores": {
-    "acento": "PENDIENTE (azul: falta el código exacto)",
+    "acento": "#FCF304",
     "texto": "#FFFFFF",
-    "fondo_tarjeta": "#000000",
-    "sombra": "rgba(0,0,0,0.6)"
+    "sombra": "difusa y suave (resplandor oscuro, sin contorno)"
   },
   "fuentes": {
-    "subtitulos": { "familia": "Inter", "archivo": "fuentes/Inter-SemiBold.ttf" },
-    "titulos": { "familia": "Inter", "archivo": "fuentes/Inter-Bold.ttf" },
-    "palabras_clave": { "familia": "Inter", "archivo": "fuentes/Inter-Black.ttf", "color": "acento" }
+    "subtitulos": {
+      "familia": "Inter",
+      "nota": "texto de apoyo en blanco, peso medio"
+    },
+    "palabras_clave": {
+      "familia": "Inter",
+      "estilo": "Black/ExtraBold Italic",
+      "mayusculas": true,
+      "color": "acento",
+      "nota": "como la referencia Pixel 11 Pro: palabra clave enorme en MAYÚSCULA itálica amarilla, apoyo pequeño blanco encima"
+    }
   },
-  "logos": [],
-  "notas": "Estilo cercano al de los formatos de referencia. Si le gusta el resultado elegante del cliente (Playfair), puede cambiar a ese."
+  "referencia_titulos": "Gancho de video de tecnología (Pixel 11 Pro): '¿De verdad decepcionó el' blanco pequeño + 'PIXEL 11 PRO?' grande amarillo itálica mayúscula, sombra muy difuminada",
+  "sonido": {
+    "efectos": "solo whoosh en zooms + sonido de transición; edición sonora 'de película' (ver referencias de Heras)",
+    "musica": "según el momento: reguetón tipo Bad Bunny (Mónaco) para lifestyle/energía, música en inglés para tensión. Riesgo de derechos de autor si es comercial"
+  },
+  "meta": "10K seguidores al 15-06-2027",
+  "pendiente": [
+    "fuente Inter Italic (descargar)",
+    "foto de perfil para el avatar de CTA"
+  ]
 }

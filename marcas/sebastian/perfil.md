@@ -13,9 +13,12 @@ Fuente: documento que Sebas compartió (28-10-2026) + capturas de sus perfiles.
 - Oferta (no se promociona por ahora): asesoría y campaña de contenido $564–1.300 USD/mes; mentoría 1:1 de 3 meses $1.140 USD.
 
 ## Objetivo
-- Comunidad de 10.000 personas (el documento dice 15-06-2027 y también "antes de navidad": confirmar) y posicionarse como
+- Comunidad de 10.000 personas al **15-06-2027** (confirmado; intentará antes) y posicionarse como
   autoridad en marcas personales (para servicios e infoproductos).
 - Ahora: **serie de contenido** documentando el proceso hasta 10K: motivacional, de valor, storytelling. Sin vender todavía.
+
+## Nicho
+- Marketing: creación de contenido orgánico y cómo escalar las ventas de un negocio desde cero sin anuncios.
 
 ## Voz
 - Español latino, **autoritario y semi formal**. Nada de spanglish ni inglés.
