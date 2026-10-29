@@ -20,3 +20,6 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
    No le gustaron las tarjetas grandes y planas (clase gratis y contador de la primera versión).
 4. **Voz limpia siempre** (antes usaba Adobe Podcast): `nucleo/limpiar_voz.py` separa la voz con Demucs y quita el
    ruido del cuarto sin cambiar el tono. Va después de montar la base.
+5. **Máximo 3 palabras por línea de subtítulo** (se lee de un vistazo). Una sola palabra si es larga o se entiende sola.
+   Texto de apoyo más grande (64 px con clave, 78 px solo). **La palabra clave siempre en UNA línea**: en dos líneas
+   "se ve raro y feo". Si no cabe, se achica; nunca se parte.
