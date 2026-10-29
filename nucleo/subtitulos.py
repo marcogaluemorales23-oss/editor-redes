@@ -131,7 +131,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
         arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
-        base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, ZONA_ABAJO)
+        base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, {**ZONA_ABAJO, **marca.get("zona_abajo", {})})
         # Formatos con pantalla partida: en esos tramos el subtítulo va en la línea que divide la pantalla.
         t_bloque = w[b["l1"][0]]["inicio"]
         tramo = next((tr for tr in y_por_tramo if tr["desde"] - 0.05 <= t_bloque < tr["hasta"]), None)

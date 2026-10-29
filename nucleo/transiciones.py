@@ -129,7 +129,7 @@ def main():
 
     salida = trabajo / "base_final.mp4"
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *entradas,
-                    "-filter_complex", ";".join(filtros), "-map", video, "-map", "[a]",
+                    "-filter_complex", ";".join(filtros), "-map", video if transiciones else "0:v", "-map", "[a]",
                     "-c:v", "libx264", "-preset", "medium", "-crf", "17", "-pix_fmt", "yuv420p",
                     "-c:a", "aac", "-b:a", "192k", "-ar", "48000", str(salida)], check=True)
     print(f"base con transiciones y música -> {salida}")

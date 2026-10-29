@@ -42,12 +42,16 @@
     "foto de perfil para el avatar de CTA"
   ],
   "subtitulos": {
-    "l1_px": 54,
-    "l2_px": 118,
+    "l1_px": 60,
+    "l2_px": 112,
     "tracking": -0.03,
     "interlineado": 108,
-    "sombra_opacidad": 0.55,
-    "sombra_desenfoque": 24,
-    "sombra_distancia": 3
+    "sombra_opacidad": 0.85,
+    "sombra_desenfoque": 16,
+    "sombra_distancia": 2
+  },
+  "zona_abajo": {
+    "ancho": 640,
+    "ancho_l2": 620
   }
 }
