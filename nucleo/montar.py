@@ -98,6 +98,14 @@ def main():
 
     num, den = (int(x) for x in fps.split("/")) if "/" in fps else (float(fps), 1)
     cortes = a_cuadros(cortes, num, den)
+    # encuadre.json (opcional): {"ancho_cara": 600, "cara_y": 880, "zoom_max": 2.0}. Con esto la persona queda del
+    # mismo tamaño y a la misma altura en todos los planos (pedido de Sebas: el subtítulo siempre bajo la barbilla,
+    # en una línea fija). Si en una toma está tan cerca que la cara ya es más grande, se deja en zoom 1 (no se puede
+    # achicar) y se anota su barbilla en encuadre_tramos.json para que subtitulos.py baje el texto solo ahí.
+    archivo_enc = trabajo / "encuadre.json"
+    encuadre = json.loads(archivo_enc.read_text()) if archivo_enc.exists() else None
+    cara_y = encuadre.get("cara_y", CARA_Y) if encuadre else CARA_Y
+    tramos_enc, t_linea = [], 0.0
     archivo_sync = trabajo / "sincronia.json"
     ajustes = json.loads(archivo_sync.read_text()) if archivo_sync.exists() else {}
     lista = []
@@ -112,13 +120,16 @@ def main():
         cuadros = round((c["out"] - c["in"]) * num / den)
         d = cuadros * den / num
         crudo = reel / "crudos" / f'{c["clip"]}.MP4'
-        cx, cy = 540.0, CARA_Y * 1.0
+        cx, cy, fw = 540.0, cara_y * 1.0, None
         if not a.sin_centrar:
             from caras import caras
             vistas = [x for x in caras(crudo, [c["in"] + 0.2, c["in"] + d / 2, c["out"] - 0.2]) if x[1] is not None]
             if vistas:
                 cx = sorted(x[1] for x in vistas)[len(vistas) // 2]
                 cy = sorted(x[2] for x in vistas)[len(vistas) // 2]
+                fw = sorted(x[3] for x in vistas)[len(vistas) // 2]
+                if encuadre and "zoom" not in movimientos.get(str(k), {}):
+                    z = min(encuadre.get("zoom_max", 2.0), max(1.0, encuadre["ancho_cara"] / fw))
                 z = max(z, zoom_para_centrar(cx))
         mov = movimientos.get(str(k))
         if mov:
@@ -130,13 +141,13 @@ def main():
             zexpr = f"{z}*(1+{mov.get('empuje', 0)}*it/{d:.3f}{golpe}{abre})"
             vf = (f"scale=2160:3840:flags=lanczos,fps={fps},"
                   f"zoompan=z='{zexpr}':x='max(0,min(iw-iw/zoom,{cx * 2:.1f}-iw/zoom/2))'"
-                  f":y='max(0,min(ih-ih/zoom,{cy * 2:.1f}-ih/zoom*{CARA_Y / 1920:.4f}))':d=1:s=1080x1920:fps={fps},"
+                  f":y='max(0,min(ih-ih/zoom,{cy * 2:.1f}-ih/zoom*{cara_y / 1920:.4f}))':d=1:s=1080x1920:fps={fps},"
                   f"format=yuv420p")
         else:
             w, h = round(1080 * z / 2) * 2, round(1920 * z / 2) * 2
             # Recorte con la cara centrada en x y a la altura CARA_Y, sin salirse del cuadro.
             x = max(0, min(w - 1080, cx * z - 540))
-            y = max(0, min(h - 1920, cy * z - CARA_Y))
+            y = max(0, min(h - 1920, cy * z - cara_y))
             vf = f"scale={w}:{h}:flags=lanczos,crop=1080:1920:{x:.0f}:{y:.0f},fps={fps},format=yuv420p"
         af = (f"aresample=48000,apad,atrim=0:{d:.6f},asetpts=PTS-STARTPTS,"
               f"afade=t=in:d=0.01,afade=t=out:st={d - 0.012:.6f}:d=0.012")
@@ -155,7 +166,14 @@ def main():
         )
         lista.append(f"file '{salida.with_suffix('.mov').name}'")
         print(f"tramo {k + 1}/{len(cortes)} listo: zoom {z:.2f}, cara en el crudo x={cx:.0f} y={cy:.0f}")
+        if fw:
+            # Dónde queda la cara en el cuadro final (el recorte no puede salirse del crudo) y su barbilla.
+            y_cara = cy * z - max(0.0, min(1920 * z - 1920, cy * z - cara_y))
+            tramos_enc.append({"desde": round(t_linea, 3), "hasta": round(t_linea + d, 3), "zoom": round(z, 3),
+                               "cara_y": round(y_cara), "barbilla": round(y_cara + 0.62 * fw * z)})
+        t_linea += d
     (tramos / "lista.txt").write_text("\n".join(lista) + "\n")
+    (trabajo / "encuadre_tramos.json").write_text(json.dumps(tramos_enc, indent=1))
     cuadrar_linea_de_tiempo(trabajo, cortes)
 
     base = trabajo / "base.mp4"

@@ -93,13 +93,37 @@ def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra, alinear=2):
             f"{{\\an{alinear}\\move({x - dx:.1f},{y:.1f},{x:.1f},{y:.1f},0,{e})\\fs{fs}\\fsp{fsp}{estilo_txt}{anim}}}{texto}")
 
 
-def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, desc2):
-    """Modo "compuesto" (Sebas, prueba-01): la frase clave manda. Va enorme (hasta l2_px) y, si no cabe, se parte
-    en dos líneas ("QUEMANDO|TU TIEMPO"). El apoyo va chico encima: pegado al borde izquierdo de la clave si es
-    corto (como "que tienes un / MAL GANCHO"), centrado si es largo. Sin clave, el apoyo va centrado y algo más grande.
-    `base` es la línea base de la ÚLTIMA línea de la clave."""
+def caja_redonda(x0, y0, w, h, r):
+    """Rectángulo de esquinas redondeadas en dibujo ASS (\\p1), con origen arriba a la izquierda."""
+    k = 0.55 * r
+    return (f"m {r} 0 l {w - r} 0 b {w - r + k} 0 {w} {r - k} {w} {r} l {w} {h - r} "
+            f"b {w} {h - r + k} {w - r + k} {h} {w - r} {h} l {r} {h} b {r - k} {h} 0 {h - r + k} 0 {h - r} "
+            f"l 0 {r} b 0 {r - k} {r - k} 0 {r} 0")
+
+
+def fondo_claro(base, t, x0, y0, w, h):
+    """¿Lo que hay detrás de la frase clave es claro o muy cargado? (luminancia media o contraste alto)."""
+    import numpy as np
+    if base is None:
+        return False
+    x0, y0, w, h = (max(0, int(v)) for v in (x0, y0, w, h))
+    crudo = subprocess.run(["ffmpeg", "-v", "error", "-ss", f"{t:.3f}", "-i", str(base), "-frames:v", "1", "-vf",
+                            f"crop={min(w, 1080 - x0)}:{min(h, 1920 - y0)}:{x0}:{y0},format=gray", "-f", "rawvideo",
+                            "-"], capture_output=True).stdout
+    if not crudo:
+        return False
+    px = np.frombuffer(crudo, np.uint8) / 255.0
+    return px.mean() > 0.55 or px.std() > 0.24
+
+
+def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, desc2, video=None):
+    """Modo "compuesto" (Sebas, prueba-01). La frase clave manda: ENORME, en UNA sola línea (si no cabe se achica,
+    nunca se parte). El apoyo (máx. 3 palabras) se acomoda ALREDEDOR de la clave, como un título de portada:
+      - en línea, a la izquierda de la clave, si los dos caben juntos ("hoy tengo 23 SEGUIDORES");
+      - si no, arriba y pegado al borde izquierdo de la clave (o centrado si es más ancho que ella).
+    Si detrás de la clave el fondo es claro o cargado, la clave va en una caja negra (letra amarilla), como el
+    "seguidores" resaltado de los videos de Sebas. `base` = línea base de la clave."""
     out = []
-    ancho_max = est["ancho_clave"]
     claves = b.get("l2", [])
     if claves and not isinstance(claves[0], list):
         claves = [claves]
@@ -107,41 +131,59 @@ def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, de
     t1 = w[a1]["inicio"]
     if not claves:
         px = tamano_que_cabe(texto1, f_l1, est["solo_px"], est["tracking"], est["ancho_apoyo"])
-        y = base + desc1 * px
         for sombra in (True, False):
-            out.append(linea(t1, fin, "L1", 540, y, px, celda1, est, texto1, sombra))
+            out.append(linea(t1, fin, "L1", 540, base - est["solo_sube"] + desc1 * px, px, celda1, est, texto1, sombra))
         return out
     for j, (a2, _, texto2) in enumerate(claves):
+        t2 = w[a2]["inicio"]
         fin2 = w[claves[j + 1][0]]["inicio"] - 0.02 if j + 1 < len(claves) else fin
-        partes = texto2.split("|")
-        px2 = est["l2_px"]
-        while px2 > 60 and max(ancho(t, f_l2, px2, est["tracking"]) for t in partes) > ancho_max:
-            px2 -= 2
-        ancho2 = max(ancho(t, f_l2, px2, est["tracking"]) for t in partes)
-        alto = px2 * est["interlinea_clave"]
-        for n, t in enumerate(partes):
-            y = base - (len(partes) - 1 - n) * alto + desc2 * px2
-            for sombra in (True, False):
-                out.append(linea(w[a2]["inicio"], fin2, "L2", 540, y, px2, celda2, est, t, sombra))
+        px2 = tamano_que_cabe(texto2, f_l2, est["l2_px"], est["tracking"], est["ancho_clave"])
+        ancho2 = ancho(texto2, f_l2, px2, est["tracking"])
+        px1 = est["l1_px"]
+        ancho1 = ancho(texto1, f_l1, px1, est["tracking"])
+        hueco = px1 * 0.35
+        en_linea = j == 0 and ancho1 + hueco + ancho2 <= est["ancho_total"]
+        if en_linea:
+            x0 = 540 - (ancho1 + hueco + ancho2) / 2
+            x_clave = x0 + ancho1 + hueco
+        else:
+            x0 = x_clave = 540 - ancho2 / 2
+        # Caja negra detrás de la clave si el fondo no deja leer (o si el bloque la pide con "caja").
+        alto_mayus = px2 * 0.73
+        caja = b.get("caja")
+        if caja is None and est.get("caja_auto"):
+            caja = fondo_claro(video, t2 + 0.2, x_clave - 20, base - alto_mayus - 20, ancho2 + 40, alto_mayus + 40)
+        if caja:
+            pad_x, pad_y = px2 * 0.14, px2 * 0.12
+            bw, bh = ancho2 + 2 * pad_x, alto_mayus + 2 * pad_y
+            bx, by = x_clave - pad_x, base - alto_mayus - pad_y
+            dur = round((fin2 - t2) * 1000)
+            out.append(f"Dialogue: 0,{ass_tiempo(t2)},{ass_tiempo(fin2)},L2,,0,0,0,,"
+                       f"{{\\an7\\pos({bx:.1f},{by:.1f})\\p1\\1c&H000000&\\1a&H1A&\\bord0\\shad0"
+                       f"\\fad({est['entrada_ms']},{min(est['salida_ms'], dur // 3)})}}"
+                       f"{caja_redonda(0, 0, round(bw), round(bh), round(bh * 0.22))}{{\\p0}}")
+        for sombra in ((False,) if caja else (True, False)):  # con caja la sombra sobra
+            out.append(linea(t2, fin2, "L2", x_clave, base + desc2 * px2, px2, celda2, est, texto2, sombra, alinear=1))
         if j == 0:
-            px1 = est["l1_px"]
-            w1 = ancho(texto1, f_l1, px1, est["tracking"])
-            tope = base - (len(partes) - 1) * alto - px2 * 0.78  # borde de arriba de la clave
-            y1 = tope - est["aire_apoyo"] + desc1 * px1
-            # La clave en itálica se inclina a la derecha: el apoyo se corre un poco para alinear con la letra.
-            if w1 < ancho2 * est["corto"]:
-                x1 = 540 - ancho2 / 2 + px2 * 0.08
+            if en_linea:
+                # Apoyo centrado en la altura de las mayúsculas de la clave.
+                y1 = base - (alto_mayus - px1 * 0.73) / 2 + desc1 * px1
                 for sombra in (True, False):
-                    out.append(linea(t1, fin, "L1", x1, y1, px1, celda1, est, texto1, sombra, alinear=1))
+                    out.append(linea(t1, fin, "L1", x0, y1, px1, celda1, est, texto1, sombra, alinear=1))
             else:
-                px1 = tamano_que_cabe(texto1, f_l1, px1, est["tracking"], est["ancho_apoyo"])
-                for sombra in (True, False):
-                    out.append(linea(t1, fin, "L1", 540, y1, px1, celda1, est, texto1, sombra))
+                y1 = base - alto_mayus - est["aire_apoyo"] - (px2 * 0.12 if caja else 0) + desc1 * px1
+                if ancho1 <= ancho2:
+                    for sombra in (True, False):
+                        out.append(linea(t1, fin, "L1", x_clave, y1, px1, celda1, est, texto1, sombra, alinear=1))
+                else:
+                    px1 = tamano_que_cabe(texto1, f_l1, px1, est["tracking"], est["ancho_apoyo"])
+                    for sombra in (True, False):
+                        out.append(linea(t1, fin, "L1", 540, y1, px1, celda1, est, texto1, sombra))
     return out
 
 
 def escribir_ass(bloques, w, marca, destino, y, fin_video, marca_dir, y_arriba=None, desde_arriba=None,
-                 y_por_tramo=()):
+                 y_por_tramo=(), encuadre=(), video=None):
     """y = línea base de la frase blanca. Los bloques desde la palabra `desde_arriba` (la llamada a la acción)
     suben a y_arriba para dejar la banda de abajo libre para el botón.
     "l2" puede ser una lista de frases clave: la blanca se queda fija y la amarilla va cambiando (listas como
@@ -180,8 +222,12 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if est.get("modo") == "compuesto":
             t_b = w[b["l1"][0]]["inicio"]
             tramo = next((tr for tr in y_por_tramo if tr["desde"] - 0.05 <= t_b < tr["hasta"]), None)
-            lineas += bloque_compuesto(b, w, fin, tramo["y"] if tramo else y, est, f_l1, f_l2, celda1, desc1,
-                                       celda2, desc2)
+            y_b = tramo["y"] if tramo else y
+            enc = next((tr for tr in encuadre if tr["desde"] - 0.05 <= t_b < tr["hasta"]), None)
+            if enc and not tramo:
+                # Bajo la barbilla: apoyo arriba + clave. Nunca más arriba que la línea fija `y`.
+                y_b = min(est.get("y_max", 1585), max(y, enc["barbilla"] + est["bajo_barbilla"]))
+            lineas += bloque_compuesto(b, w, fin, y_b, est, f_l1, f_l2, celda1, desc1, celda2, desc2, video)
             continue
         arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
         base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, {**ZONA_ABAJO, **marca.get("zona_abajo", {})})
@@ -260,9 +306,11 @@ def main():
     dur = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
                                 str(base)], capture_output=True, text=True, check=True).stdout)
     ass = trabajo / "subtitulos.ass"
+    arch_enc = trabajo / "encuadre_tramos.json"
+    encuadre = json.loads(arch_enc.read_text()) if arch_enc.exists() else []
     escribir_ass(conf["bloques"], w, marca, ass, a.y, dur, marca_dir, a.y_arriba,
                  conf.get("arriba_desde_palabra", conf.get("badge", {}).get("desde_palabra")),
-                 conf.get("y_por_tramo", []))
+                 conf.get("y_por_tramo", []), encuadre, base)
 
     salida = Path(a.reel) / "salida"
     salida.mkdir(exist_ok=True)
