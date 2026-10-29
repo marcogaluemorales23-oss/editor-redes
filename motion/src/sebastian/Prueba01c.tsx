@@ -1,8 +1,8 @@
 import React from "react";
-import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentFrame } from "remotion";
 
 // Prueba-01 al estilo dynamic vd2 (lo eligió Sebas): el video se DIFUMINA arriba (lo hace ffmpeg,
-// nucleo/componer_difuminado.py) y aquí solo va lo que flota encima: título + tarjeta de vidrio, pantallas
+// nucleo/componer_difuminado.py) y aquí solo va lo que flota encima: título + tarjeta, pantallas
 // completas y la tarjeta de capítulo. Todo entra suave: fundido + desenfoque + 16 px de subida.
 // Zona libre: título en y≈236, tarjeta entre 330 y 690 (el subtítulo va en la costura, ~730-830).
 export const FPS = 60;
@@ -11,6 +11,7 @@ export const DURACION_S = 36.0;
 const TEXTO = "#1c1a17";
 const ACENTO = "#C8553D";
 const CREMA = "#F4F0E8";
+const AMARILLO = "#FCF304";
 const ENTRA = 0.45;
 const SALE = 0.35;
 const c = (s: number) => Math.round(s * FPS);
@@ -27,13 +28,6 @@ const useSuave = (desde: number, hasta: number, retraso = 0) => {
     visible: f >= c(a) && f < c(hasta),
     estilo: { opacity: v, filter: `blur(${(1 - v) * 10}px)`, transform: `translateY(${(1 - p) * 16 - q * 10}px)` } as React.CSSProperties,
   };
-};
-
-const vidrio: React.CSSProperties = {
-  background: "rgba(255,255,255,0.62)",
-  border: "1.5px solid rgba(255,255,255,0.9)",
-  borderRadius: 34,
-  boxShadow: "0 18px 44px rgba(60,40,20,0.14), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
 /** Título: apoyo en Inter Bold blanca + clave en Inter Black Italic amarilla, en una línea, centrado. */
@@ -63,22 +57,6 @@ const LogoIG: React.FC<{ tam: number }> = ({ tam }) => (
   </svg>
 );
 
-const Reloj: React.FC<{ tam?: number }> = ({ tam = 170 }) => {
-  const f = useCurrentFrame();
-  const p = interpolate(f, [c(10.6), c(13.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  return (
-    <svg width={tam} height={tam * 1.36} viewBox="0 0 100 136">
-      <rect x="8" y="2" width="84" height="10" rx="5" fill={TEXTO} />
-      <rect x="8" y="124" width="84" height="10" rx="5" fill={TEXTO} />
-      <path d="M18 12 C18 48 46 58 46 68 C46 78 18 88 18 124 L82 124 C82 88 54 78 54 68 C54 58 82 48 82 12 Z" fill="rgba(255,255,255,0.75)" stroke={TEXTO} strokeWidth="3" />
-      <clipPath id="arenaC"><rect x="0" y={12 + 46 * p} width="100" height={56 - 46 * p} /></clipPath>
-      <path d="M22 16 C22 46 47 56 48 66 L52 66 C53 56 78 46 78 16 Z" fill={ACENTO} clipPath="url(#arenaC)" />
-      <rect x="48.5" y="66" width="3" height={58 - 40 * p} fill={ACENTO} opacity={p < 0.98 ? 1 : 0} />
-      <path d={`M22 121 C24 ${121 - 34 * p} 76 ${121 - 34 * p} 78 121 Z`} fill={ACENTO} />
-    </svg>
-  );
-};
-
 /** Ícono suelto DETRÁS de Sebas (regla de Sebas: nada de "ícono con título encima"; el ícono va a un lado,
  * detrás de él). Esta capa se pone debajo del recorte de la persona (nucleo/silueta.py -> persona.mov).
  * Entra creciendo desde atrás con desenfoque, flota suave y sale borroso. */
@@ -97,47 +75,91 @@ const Detras: React.FC<{ desde: number; hasta: number; x: number; y: number; chi
   );
 };
 
-/** Tarjeta de capítulo amarilla (como "Paso 01 · Proyecto" de vd2): entra y sale por fundido. */
-const Capitulo: React.FC<{ desde: number; hasta: number; chico: string; grande: string }> = ({ desde, hasta, chico, grande }) => {
+/** 1 · 2 · 3 en "seguir estas tres cosas" (el de las primeras versiones, el que le gustó a Sebas): círculos oscuros
+ * con borde blanco y resplandor, el 3 en amarillo; entran uno tras otro con rebote, arriba de la cabeza. */
+const TresCirculos: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta }) => {
   const f = useCurrentFrame();
-  const o = interpolate(f, [c(desde), c(desde + 0.18), c(hasta - 0.18), c(hasta)], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const s = interpolate(f, [c(desde), c(hasta)], [1.04, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   if (f < c(desde) || f >= c(hasta)) return null;
+  const sale = interpolate(f, [c(hasta - 0.15), c(hasta)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: CURVA });
   return (
-    <AbsoluteFill style={{ background: ACENTO, opacity: o, alignItems: "center", justifyContent: "center", fontFamily: "Inter", color: CREMA }}>
-      <div style={{ fontWeight: 700, fontSize: 30, letterSpacing: 6, opacity: 0.75 }}>{chico}</div>
-      <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 190, lineHeight: 1.05, transform: `scale(${s})` }}>{grande}</div>
-    </AbsoluteFill>
+    <div style={{ position: "absolute", top: 255, width: 1080, display: "flex", justifyContent: "center", gap: 36, opacity: 1 - sale, filter: `blur(${sale * 10}px)` }}>
+      {[1, 2, 3].map((n, i) => {
+        const s0 = spring({ frame: f - c(desde) - i * 7, fps: FPS, config: { damping: 11, stiffness: 230 } });
+        return (
+          <div key={n} style={{ width: 150, height: 150, borderRadius: 75, background: n === 3 ? AMARILLO : "rgba(20,20,20,0.82)",
+            border: "4px solid rgba(255,255,255,0.92)", display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "Inter", fontWeight: 900, fontStyle: "italic", fontSize: 96, color: n === 3 ? "#111" : "#fff",
+            transform: `scale(${s0})`, opacity: Math.min(1, s0 * 2),
+            boxShadow: "0 0 22px rgba(255,255,255,0.35), 0 18px 40px rgba(0,0,0,0.35)" }}>{n}</div>
+        );
+      })}
+    </div>
   );
 };
 
-const ClaseGratis: React.FC = () => {
+/** Iris: círculo que se abre desde (x, y) y se cierra al final. La crema va un poco adelantada al abrir y atrasada
+ * al cerrar, así queda un aro crema en el borde del naranja (la transición que pidió Sebas para la clase). */
+const iris = (f: number, desde: number, hasta: number, adelanto: number) => {
+  const abre = interpolate(f, [c(desde - adelanto), c(desde - adelanto + 0.45)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.65, 0, 0.35, 1) });
+  const cierra = interpolate(f, [c(hasta - 0.3 + adelanto), c(hasta + adelanto)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.65, 0, 0.35, 1) });
+  return 2300 * abre * (1 - cierra);
+};
+
+/** Miniatura propia de la clase (no la foto de perfil): video EN PAUSA, título simple y barra de reproducción. */
+const Miniatura: React.FC = () => (
+  <div style={{ position: "relative", width: 840, height: 472, borderRadius: 28, overflow: "hidden", fontFamily: "Inter",
+    background: "linear-gradient(135deg, #24201b 0%, #15120f 100%)", boxShadow: "0 30px 70px rgba(60,20,10,0.45)", border: "2px solid rgba(255,255,255,0.18)" }}>
+    <div style={{ position: "absolute", left: 48, top: 52, background: AMARILLO, color: "#111", fontWeight: 900, fontStyle: "italic", fontSize: 30, padding: "6px 16px" }}>CLASE 01</div>
+    <div style={{ position: "absolute", left: 48, top: 120, color: CREMA, fontWeight: 900, fontStyle: "italic", fontSize: 76, lineHeight: 0.98, letterSpacing: -2 }}>VENDER CON<br />CONTENIDO</div>
+    <div style={{ position: "absolute", left: 50, top: 290, color: "rgba(244,240,232,0.7)", fontWeight: 700, fontSize: 32 }}>sin pagar anuncios</div>
+    {/* En pausa: velo, botón de play y barra al inicio */}
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.18)" }} />
+    <div style={{ position: "absolute", right: 70, top: 130, width: 140, height: 140, borderRadius: 70, background: "rgba(255,255,255,0.95)",
+      display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 30px rgba(0,0,0,0.35)" }}>
+      <svg width="52" height="58" viewBox="0 0 46 52"><path d="M8 4 L42 26 L8 48 Z" fill={ACENTO} /></svg>
+    </div>
+    <div style={{ position: "absolute", left: 40, right: 40, bottom: 34, display: "flex", alignItems: "center", gap: 18, color: CREMA, fontWeight: 700, fontSize: 24 }}>
+      <svg width="22" height="24" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill={CREMA} /></svg>
+      <div style={{ position: "relative", flex: 1, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.28)" }}>
+        <div style={{ position: "absolute", left: 0, top: 0, width: "4%", height: 6, borderRadius: 3, background: ACENTO }} />
+        <div style={{ position: "absolute", left: "4%", top: -7, width: 20, height: 20, borderRadius: 10, background: CREMA, transform: "translateX(-50%)" }} />
+      </div>
+      <span>0:00 / 18:24</span>
+    </div>
+  </div>
+);
+
+/** Clase gratis en pantalla completa NARANJA (el fondo de la tarjeta "3 COSAS"), entra y sale por iris. */
+const ClaseGratis: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta }) => {
   const f = useCurrentFrame();
-  const pasos = interpolate(f, [c(20.45), c(20.9)], [0, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const t = useSuave(17.2, 21.0, 0.15);
-  const p = useSuave(17.2, 21.0, 0.3);
+  if (f < c(desde - 0.07) || f >= c(hasta + 0.07)) return null;
+  const pasos = [20.5, 20.63, 20.76].filter((t) => f >= c(t)).length;
+  const contenido = suaveValor(f, desde + 0.2, hasta - 0.3);
+  const centro = "540px 660px";
   return (
     <>
-      {t.visible && (
-        <div style={{ position: "absolute", top: 430, left: 160, width: 760, height: 428, ...vidrio, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", ...t.estilo }}>
-          <Img src={staticFile("sebastian/avatar.jpg")} style={{ position: "absolute", width: 760, height: 428, objectFit: "cover", opacity: 0.5, filter: "blur(3px)" }} />
-          <div style={{ position: "relative", width: 128, height: 128, borderRadius: 64, background: ACENTO, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 30px rgba(200,85,61,0.35)" }}>
-            <svg width="48" height="54" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill={CREMA} /></svg>
-          </div>
-          <div style={{ position: "absolute", left: 26, bottom: 20, fontFamily: "Inter", fontWeight: 700, fontSize: 28, color: TEXTO }}>ya grabada</div>
+      <AbsoluteFill style={{ background: CREMA, clipPath: `circle(${iris(f, desde, hasta, 0.07)}px at ${centro})` }} />
+      <AbsoluteFill style={{ background: ACENTO, clipPath: `circle(${iris(f, desde, hasta, 0)}px at ${centro})` }}>
+        <div style={{ position: "absolute", top: 424, left: 120, opacity: contenido, transform: `translateY(${(1 - contenido) * 24}px) scale(${0.96 + 0.04 * contenido})` }}>
+          <Miniatura />
         </div>
-      )}
-      {p.visible && (
-        <div style={{ position: "absolute", top: 900, width: 1080, display: "flex", justifyContent: "center", gap: 22, fontFamily: "Inter", ...p.estilo }}>
-          {[0, 1, 2].map((i) => (
-            <div key={i} style={{ width: 220, height: 84, borderRadius: 42, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontStyle: "italic", fontSize: 38,
-              ...(pasos > i ? { background: ACENTO, color: CREMA } : { ...vidrio, borderRadius: 42, color: TEXTO }) }}>PASO {i + 1}</div>
-          ))}
+        <div style={{ position: "absolute", top: 950, width: 1080, display: "flex", justifyContent: "center", gap: 22, fontFamily: "Inter", opacity: contenido }}>
+          {[0, 1, 2].map((i) => {
+            const on = pasos > i;
+            return (
+              <div key={i} style={{ width: 220, height: 84, borderRadius: 42, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontStyle: "italic", fontSize: 38,
+                border: `3px solid ${CREMA}`, background: on ? CREMA : "transparent", color: on ? ACENTO : CREMA, transform: `scale(${on && f < c([20.5, 20.63, 20.76][i] + 0.12) ? 1.08 : 1})` }}>PASO {i + 1}</div>
+            );
+          })}
         </div>
-      )}
+      </AbsoluteFill>
     </>
   );
 };
+
+/** Entrada/salida suave (0..1) sin hooks, para usar dentro de un componente que ya decide si se ve. */
+const suaveValor = (f: number, desde: number, hasta: number) =>
+  interpolate(f, [c(desde), c(desde + 0.35), c(hasta), c(hasta + 0.25)], [0, 1, 1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: CURVA });
 
 const Perfil: React.FC = () => {
   const f = useCurrentFrame();
@@ -202,7 +224,6 @@ export const Prueba01c: React.FC<{ capa?: "frente" | "detras" }> = ({ capa = "fr
     <AbsoluteFill>
       {/* Detrás de Sebas (debajo de su recorte) */}
       <Detras desde={1.2} hasta={3.8} x={770} y={430}><LogoIG tam={300} /></Detras>
-      <Detras desde={10.3} hasta={13.7} x={170} y={620}><Reloj tam={250} /></Detras>
     </AbsoluteFill>
   ) : (
     <AbsoluteFill>
@@ -211,9 +232,9 @@ export const Prueba01c: React.FC<{ capa?: "frente" | "detras" }> = ({ capa = "fr
       <Perfil />
       <Comentario />
       {/* Pantallas completas (fondo difuminado) */}
-      <ClaseGratis />
+      <ClaseGratis desde={17.2} hasta={21.3} />
       <Contador />
-      {/* Capítulo: el subtítulo "seguir estas" se va justo antes, así "3 COSAS" no sale dos veces */}
-      <Capitulo desde={15.83} hasta={16.5} chico="" grande="3 COSAS" />
+      {/* 1 · 2 · 3 arriba de la cabeza en "seguir estas tres cosas" */}
+      <TresCirculos desde={15.82} hasta={16.55} />
     </AbsoluteFill>
   );

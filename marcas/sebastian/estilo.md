@@ -60,3 +60,10 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
     (capa `detras` de Remotion + recorte `persona.mov` de `nucleo/silueta.py`, en `componer_difuminado.py --detras`).
     Un motion graphic de verdad (algo que pasa, p. ej. el logo de Instagram cortándose) sí puede ir en grande.
     El difuminado arriba con título queda para gráficos con contenido (perfil, comentario, contador).
+18. **Un ícono solo vale si se ve.** Si a un lado de Sebas no hay espacio (la cara llena el ancho), el ícono no va
+    (el reloj de prueba-01 se quitó: se tapaba casi entero).
+19. **Listas cortas ("3 cosas")**: círculos 1 · 2 · 3 oscuros con borde blanco y resplandor, el último en amarillo,
+    entrando uno tras otro con rebote y un pop cada uno (le gustan más que una tarjeta de capítulo a pantalla completa).
+20. **Pantalla completa de una oferta (clase gratis)**: fondo naranja de marca que entra y sale por **iris** (círculo
+    con aro crema) y whoosh. La miniatura de la clase es propia y **en pausa** (título simple, botón de play, barra al
+    inicio), nunca la foto de perfil.
