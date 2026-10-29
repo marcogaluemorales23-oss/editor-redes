@@ -14,8 +14,9 @@
   "fuentes": {
     "subtitulos": {
       "familia": "Inter",
-      "archivo": "fuentes/Inter-SemiBold.ttf",
-      "nota": "apoyo pequeño en blanco"
+      "archivo": "fuentes/Inter-Bold.ttf",
+      "peso": 700,
+      "nota": "apoyo en Inter Bold blanco"
     },
     "titulos": {
       "familia": "Inter",
@@ -47,8 +48,8 @@
     "solo_px": 82,
     "l2_px": 150,
     "tracking": -0.03,
-    "interlinea_clave": 0.92,
-    "aire_apoyo": 14,
+    "interlinea_clave": 0.88,
+    "aire_apoyo": -6,
     "corto": 0.7,
     "ancho_clave": 660,
     "ancho_apoyo": 740,

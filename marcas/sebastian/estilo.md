@@ -29,3 +29,8 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
 7. **Captura del perfil**: como en la v1 (borde blanco limpio, sin punteado), más chica y **abajo, sobre el pecho**;
    mientras se ve, los subtítulos suben arriba de la cabeza (`y_por_tramo`). Ese plano se abre (`"zoom": 1.0`) para
    que la cara no quede tapada.
+8. **Tipografía de subtítulos**: clave en **Inter Black Italic** amarilla; apoyo en **Inter Bold** blanca (no Regular).
+   **Interlineado apretado**: el apoyo casi pegado a la clave.
+9. **Posición fija bajo la barbilla** (`trabajo/encuadre.json`): la persona del mismo tamaño y a la misma altura en
+   todos los planos y el subtítulo justo debajo de la barbilla. Títulos compuestos: el apoyo se acomoda alrededor de
+   la clave (en línea si cabe, si no arriba); si el fondo no deja leer, la clave va en caja negra con letra amarilla.
