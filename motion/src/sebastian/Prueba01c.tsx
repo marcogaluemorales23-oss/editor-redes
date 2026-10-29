@@ -84,7 +84,7 @@ const TresCirculos: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta
   return (
     <div style={{ position: "absolute", top: 255, width: 1080, display: "flex", justifyContent: "center", gap: 36, opacity: 1 - sale, filter: `blur(${sale * 10}px)` }}>
       {[1, 2, 3].map((n, i) => {
-        const s0 = spring({ frame: f - c(desde) - i * 7, fps: FPS, config: { damping: 11, stiffness: 230 } });
+        const s0 = spring({ frame: f - c(desde) - i * 5, fps: FPS, config: { damping: 11, stiffness: 230 } });
         return (
           <div key={n} style={{ width: 150, height: 150, borderRadius: 75, background: n === 3 ? AMARILLO : "rgba(20,20,20,0.82)",
             border: "4px solid rgba(255,255,255,0.92)", display: "flex", alignItems: "center", justifyContent: "center",
