@@ -223,12 +223,19 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
         if est.get("modo") == "compuesto":
             t_b = w[b["l1"][0]]["inicio"]
             tramo = next((tr for tr in y_por_tramo if tr["desde"] - 0.05 <= t_b < tr["hasta"]), None)
-            y_b = tramo["y"] if tramo else y
+            y_b = tramo["y"] if tramo and "y" in tramo else y
             enc = next((tr for tr in encuadre if tr["desde"] - 0.05 <= t_b < tr["hasta"]), None)
             if enc and not tramo:
                 # Bajo la barbilla: apoyo arriba + clave. Nunca más arriba que la línea fija `y`.
                 y_b = min(est.get("y_max", 1585), max(y, enc["barbilla"] + est["bajo_barbilla"]))
-            lineas += bloque_compuesto(b, w, fin, y_b, est, f_l1, f_l2, celda1, desc1, celda2, desc2, video)
+            nuevas = bloque_compuesto(b, w, fin, y_b, est, f_l1, f_l2, celda1, desc1, celda2, desc2, video)
+            if tramo and tramo.get("colores"):
+                # Sobre fondo claro (pantallas crema): apoyo oscuro y clave en el acento del tramo, sin sombra.
+                l1c, l2c = (ass_color(x) + "&" for x in tramo["colores"])
+                nuevas = [x.replace(",L1,,", ",L1,,").replace("{\\an", "{\\1c" + l1c + "\\an", 1)
+                          if ",L1,," in x else x.replace("{\\an", "{\\1c" + l2c + "\\an", 1) if ",L2,," in x and "\\p1" not in x else x
+                          for x in nuevas if not (x.startswith("Dialogue: 0,") and "\\blur" in x and "\\1a" in x)]
+            lineas += nuevas
             continue
         arriba = desde_arriba is not None and b["l1"][0] >= desde_arriba
         base, zona = (y_arriba, ZONA_ARRIBA) if arriba else (y, {**ZONA_ABAJO, **marca.get("zona_abajo", {})})

@@ -7,7 +7,10 @@ import { AbsoluteFill, Easing, Img, interpolate, staticFile, useCurrentFrame } f
 // Zona libre: título en y≈236, tarjeta entre 330 y 690 (el subtítulo va en la costura, ~730-830).
 export const FPS = 60;
 export const DURACION_S = 36.0;
-const AMARILLO = "#FCF304";
+// Tema claro (eligió Sebas, como vd2): crema, texto casi negro, clave en terracota.
+const TEXTO = "#1c1a17";
+const ACENTO = "#C8553D";
+const CREMA = "#F4F0E8";
 const ENTRA = 0.45;
 const SALE = 0.35;
 const c = (s: number) => Math.round(s * FPS);
@@ -27,10 +30,10 @@ const useSuave = (desde: number, hasta: number, retraso = 0) => {
 };
 
 const vidrio: React.CSSProperties = {
-  background: "rgba(255,255,255,0.09)",
-  border: "1.5px solid rgba(255,255,255,0.22)",
+  background: "rgba(255,255,255,0.62)",
+  border: "1.5px solid rgba(255,255,255,0.9)",
   borderRadius: 34,
-  boxShadow: "0 20px 50px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18)",
+  boxShadow: "0 18px 44px rgba(60,40,20,0.14), inset 0 1px 0 rgba(255,255,255,0.9)",
 };
 
 /** Título: apoyo en Inter Bold blanca + clave en Inter Black Italic amarilla, en una línea, centrado. */
@@ -39,8 +42,8 @@ const Titulo: React.FC<{ apoyo: string; clave: string; desde: number; hasta: num
   if (!visible) return null;
   return (
     <div style={{ position: "absolute", top: y, width: 1080, textAlign: "center", fontFamily: "Inter", whiteSpace: "nowrap", ...estilo }}>
-      <span style={{ fontWeight: 700, fontSize: tam, color: "#fff" }}>{apoyo} </span>
-      <span style={{ fontWeight: 900, fontStyle: "italic", fontSize: tam * 1.14, color: AMARILLO }}>{clave}</span>
+      <span style={{ fontWeight: 700, fontSize: tam, color: TEXTO }}>{apoyo} </span>
+      <span style={{ fontWeight: 900, fontStyle: "italic", fontSize: tam * 1.14, color: ACENTO }}>{clave}</span>
     </div>
   );
 };
@@ -75,13 +78,13 @@ const Reloj: React.FC = () => {
   const p = interpolate(f, [c(10.6), c(13.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <svg width={170} height={232} viewBox="0 0 100 136">
-      <rect x="8" y="2" width="84" height="10" rx="5" fill="#fff" />
-      <rect x="8" y="124" width="84" height="10" rx="5" fill="#fff" />
-      <path d="M18 12 C18 48 46 58 46 68 C46 78 18 88 18 124 L82 124 C82 88 54 78 54 68 C54 58 82 48 82 12 Z" fill="rgba(255,255,255,0.06)" stroke="#fff" strokeWidth="3" />
+      <rect x="8" y="2" width="84" height="10" rx="5" fill={TEXTO} />
+      <rect x="8" y="124" width="84" height="10" rx="5" fill={TEXTO} />
+      <path d="M18 12 C18 48 46 58 46 68 C46 78 18 88 18 124 L82 124 C82 88 54 78 54 68 C54 58 82 48 82 12 Z" fill="rgba(255,255,255,0.4)" stroke={TEXTO} strokeWidth="3" />
       <clipPath id="arenaC"><rect x="0" y={12 + 46 * p} width="100" height={56 - 46 * p} /></clipPath>
-      <path d="M22 16 C22 46 47 56 48 66 L52 66 C53 56 78 46 78 16 Z" fill={AMARILLO} clipPath="url(#arenaC)" />
-      <rect x="48.5" y="66" width="3" height={58 - 40 * p} fill={AMARILLO} opacity={p < 0.98 ? 1 : 0} />
-      <path d={`M22 121 C24 ${121 - 34 * p} 76 ${121 - 34 * p} 78 121 Z`} fill={AMARILLO} />
+      <path d="M22 16 C22 46 47 56 48 66 L52 66 C53 56 78 46 78 16 Z" fill={ACENTO} clipPath="url(#arenaC)" />
+      <rect x="48.5" y="66" width="3" height={58 - 40 * p} fill={ACENTO} opacity={p < 0.98 ? 1 : 0} />
+      <path d={`M22 121 C24 ${121 - 34 * p} 76 ${121 - 34 * p} 78 121 Z`} fill={ACENTO} />
     </svg>
   );
 };
@@ -93,8 +96,8 @@ const Capitulo: React.FC<{ desde: number; hasta: number; chico: string; grande: 
   const s = interpolate(f, [c(desde), c(hasta)], [1.04, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   if (f < c(desde) || f >= c(hasta)) return null;
   return (
-    <AbsoluteFill style={{ background: AMARILLO, opacity: o, alignItems: "center", justifyContent: "center", fontFamily: "Inter", color: "#111" }}>
-      <div style={{ fontWeight: 700, fontSize: 30, letterSpacing: 6, opacity: 0.6 }}>{chico}</div>
+    <AbsoluteFill style={{ background: ACENTO, opacity: o, alignItems: "center", justifyContent: "center", fontFamily: "Inter", color: CREMA }}>
+      <div style={{ fontWeight: 700, fontSize: 30, letterSpacing: 6, opacity: 0.75 }}>{chico}</div>
       <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 190, lineHeight: 1.05, transform: `scale(${s})` }}>{grande}</div>
     </AbsoluteFill>
   );
@@ -110,18 +113,18 @@ const ClaseGratis: React.FC = () => {
       <Titulo apoyo="una" clave="clase gratis" desde={17.2} hasta={21.0} y={300} tam={64} />
       {t.visible && (
         <div style={{ position: "absolute", top: 430, left: 160, width: 760, height: 428, ...vidrio, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", ...t.estilo }}>
-          <Img src={staticFile("sebastian/avatar.jpg")} style={{ position: "absolute", width: 760, height: 428, objectFit: "cover", opacity: 0.28, filter: "blur(3px)" }} />
-          <div style={{ position: "relative", width: 128, height: 128, borderRadius: 64, background: AMARILLO, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <svg width="48" height="54" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill="#111" /></svg>
+          <Img src={staticFile("sebastian/avatar.jpg")} style={{ position: "absolute", width: 760, height: 428, objectFit: "cover", opacity: 0.5, filter: "blur(3px)" }} />
+          <div style={{ position: "relative", width: 128, height: 128, borderRadius: 64, background: ACENTO, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 12px 30px rgba(200,85,61,0.35)" }}>
+            <svg width="48" height="54" viewBox="0 0 46 52"><path d="M6 4 L42 26 L6 48 Z" fill={CREMA} /></svg>
           </div>
-          <div style={{ position: "absolute", left: 26, bottom: 20, fontFamily: "Inter", fontWeight: 700, fontSize: 28, color: "rgba(255,255,255,0.85)" }}>ya grabada</div>
+          <div style={{ position: "absolute", left: 26, bottom: 20, fontFamily: "Inter", fontWeight: 700, fontSize: 28, color: TEXTO }}>ya grabada</div>
         </div>
       )}
       {p.visible && (
         <div style={{ position: "absolute", top: 900, width: 1080, display: "flex", justifyContent: "center", gap: 22, fontFamily: "Inter", ...p.estilo }}>
           {[0, 1, 2].map((i) => (
             <div key={i} style={{ width: 220, height: 84, borderRadius: 42, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontStyle: "italic", fontSize: 38,
-              ...(pasos > i ? { background: AMARILLO, color: "#111" } : { ...vidrio, borderRadius: 42, color: "rgba(255,255,255,0.8)" }) }}>PASO {i + 1}</div>
+              ...(pasos > i ? { background: ACENTO, color: CREMA } : { ...vidrio, borderRadius: 42, color: TEXTO }) }}>PASO {i + 1}</div>
           ))}
         </div>
       )}
@@ -136,10 +139,10 @@ const Perfil: React.FC = () => {
   const { visible, estilo } = useSuave(22.62, 24.3, 0.12);
   if (!visible) return null;
   return (
-    <div style={{ position: "absolute", top: 330, left: (1080 - W) / 2, width: W, height: 780 * escala, borderRadius: 28, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.6)", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", ...estilo }}>
+    <div style={{ position: "absolute", top: 330, left: (1080 - W) / 2, width: W, height: 780 * escala, borderRadius: 28, overflow: "hidden", border: "1.5px solid rgba(255,255,255,0.95)", boxShadow: "0 18px 44px rgba(60,40,20,0.18)", ...estilo }}>
       <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
-      <div style={{ position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala, border: `4px solid ${AMARILLO}`, borderRadius: 16,
-        opacity: marca, transform: `scale(${1.3 - 0.3 * marca})`, boxShadow: `0 0 22px ${AMARILLO}` }} />
+      <div style={{ position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala, border: `4px solid ${ACENTO}`, borderRadius: 16,
+        opacity: marca, transform: `scale(${1.3 - 0.3 * marca})`, boxShadow: `0 0 18px ${ACENTO}88` }} />
     </div>
   );
 };
@@ -153,14 +156,14 @@ const Contador: React.FC = () => {
   const { visible, estilo } = useSuave(27.75, 29.75, 0.15);
   if (!visible) return null;
   return (
-    <div style={{ position: "absolute", top: 300, width: 1080, fontFamily: "Inter", color: "#fff", ...estilo }}>
+    <div style={{ position: "absolute", top: 300, width: 1080, fontFamily: "Inter", color: TEXTO, ...estilo }}>
       <div style={{ textAlign: "center", fontWeight: 700, fontSize: 44, opacity: 0.75 }}>seguidores</div>
-      <div style={{ textAlign: "center", fontWeight: 900, fontStyle: "italic", fontSize: 180, lineHeight: 1.05, color: p >= 1 ? AMARILLO : "#fff" }}>{n.toLocaleString("es-VE")}</div>
+      <div style={{ textAlign: "center", fontWeight: 900, fontStyle: "italic", fontSize: 180, lineHeight: 1.05, color: p >= 1 ? ACENTO : TEXTO }}>{n.toLocaleString("es-VE")}</div>
       <svg width={W} height={H} style={{ marginLeft: (1080 - W) / 2, marginTop: 30, overflow: "visible" }}>
-        <line x1="0" y1={H - 10} x2={W} y2={H - 10} stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeDasharray="8 10" />
-        <text x={W} y="4" textAnchor="end" fill={AMARILLO} fontFamily="Inter" fontWeight="900" fontStyle="italic" fontSize="34">META 10K</text>
-        <text x="0" y={H + 40} fill="rgba(255,255,255,0.65)" fontFamily="Inter" fontWeight="700" fontSize="30">hoy: 23</text>
-        <polyline points={pts.join(" ")} fill="none" stroke={AMARILLO} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: `drop-shadow(0 0 12px ${AMARILLO})` }} />
+        <line x1="0" y1={H - 10} x2={W} y2={H - 10} stroke="rgba(28,26,23,0.18)" strokeWidth="2" strokeDasharray="8 10" />
+        <text x={W} y="4" textAnchor="end" fill={ACENTO} fontFamily="Inter" fontWeight="900" fontStyle="italic" fontSize="34">META 10K</text>
+        <text x="0" y={H + 40} fill="rgba(28,26,23,0.6)" fontFamily="Inter" fontWeight="700" fontSize="30">hoy: 23</text>
+        <polyline points={pts.join(" ")} fill="none" stroke={ACENTO} strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" style={{ filter: `drop-shadow(0 6px 10px ${ACENTO}55)` }} />
       </svg>
     </div>
   );
@@ -174,14 +177,14 @@ const Comentario: React.FC = () => {
   const { visible, estilo } = useSuave(29.85, 32.6, 0.12);
   if (!visible) return null;
   return (
-    <div style={{ position: "absolute", top: 380, left: 120, width: 840, display: "flex", alignItems: "center", gap: 22, padding: "22px 26px", borderRadius: 60, background: "rgba(255,255,255,0.95)", boxShadow: "0 20px 50px rgba(0,0,0,0.4)", fontFamily: "Inter", ...estilo }}>
+    <div style={{ position: "absolute", top: 380, left: 120, width: 840, display: "flex", alignItems: "center", gap: 22, padding: "22px 26px", borderRadius: 60, background: "rgba(255,255,255,0.97)", border: "1.5px solid rgba(255,255,255,1)", boxShadow: "0 18px 44px rgba(60,40,20,0.16)", fontFamily: "Inter", ...estilo }}>
       <Img src={staticFile("sebastian/avatar.jpg")} style={{ width: 88, height: 88, borderRadius: 44, objectFit: "cover" }} />
       <div style={{ flex: 1, fontSize: 56, fontWeight: 900, fontStyle: "italic", color: "#111" }}>
         {"RELOJ".slice(0, letras)}{cursor ? "|" : ""}
         {letras === 0 && <span style={{ fontStyle: "normal", fontWeight: 600, fontSize: 36, color: "#999" }}>Añade un comentario…</span>}
       </div>
-      <div style={{ width: 88, height: 88, borderRadius: 44, background: enviado > 0.5 ? AMARILLO : "#3897f0", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 + 0.2 * Math.sin(enviado * Math.PI)})` }}>
-        <svg width="42" height="42" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z" fill={enviado > 0.5 ? "#111" : "#fff"} /></svg>
+      <div style={{ width: 88, height: 88, borderRadius: 44, background: enviado > 0.5 ? ACENTO : "#3897f0", display: "flex", alignItems: "center", justifyContent: "center", transform: `scale(${1 + 0.2 * Math.sin(enviado * Math.PI)})` }}>
+        <svg width="42" height="42" viewBox="0 0 24 24"><path d="M3 11l18-8-8 18-2-8z" fill="#fff" /></svg>
       </div>
     </div>
   );
