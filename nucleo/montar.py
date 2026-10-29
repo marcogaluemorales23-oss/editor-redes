@@ -103,6 +103,9 @@ def main():
     lista = []
     for k, c in enumerate(cortes):
         z = zooms[k % len(zooms)]
+        # movimientos.json puede fijar el zoom de un tramo ("zoom": 1.0), p. ej. para abrir el plano y dejar
+        # espacio a un gráfico sin tapar la cara.
+        z = movimientos.get(str(k), {}).get("zoom", z)
         # Duración exacta en cuadros enteros, igual para imagen y sonido. Si el video se redondea a cuadros y el
         # audio no, cada tramo queda unos ms más largo en imagen y al unirlos la voz se adelanta a los labios
         # (en video-01 llegó a ~200 ms a mitad del reel).

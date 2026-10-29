@@ -23,3 +23,9 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
 5. **Máximo 3 palabras por línea de subtítulo** (se lee de un vistazo). Una sola palabra si es larga o se entiende sola.
    Texto de apoyo más grande (64 px con clave, 78 px solo). **La palabra clave siempre en UNA línea**: en dos líneas
    "se ve raro y feo". Si no cabe, se achica; nunca se parte.
+6. **El corte mide sobre la voz aislada** (`tomas.json` → `"voz_separada": true`, `"unir": 0.17`): en tomas grabadas
+   lejos del celular la voz queda al nivel del ruido y quedaba medio segundo muerto al empezar ("y te preguntarás").
+   Whisper también inventa palabras sobre una respiración: el inicio se busca donde hay voz de verdad.
+7. **Captura del perfil**: como en la v1 (borde blanco limpio, sin punteado), más chica y **abajo, sobre el pecho**;
+   mientras se ve, los subtítulos suben arriba de la cabeza (`y_por_tramo`). Ese plano se abre (`"zoom": 1.0`) para
+   que la cara no quede tapada.

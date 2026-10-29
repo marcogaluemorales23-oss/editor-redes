@@ -6,7 +6,7 @@ import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentF
 // (reels/prueba-01/trabajo/corte_check.json). Todo flota ARRIBA de la cabeza (y < 700): la cara (y≈930) y
 // los subtítulos (y≈1250-1360) quedan libres. Zona segura de arriba: nada antes de y=245.
 export const FPS = 60;
-export const DURACION_S = 37.167;
+export const DURACION_S = 36.0;
 const AMARILLO = "#FCF304";
 
 export const cargarFuentesSebastian = () =>
@@ -45,7 +45,7 @@ const Caja: React.FC<{ y: number; children: React.ReactNode; estilo: React.CSSPr
 );
 
 const LogoInstagram: React.FC = () => {
-  const { visible, estilo } = useFlotante(1.5, 3.95);
+  const { visible, estilo } = useFlotante(1.5, 3.8);
   if (!visible) return null;
   return (
     <Caja y={262} estilo={estilo}>
@@ -71,10 +71,10 @@ const LogoInstagram: React.FC = () => {
 /** Reloj de arena que se vacía: "quemando tu tiempo". */
 const RelojDeArena: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(11.25, 14.35);
+  const { visible, estilo } = useFlotante(10.45, 13.7);
   if (!visible) return null;
-  const p = interpolate(f, [c(11.35), c(14.1)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
-  const giro = interpolate(f, [c(11.25), c(11.65)], [-20, 0], { extrapolateRight: "clamp", easing: SUAVE });
+  const p = interpolate(f, [c(10.55), c(13.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const giro = interpolate(f, [c(10.45), c(10.85)], [-20, 0], { extrapolateRight: "clamp", easing: SUAVE });
   return (
     <Caja y={255} estilo={estilo}>
       <svg width={170} height={232} viewBox="0 0 100 136" style={{ transform: `rotate(${giro}deg)`, filter: "drop-shadow(0 18px 40px rgba(0,0,0,0.5))" }}>
@@ -98,13 +98,13 @@ const RelojDeArena: React.FC = () => {
 const TresCosas: React.FC = () => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const { visible, estilo } = useFlotante(16.42, 17.0);
+  const { visible, estilo } = useFlotante(15.83, 16.45);
   if (!visible) return null;
   return (
     <Caja y={330} estilo={estilo}>
       <div style={{ display: "flex", gap: 40 }}>
         {[1, 2, 3].map((n, i) => {
-          const s = spring({ frame: f - c(16.42) - i * 5, fps, config: { damping: 12, stiffness: 220 } });
+          const s = spring({ frame: f - c(15.83) - i * 5, fps, config: { damping: 12, stiffness: 220 } });
           return (
             <div key={n} style={{
               width: 170, height: 170, borderRadius: 85, background: n === 3 ? AMARILLO : "rgba(20,20,20,0.82)",
@@ -129,9 +129,9 @@ const punteado: React.CSSProperties = {
 /** Clase gratis: miniatura de video con play + título, en tarjeta punteada (estilo dynamic vd5). */
 const ClaseGratis: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(17.7, 23.3);
+  const { visible, estilo } = useFlotante(17.2, 22.7);
   if (!visible) return null;
-  const pasos = interpolate(f, [c(20.95), c(21.4)], [0, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const pasos = interpolate(f, [c(20.45), c(20.9)], [0, 3], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <Caja y={258} estilo={estilo}>
       <div style={{ ...punteado, width: 600, padding: 22, display: "flex", gap: 22, alignItems: "center", fontFamily: "Inter", color: "#fff" }}>
@@ -155,24 +155,23 @@ const ClaseGratis: React.FC = () => {
   );
 };
 
-/** Captura real del perfil con 23 seguidores, más chica e inclinada para no tapar la cara; se marca el número. */
+/** Captura real del perfil con 23 seguidores, como en la v1 (borde blanco limpio, sin punteado), más chica y abajo
+ * sobre el pecho: no tapa la cara. Mientras se ve, los subtítulos suben arriba de la cabeza (subtitulos.json). */
 const Perfil: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(23.3, 27.1);
+  const { visible, estilo } = useFlotante(22.93, 26.5);
   if (!visible) return null;
-  const W = 600, escala = W / 1179;
-  const marca = interpolate(f, [c(23.8), c(24.15)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SUAVE });
+  const W = 520, escala = W / 1179;
+  const marca = interpolate(f, [c(23.42), c(23.77)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: SUAVE });
   return (
-    <Caja y={250} estilo={{ ...estilo, transform: `${estilo.transform} rotate(-3deg)` }}>
-      <div style={{ ...punteado, padding: 10, borderRadius: 30 }}>
-        <div style={{ position: "relative", width: W, height: 780 * escala, borderRadius: 22, overflow: "hidden" }}>
-          <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
-          <div style={{
-            position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala,
-            border: `5px solid ${AMARILLO}`, borderRadius: 18, opacity: marca, transform: `scale(${1.4 - 0.4 * marca})`,
-            boxShadow: `0 0 26px ${AMARILLO}`,
-          }} />
-        </div>
+    <Caja y={1240} estilo={{ ...estilo, transform: `${estilo.transform} rotate(-2deg)` }}>
+      <div style={{ position: "relative", width: W, height: 780 * escala, borderRadius: 30, overflow: "hidden", boxShadow: sombra, border: "3px solid rgba(255,255,255,0.9)" }}>
+        <Img src={staticFile("sebastian/perfil_23c.png")} style={{ width: W, display: "block" }} />
+        <div style={{
+          position: "absolute", left: 630 * escala, top: 300 * escala, width: 250 * escala, height: 130 * escala,
+          border: `5px solid ${AMARILLO}`, borderRadius: 18, opacity: marca, transform: `scale(${1.4 - 0.4 * marca})`,
+          boxShadow: `0 0 26px ${AMARILLO}`,
+        }} />
       </div>
     </Caja>
   );
@@ -181,9 +180,9 @@ const Perfil: React.FC = () => {
 /** De 23 a 10K: curva que crece con brillo amarillo y número grande (como la curva de retención de vd5). */
 const Contador: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(27.1, 30.7);
+  const { visible, estilo } = useFlotante(26.5, 29.6);
   if (!visible) return null;
-  const p = interpolate(f, [c(28.4), c(29.9)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.7, 0, 0.2, 1) });
+  const p = interpolate(f, [c(27.8), c(29.0)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.7, 0, 0.2, 1) });
   const n = Math.round(23 + (10000 - 23) * p);
   const W = 560, H = 170;
   // curva exponencial de 23 a 10K, se dibuja hasta p
@@ -211,10 +210,10 @@ const Contador: React.FC = () => {
 /** Caja de comentario que escribe RELOJ y se envía. */
 const Comentario: React.FC = () => {
   const f = useCurrentFrame();
-  const { visible, estilo } = useFlotante(30.75, 37.167);
+  const { visible, estilo } = useFlotante(29.85, 36.0);
   if (!visible) return null;
-  const letras = Math.floor(interpolate(f, [c(31.62), c(32.1)], [0, 5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
-  const enviado = interpolate(f, [c(32.35), c(32.55)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const letras = Math.floor(interpolate(f, [c(30.42), c(30.9)], [0, 5], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
+  const enviado = interpolate(f, [c(31.2), c(31.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const cursor = Math.floor(f / 18) % 2 === 0 && letras < 5;
   return (
     <Caja y={330} estilo={estilo}>

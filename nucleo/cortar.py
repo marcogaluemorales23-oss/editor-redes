@@ -20,7 +20,12 @@ import numpy as np
 PAUSAS = {"nada": 0.06, "coma": 0.14, "punto": 0.28, "fin": 0.35}
 COLA = 0.12  # aire que queda después de la última palabra de una toma
 # Formatos con más ritmo (dynamic) piden pausas más cortas: tomas.json puede traer "pausas" y "cola".
+# "voz_separada": true mide la energía sobre la voz aislada con Demucs (trabajo/voz_<clip>.wav), no sobre el audio
+# crudo: en un cuarto con ruido y con la persona lejos del micrófono (prueba-01, toma "y te preguntarás") la voz
+# queda casi al nivel del ruido y el corte dejaba medio segundo muerto. "unir": huecos menores a esto dentro de
+# una toma no se cortan (cortarlos parte sílabas y suena entrecortado).
 PASO = 0.01  # resolución de la energía: 10 ms
+SEPARADA = False
 
 
 def energia_db(clip):
@@ -32,6 +37,17 @@ def energia_db(clip):
     n = int(16000 * PASO)
     x = x[: len(x) // n * n].reshape(-1, n)
     return 20 * np.log10(np.sqrt((x ** 2).mean(axis=1)) + 1e-9)
+
+
+def voz_separada(clip, destino):
+    """Voz aislada con Demucs (htdemucs, dos pistas). Se guarda para no repetirla."""
+    if not destino.exists():
+        tmp = destino.with_suffix("")
+        subprocess.run([sys.executable, "-m", "demucs", "--two-stems", "vocals", "-n", "htdemucs", "-o", str(tmp),
+                        str(clip)], check=True, capture_output=True)
+        next(tmp.glob("htdemucs/*/vocals.wav")).rename(destino)
+        subprocess.run(["rm", "-rf", str(tmp)], check=True)
+    return destino
 
 
 def umbral(env):
@@ -76,7 +92,7 @@ def arranque(env, th, t, antes=0.15, despues=0.3, sostenida=3):
     for k in range(max(0, int((t - antes) / PASO)), min(len(env) - sostenida, int((t + despues) / PASO))):
         if (env[k:k + sostenida] > th).all():
             return k * PASO
-    return t
+    return None
 
 
 def caida(env, th, t, desde, despues=0.15):
@@ -92,12 +108,21 @@ def cortar_toma(env, th, w, d, h):
     tramos = []
     # Whisper puede adelantar el inicio de la primera palabra hasta medio segundo (C6766: dijo 3,24 s y la voz
     # empieza en 3,74 s), así que la ventana mira bastante hacia delante y con el umbral de la voz principal.
-    fuerte = umbral_fuerte(env)
+    fuerte = th if SEPARADA else umbral_fuerte(env)
     # 80 ms sostenidos: un "ya" del camarógrafo dura ~60 ms por encima del umbral, la voz de cámara no.
-    t_in = max(0.0, arranque(env, fuerte, w[d]["inicio"], antes=0.15, despues=0.7, sostenida=8) - 0.08)
+    # Whisper también inventa palabras sobre una respiración ("Y" en prueba-01): si no hay voz cerca de la primera
+    # palabra, se sigue buscando hasta el final de la segunda.
+    despues = max(0.7, w[min(d + 1, h)]["fin"] - w[d]["inicio"])
+    inicio = arranque(env, fuerte, w[d]["inicio"], antes=0.15, despues=despues, sostenida=8)
+    if inicio is None:  # sin voz sostenida en esa ventana: buscar hasta el final de la toma
+        inicio = arranque(env, fuerte, w[d]["inicio"], antes=0.15, despues=w[h]["fin"] - w[d]["inicio"],
+                          sostenida=8)
+    t_in = max(0.0, (w[d]["inicio"] if inicio is None else inicio) - 0.08)
     for i in range(d, h):
         meta = PAUSAS[tipo_pausa(w[i]["texto"])]
-        s = silencio(env, th, w[i]["fin"] - 0.15, w[i + 1]["inicio"] + 0.15)
+        # Whisper a veces corre la palabra siguiente hacia atrás sobre la pausa (prueba-01: "hoy. Hoy"): se busca
+        # el silencio hasta bien entrada la palabra siguiente.
+        s = silencio(env, th, w[i]["fin"] - 0.15, min(w[i + 1]["fin"], w[i + 1]["inicio"] + 0.6))
         if s and s[1] - s[0] > max(meta + 0.05, 0.12):
             tramos.append((t_in, s[0] + meta * 0.55))
             t_in = s[1] - meta * 0.45
@@ -108,20 +133,30 @@ def cortar_toma(env, th, w, d, h):
 
 def main(reel):
     trabajo = Path(reel) / "trabajo"
-    global COLA
+    global COLA, SEPARADA
     conf = json.loads((trabajo / "tomas.json").read_text())
     tomas = conf["tomas"]
     PAUSAS.update(conf.get("pausas", {}))
     COLA = conf.get("cola", COLA)
+    unir = conf.get("unir", 0.0)
+    SEPARADA = bool(conf.get("voz_separada"))
     cortes, energias = [], {}
     for n, tm in enumerate(tomas):
         clip = tm["clip"]
         w = json.loads((trabajo / f"{clip}.json").read_text())["palabras"]
         if clip not in energias:
-            env = energia_db(str(Path(reel) / "crudos" / f"{clip}.MP4"))
-            energias[clip] = (env, umbral(env))
+            fuente = Path(reel) / "crudos" / f"{clip}.MP4"
+            if conf.get("voz_separada"):
+                fuente = voz_separada(fuente, trabajo / f"voz_{clip}.wav")
+            env = energia_db(str(fuente))
+            # Sobre la voz aislada el ruido queda ~-47 dB y el habla ~-22: el umbral va 20 dB bajo la voz (p90).
+            energias[clip] = (env, np.percentile(env, 90) - 20 if SEPARADA else umbral(env))
         env, th = energias[clip]
         for a, b in cortar_toma(env, th, w, tm["desde"], tm["hasta"]):
+            previo = cortes[-1] if cortes else None
+            if previo and previo["toma"] == n and a - previo["out"] < unir:
+                previo["out"] = b
+                continue
             cortes.append({"toma": n, "clip": clip, "in": a, "out": b})
     total = sum(c["out"] - c["in"] for c in cortes)
     (trabajo / "edl.json").write_text(json.dumps({"cortes": cortes, "duracion": round(total, 3)}, indent=1))
