@@ -44,3 +44,9 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
     - Whoosh en cada entrada y salida.
 11. **Voz**: si Sebas la pasa por Adobe Podcast, se le manda la voz cortada en WAV (mismo largo que el video) y la
     devuelve igual de larga: se reemplaza sin tocar la sincronía.
+12. **Estilo dynamic = vd2** (lo eligió Sebas, 29-10): el video NO se tapa, se **difumina** arriba (desenfoque +
+    tinte ahumado con degradado que termina sobre la cabeza) y ahí flotan título y tarjeta de vidrio. Entradas
+    suaves (fundido + desenfoque + 16 px de subida), pantallas completas por **fundido** (no cortinas), tarjeta de
+    capítulo amarilla. Versión oscura: vidrio ahumado, blanco y amarillo #FCF304. Grabar con **un tercio de pantalla
+    libre sobre la cabeza**; si no hay aire, el video baja y se rellena arriba con el mismo fondo desenfocado.
+13. **Storyboard visual antes de cada render** (cuadros reales con el estilo aplicado). El render sale aprobado.
