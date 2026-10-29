@@ -1,6 +1,6 @@
 import { loadFont } from "@remotion/fonts";
 import React from "react";
-import { Easing, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { Easing, interpolate, staticFile, useCurrentFrame } from "remotion";
 import { COLORES, FPS } from "./datos";
 
 export const cargarFuentes = () =>
