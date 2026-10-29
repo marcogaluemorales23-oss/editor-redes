@@ -18,3 +18,5 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
 3. **Tarjetas como las de dynamic vd5**: vidrio oscuro con borde punteado blanco que brilla, compactas (~600 px de ancho)
    y ARRIBA de la cabeza. **Nunca tapar la cara**: como mucho el pelo o la frente, los ojos siempre libres.
    No le gustaron las tarjetas grandes y planas (clase gratis y contador de la primera versión).
+4. **Voz limpia siempre** (antes usaba Adobe Podcast): `nucleo/limpiar_voz.py` separa la voz con Demucs y quita el
+   ruido del cuarto sin cambiar el tono. Va después de montar la base.
