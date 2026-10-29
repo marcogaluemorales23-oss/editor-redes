@@ -34,6 +34,7 @@ export const RemotionRoot: React.FC = () => (
     <Composition
       id="SebastianPrueba01c"
       component={Prueba01c}
+      defaultProps={{ capa: "frente" as const }}
       fps={FPS_P01}
       width={1080}
       height={1920}

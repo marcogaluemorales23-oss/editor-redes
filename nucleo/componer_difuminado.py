@@ -2,6 +2,7 @@
 """Compone el formato dynamic estilo vd2 (el que eligió Sebas): el video no se tapa, se DIFUMINA.
 
 Uso: python3 nucleo/componer_difuminado.py <reel> --base base_adobe.mp4 [--graficos graficos_c.mov] [--sin-graficos]
+       [--detras detras.mov --detras-desde 1.0 --persona persona.mov]
 Lee <reel>/trabajo/capas.json:
     {"tema": "claro"|"oscuro", "bajar": 300, "arriba": [[desde, hasta], ...], "pantallas": [[desde, hasta], ...],
      "blanco_y_negro": [[desde, hasta], ...], "fundido": 0.45}
@@ -10,6 +11,9 @@ Lee <reel>/trabajo/capas.json:
   tramo el video baja `bajar` px y el hueco de arriba se rellena con el mismo video ampliado y muy desenfocado
   (parece la pared). Todo entra y sale por fundido.
 - "pantallas": todo el cuadro pasa a desenfocado oscuro por fundido (la capa de Remotion pone el contenido).
+- "detras" (--detras): íconos sueltos a un lado de Sebas y DETRÁS de él (regla de Sebas: nada de ícono con título
+  encima). Va la capa de Remotion (renderizada desde --detras-desde) y encima el recorte de la persona
+  (persona.mov de nucleo/silueta.py), así el ícono queda entre la pared y Sebas.
 Escribe <reel>/trabajo/base_compuesta.mp4 (con --sin-graficos, base_difuminada.mp4 para el storyboard).
 """
 import argparse
@@ -54,6 +58,9 @@ def main():
     ap.add_argument("--base", default="base_adobe.mp4")
     ap.add_argument("--graficos", default="graficos_c.mov")
     ap.add_argument("--sin-graficos", action="store_true")
+    ap.add_argument("--detras")
+    ap.add_argument("--detras-desde", type=float, default=0.0)
+    ap.add_argument("--persona", default="persona.mov")
     a = ap.parse_args()
     t = Path(a.reel) / "trabajo"
     c = json.loads((t / "capas.json").read_text())
@@ -71,7 +78,7 @@ def main():
         "[v]format=rgba[va]", "[2:v]format=gray,scale=1080:1920[mb]", "[va][mb]alphamerge[vb]",
         f"[relleno][vb]overlay=x=0:y='{y}':eval=frame:shortest=1[bajado]",
         # Fuera de los tramos "arriba" el video va limpio (sin borde suave ni relleno).
-        f"[bajado][vplano]overlay=0:0:enable='not({en_arriba})'[comp]",
+        f"[bajado][vplano]overlay=0:0:enable='not({en_arriba})'" + ("[comp0]" if a.detras else "[comp]"),
         f"[comp]split={n + 1}[c0]" + "".join(f"[c{i + 1}]" for i in range(n)),
         "[1:v]format=gray,scale=1080:1920,split=" + str(max(1, len(arriba))) + "".join(f"[mz{i}]" for i in range(max(1, len(arriba)))),
     ]
@@ -98,12 +105,16 @@ def main():
     if not arriba:
         g.append("[mz0]nullsink")
     entradas = ["-i", str(t / a.base), "-loop", "1", "-i", str(zona), "-loop", "1", "-i", str(borde)]
+    if a.detras:
+        entradas += ["-i", str(t / a.detras), "-i", str(t / a.persona)]
+        g[1:1] = [f"[3:v]format=rgba,setpts=PTS-STARTPTS+{a.detras_desde:.3f}/TB[dt]", "[4:v]format=rgba[pe]",
+                  "[comp0][dt]overlay=0:0:eof_action=pass[comp1]", "[comp1][pe]overlay=0:0:eof_action=pass[comp]"]
     if a.sin_graficos:
         g.append(f"{actual}format=yuv420p[out]")
         salida = t / "base_difuminada.mp4"
     else:
         entradas += ["-i", str(t / a.graficos)]
-        g += ["[3:v]format=rgba[gr]", f"{actual}[gr]overlay=0:0,format=yuv420p[out]"]
+        g += [f"[{5 if a.detras else 3}:v]format=rgba[gr]", f"{actual}[gr]overlay=0:0,format=yuv420p[out]"]
         salida = t / "base_compuesta.mp4"
     subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", *entradas, "-filter_complex", ";".join(g),
                     "-map", "[out]", "-map", "0:a", "-c:v", "libx264", "-preset", "medium", "-crf", "16",

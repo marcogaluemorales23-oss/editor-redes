@@ -65,7 +65,9 @@
     "solo_sube": 60,
     "bajo_barbilla": 215,
     "y_max": 1585,
-    "caja_auto": true
+    "caja_auto": true,
+    "caja_siempre": true,
+    "caja_radio": 0
   },
   "zona_abajo": {
     "ancho": 640,

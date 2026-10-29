@@ -94,7 +94,9 @@ def linea(t0, t1, estilo, x, y, px, celda, est, texto, sombra, alinear=2):
 
 
 def caja_redonda(x0, y0, w, h, r):
-    """Rectángulo de esquinas redondeadas en dibujo ASS (\\p1), con origen arriba a la izquierda."""
+    """Rectángulo de esquinas redondeadas en dibujo ASS (\\p1), con origen arriba a la izquierda. r=0: recto."""
+    if r <= 0:
+        return f"m 0 0 l {w} 0 l {w} {h} l 0 {h} l 0 0"
     k = 0.55 * r
     return (f"m {r} 0 l {w - r} 0 b {w - r + k} 0 {w} {r - k} {w} {r} l {w} {h - r} "
             f"b {w} {h - r + k} {w - r + k} {h} {w - r} {h} l {r} {h} b {r - k} {h} 0 {h - r + k} 0 {h - r} "
@@ -127,6 +129,7 @@ def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, de
     claves = b.get("l2", [])
     if claves and not isinstance(claves[0], list):
         claves = [claves]
+    claves = [cl for cl in claves if w[cl[0]]["inicio"] < fin]  # la clave que llega después de "hasta_s" no sale
     a1, _, texto1 = b["l1"]
     t1 = w[a1]["inicio"]
     if not claves:
@@ -151,6 +154,8 @@ def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, de
         # Caja negra detrás de la clave si el fondo no deja leer (o si el bloque la pide con "caja").
         alto_mayus = px2 * 0.73
         caja = b.get("caja")
+        if caja is None and est.get("caja_siempre"):  # Sebas: TODAS las claves amarillas llevan su caja
+            caja = True
         if caja is None and est.get("caja_auto"):
             caja = fondo_claro(video, t2 + 0.2, x_clave - 20, base - alto_mayus - 20, ancho2 + 40, alto_mayus + 40)
         if caja:
@@ -161,7 +166,7 @@ def bloque_compuesto(b, w, fin, base, est, f_l1, f_l2, celda1, desc1, celda2, de
             out.append(f"Dialogue: 0,{ass_tiempo(t2)},{ass_tiempo(fin2)},L2,,0,0,0,,"
                        f"{{\\an7\\pos({bx:.1f},{by:.1f})\\p1\\1c&H000000&\\1a&H1A&\\bord0\\shad0"
                        f"\\fad({est['entrada_ms']},{min(est['salida_ms'], dur // 3)})}}"
-                       f"{caja_redonda(0, 0, round(bw), round(bh), round(bh * 0.22))}{{\\p0}}")
+                       f"{caja_redonda(0, 0, round(bw), round(bh), round(bh * est.get('caja_radio', 0.22)))}{{\\p0}}")
         for sombra in ((False,) if caja else (True, False)):  # con caja la sombra sobra
             out.append(linea(t2, fin2, "L2", x_clave, base + desc2 * px2, px2, celda2, est, texto2, sombra, alinear=1))
         if j == 0:
@@ -220,6 +225,8 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     for k, b in enumerate(bloques):
         siguiente = bloques[k + 1]["l1"][0] if k + 1 < len(bloques) else None
         fin = w[siguiente]["inicio"] - 0.02 if siguiente is not None else fin_video
+        # "hasta_s": el bloque se va antes (p. ej. cuando entra un gráfico que ya dice lo mismo: nada repetido).
+        fin = min(fin, b.get("hasta_s", fin))
         if est.get("modo") == "compuesto":
             t_b = w[b["l1"][0]]["inicio"]
             tramo = next((tr for tr in y_por_tramo if tr["desde"] - 0.05 <= t_b < tr["hasta"]), None)

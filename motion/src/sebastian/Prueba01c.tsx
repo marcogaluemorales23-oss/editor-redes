@@ -48,16 +48,6 @@ const Titulo: React.FC<{ apoyo: string; clave: string; desde: number; hasta: num
   );
 };
 
-const Tarjeta: React.FC<{ desde: number; hasta: number; top: number; ancho: number; alto: number; children: React.ReactNode }> = ({ desde, hasta, top, ancho, alto, children }) => {
-  const { visible, estilo } = useSuave(desde, hasta, 0.12);
-  if (!visible) return null;
-  return (
-    <div style={{ position: "absolute", top, left: (1080 - ancho) / 2, width: ancho, height: alto, ...vidrio, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", ...estilo }}>
-      {children}
-    </div>
-  );
-};
-
 const LogoIG: React.FC<{ tam: number }> = ({ tam }) => (
   <svg width={tam} height={tam} viewBox="0 0 100 100">
     <defs>
@@ -73,19 +63,37 @@ const LogoIG: React.FC<{ tam: number }> = ({ tam }) => (
   </svg>
 );
 
-const Reloj: React.FC = () => {
+const Reloj: React.FC<{ tam?: number }> = ({ tam = 170 }) => {
   const f = useCurrentFrame();
   const p = interpolate(f, [c(10.6), c(13.4)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
-    <svg width={170} height={232} viewBox="0 0 100 136">
+    <svg width={tam} height={tam * 1.36} viewBox="0 0 100 136">
       <rect x="8" y="2" width="84" height="10" rx="5" fill={TEXTO} />
       <rect x="8" y="124" width="84" height="10" rx="5" fill={TEXTO} />
-      <path d="M18 12 C18 48 46 58 46 68 C46 78 18 88 18 124 L82 124 C82 88 54 78 54 68 C54 58 82 48 82 12 Z" fill="rgba(255,255,255,0.4)" stroke={TEXTO} strokeWidth="3" />
+      <path d="M18 12 C18 48 46 58 46 68 C46 78 18 88 18 124 L82 124 C82 88 54 78 54 68 C54 58 82 48 82 12 Z" fill="rgba(255,255,255,0.75)" stroke={TEXTO} strokeWidth="3" />
       <clipPath id="arenaC"><rect x="0" y={12 + 46 * p} width="100" height={56 - 46 * p} /></clipPath>
       <path d="M22 16 C22 46 47 56 48 66 L52 66 C53 56 78 46 78 16 Z" fill={ACENTO} clipPath="url(#arenaC)" />
       <rect x="48.5" y="66" width="3" height={58 - 40 * p} fill={ACENTO} opacity={p < 0.98 ? 1 : 0} />
       <path d={`M22 121 C24 ${121 - 34 * p} 76 ${121 - 34 * p} 78 121 Z`} fill={ACENTO} />
     </svg>
+  );
+};
+
+/** Ícono suelto DETRÁS de Sebas (regla de Sebas: nada de "ícono con título encima"; el ícono va a un lado,
+ * detrás de él). Esta capa se pone debajo del recorte de la persona (nucleo/silueta.py -> persona.mov).
+ * Entra creciendo desde atrás con desenfoque, flota suave y sale borroso. */
+const Detras: React.FC<{ desde: number; hasta: number; x: number; y: number; children: React.ReactNode }> = ({ desde, hasta, x, y, children }) => {
+  const f = useCurrentFrame();
+  const p = interpolate(f, [c(desde), c(desde + 0.5)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: Easing.bezier(0.34, 1.4, 0.64, 1) });
+  const q = interpolate(f, [c(hasta - SALE), c(hasta)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: CURVA });
+  if (f < c(desde) || f >= c(hasta)) return null;
+  const o = Math.min(1, p * 1.6) * (1 - q);
+  const flota = Math.sin((f - c(desde)) / FPS * 2.2) * 8;
+  return (
+    <div style={{ position: "absolute", left: x, top: y, transform: `translate(-50%, -50%) translateY(${flota + (1 - p) * 40}px) scale(${0.7 + 0.3 * p - 0.08 * q})`,
+      opacity: o, filter: `blur(${(1 - Math.min(1, p)) * 12 + q * 14}px) drop-shadow(0 20px 30px rgba(0,0,0,0.28))` }}>
+      {children}
+    </div>
   );
 };
 
@@ -110,7 +118,6 @@ const ClaseGratis: React.FC = () => {
   const p = useSuave(17.2, 21.0, 0.3);
   return (
     <>
-      <Titulo apoyo="una" clave="clase gratis" desde={17.2} hasta={21.0} y={300} tam={64} />
       {t.visible && (
         <div style={{ position: "absolute", top: 430, left: 160, width: 760, height: 428, ...vidrio, overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", ...t.estilo }}>
           <Img src={staticFile("sebastian/avatar.jpg")} style={{ position: "absolute", width: 760, height: 428, objectFit: "cover", opacity: 0.5, filter: "blur(3px)" }} />
@@ -177,7 +184,7 @@ const Comentario: React.FC = () => {
   const { visible, estilo } = useSuave(29.85, 32.6, 0.12);
   if (!visible) return null;
   return (
-    <div style={{ position: "absolute", top: 380, left: 120, width: 840, display: "flex", alignItems: "center", gap: 22, padding: "22px 26px", borderRadius: 60, background: "rgba(255,255,255,0.97)", border: "1.5px solid rgba(255,255,255,1)", boxShadow: "0 18px 44px rgba(60,40,20,0.16)", fontFamily: "Inter", ...estilo }}>
+    <div style={{ position: "absolute", top: 330, left: 120, width: 840, display: "flex", alignItems: "center", gap: 22, padding: "22px 26px", borderRadius: 60, background: "rgba(255,255,255,0.97)", border: "1.5px solid rgba(255,255,255,1)", boxShadow: "0 18px 44px rgba(60,40,20,0.16)", fontFamily: "Inter", ...estilo }}>
       <Img src={staticFile("sebastian/avatar.jpg")} style={{ width: 88, height: 88, borderRadius: 44, objectFit: "cover" }} />
       <div style={{ flex: 1, fontSize: 56, fontWeight: 900, fontStyle: "italic", color: "#111" }}>
         {"RELOJ".slice(0, letras)}{cursor ? "|" : ""}
@@ -190,21 +197,23 @@ const Comentario: React.FC = () => {
   );
 };
 
-export const Prueba01c: React.FC = () => (
-  <AbsoluteFill>
-    {/* Arriba (video difuminado detrás) */}
-    <Titulo apoyo="crear contenido en" clave="Instagram" desde={1.2} hasta={3.8} />
-    <Tarjeta desde={1.2} hasta={3.8} top={340} ancho={300} alto={300}><LogoIG tam={170} /></Tarjeta>
-    <Titulo apoyo="estás quemando tu" clave="tiempo" desde={10.3} hasta={13.7} />
-    <Tarjeta desde={10.3} hasta={13.7} top={330} ancho={300} alto={330}><Reloj /></Tarjeta>
-    <Titulo apoyo="hoy tengo" clave="23 seguidores" desde={22.62} hasta={24.3} />
-    <Perfil />
-    <Titulo apoyo="comenta la palabra" clave="RELOJ" desde={29.85} hasta={32.6} />
-    <Comentario />
-    {/* Pantallas completas (fondo difuminado oscuro) */}
-    <ClaseGratis />
-    <Contador />
-    {/* Capítulo */}
-    <Capitulo desde={15.83} hasta={16.5} chico="SOLO TIENES QUE SEGUIR" grande="3 COSAS" />
-  </AbsoluteFill>
-);
+export const Prueba01c: React.FC<{ capa?: "frente" | "detras" }> = ({ capa = "frente" }) =>
+  capa === "detras" ? (
+    <AbsoluteFill>
+      {/* Detrás de Sebas (debajo de su recorte) */}
+      <Detras desde={1.2} hasta={3.8} x={770} y={430}><LogoIG tam={300} /></Detras>
+      <Detras desde={10.3} hasta={13.7} x={170} y={620}><Reloj tam={250} /></Detras>
+    </AbsoluteFill>
+  ) : (
+    <AbsoluteFill>
+      {/* Arriba (video difuminado detrás). Nada que repita el subtítulo. */}
+      <Titulo apoyo="día" clave="1" desde={22.62} hasta={24.3} tam={72} />
+      <Perfil />
+      <Comentario />
+      {/* Pantallas completas (fondo difuminado) */}
+      <ClaseGratis />
+      <Contador />
+      {/* Capítulo: el subtítulo "seguir estas" se va justo antes, así "3 COSAS" no sale dos veces */}
+      <Capitulo desde={15.83} hasta={16.5} chico="" grande="3 COSAS" />
+    </AbsoluteFill>
+  );

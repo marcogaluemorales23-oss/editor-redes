@@ -50,3 +50,13 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
     capítulo amarilla. Versión oscura: vidrio ahumado, blanco y amarillo #FCF304. Grabar con **un tercio de pantalla
     libre sobre la cabeza**; si no hay aire, el video baja y se rellena arriba con el mismo fondo desenfocado.
 13. **Storyboard visual antes de cada render** (cuadros reales con el estilo aplicado). El render sale aprobado.
+14. **Sin escalar la toma** (corrección v8): Sebas no graba tan cerca como para necesitar zoom. Base a `zoom_max: 1.0`
+    (la toma tal cual) y golpes de zoom muy suaves (≤ 5 %). Escalar de más lo deja apretado y sin aire.
+15. **Nada repetido**: un título o gráfico no dice lo mismo que el subtítulo que está en pantalla. Si un gráfico ya
+    lo dice, el subtítulo se va antes (`"hasta_s"` en el bloque) o el título se quita.
+16. **Toda clave amarilla lleva su caja negra**, en TODO el video, **recta, sin esquinas redondeadas**
+    (`marca.json` → `caja_siempre: true`, `caja_radio: 0`). En pantallas claras la clave sigue amarilla en su caja.
+17. **Nada de "ícono suelto con título encima"**: un ícono o emoji solo va **a un lado de Sebas y detrás de él**
+    (capa `detras` de Remotion + recorte `persona.mov` de `nucleo/silueta.py`, en `componer_difuminado.py --detras`).
+    Un motion graphic de verdad (algo que pasa, p. ej. el logo de Instagram cortándose) sí puede ir en grande.
+    El difuminado arriba con título queda para gráficos con contenido (perfil, comentario, contador).
