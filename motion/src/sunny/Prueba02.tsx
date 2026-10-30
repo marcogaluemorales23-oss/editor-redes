@@ -87,9 +87,10 @@ const Casa: React.FC<{ tam: number; color: string; detalle: "llave" | "dolar" }>
   </svg>
 );
 
-const Contador: React.FC<{ valor: number; sufijo: string; tam: number; color: string }> = ({ valor, sufijo, tam, color }) => (
+// `miles`: 100000 -> "$100K" (así como lo dicen: "60 mil, 70 mil, 100 mil"); "$100,000" no cabe en la tarjeta.
+const Contador: React.FC<{ valor: number; sufijo: string; tam: number; color: string; miles?: boolean }> = ({ valor, sufijo, tam, color, miles }) => (
   <div style={{ fontFamily: "Inter", fontWeight: 900, fontStyle: "italic", fontSize: tam, lineHeight: 1, color, letterSpacing: -tam * 0.03 }}>
-    ${Math.round(valor).toLocaleString("en-US")}{sufijo}
+    ${miles ? `${Math.round(valor / 1000)}K` : Math.round(valor).toLocaleString("en-US")}{sufijo}
   </div>
 );
 
@@ -127,7 +128,7 @@ const Comparativa: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta 
       <div style={{ ...tarjeta, left: 560, opacity: flip, transform: `translateY(${(1 - flip) * 40}px)` }}>
         <Casa tam={150} color={TEXTO} detalle="dolar" />
         <div style={{ background: NEGRO, color: AMARILLO, fontWeight: 900, fontStyle: "italic", fontSize: 58, padding: "4px 16px 0" }}>FIX & FLIP</div>
-        <Contador valor={k} sufijo="" tam={92} color={TEXTO} />
+        <Contador valor={k} sufijo="" tam={92} color={TEXTO} miles />
         <div style={{ fontWeight: 700, fontSize: 34, color: "rgba(28,26,23,0.65)" }}>por casa</div>
       </div>
       {/* Barras: la renta casi no se ve al lado del flip */}
