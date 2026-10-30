@@ -71,3 +71,5 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
     negros un poco más firmes, S de contraste ±3 % y saturación +8..18 %. Que se note (la primera prueba con +4..14 %
     casi no se veía) pero sin exagerar. **Nunca más brillante que el original** ("se ve muy brillante"): no se estiran
     los blancos y los medios bajan hasta que el brillo medio quede en ~97 % del original. Va antes de silueta.py.
+    **La piel no se toca** ("parezco un indigente"): la saturación sube solo fuera de la piel (verdes, cianes, azules),
+    los rojos bajan 5 % y el balance de blancos nunca quita verde ni agrega rojo (eso ponía la frente roja y naranja).

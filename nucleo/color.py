@@ -8,8 +8,9 @@ Mide cada tramo de trabajo/encuadre_tramos.json (cada toma tiene su luz: cocina,
 2. Niveles: negros que no llegan a negro se bajan un poco. Los blancos NO se estiran.
 3. Brillo: los medios se ajustan para que el brillo medio quede igual o un poco más bajo que el original
    (--brillo 0.97). Corrección de Sebas: la primera versión subía blancos y medios y "se veía muy brillante".
-4. Contraste: curva en S suave (±3 % en los cuartos).
-5. Saturación: hacia ~0,34 de saturación media, entre +8 % y +18 % (la primera prueba, +4..14 %, casi no se notaba).
+4. Contraste: curva en S suave (±2 % en los cuartos).
+5. Saturación: hacia ~0,34 de saturación media, entre +8 % y +18 %, pero SOLO fuera de la piel (verdes, cianes,
+   azules, magentas); los rojos bajan 5 %. El balance de blancos nunca quita verde ni agrega rojo.
 Todo con fuerza ajustable (--fuerza 0.5 = la mitad). Corta por cuadros exactos (trim + concat), el audio se copia.
 Escribe trabajo/<salida>, trabajo/color.json (medidas y ajustes) y con --hoja trabajo/color_antes_despues.jpg.
 Va después de montar.py / la voz limpia, y ANTES de silueta.py y componer (el recorte debe salir ya corregido).
@@ -52,12 +53,15 @@ def medir(img):
 def ajustes(m, fuerza, y, brillo):
     g = np.array(m["gris"])
     ganancia = np.clip(1 + (g.mean() / g - 1) * 0.5 * fuerza, 0.94, 1.06)
+    # Nunca hacia magenta/rojo: con menos verde o más rojo la piel se ve irritada ("parezco un indigente", Sebas).
+    ganancia[0] = min(ganancia[0], 1.0)
+    ganancia[1] = max(ganancia[1], 1.0)
     negro = min(0.06, max(0.0, (m["p1"] - 0.02) * 0.6)) * fuerza
     blanco = 1.0
     sat = float(np.clip(1 + (0.34 - m["sat"]) * 0.8, 1.08, 1.18))
     sat = 1 + (sat - 1) * fuerza
     a = {"ganancia": [round(float(v), 4) for v in ganancia], "negro": round(negro, 4), "blanco": blanco,
-         "medio": 0.0, "saturacion": round(sat, 4), "contraste": round(0.03 * fuerza, 4)}
+         "medio": 0.0, "saturacion": round(sat, 4), "contraste": round(0.02 * fuerza, 4)}
     # Medios que dejan el brillo medio en `brillo` x el original (la S y los niveles no deben aclarar la toma).
     meta = y.mean() * brillo
     a["medio"] = round(float(min(np.arange(-0.12, 0.031, 0.005), key=lambda md: abs(aplicar(y, {**a, "medio": md}).mean() - meta))), 4)
@@ -79,8 +83,11 @@ def curva(a):
 
 def filtro(a):
     r, g, b = a["ganancia"]
+    # La saturación sube en todo MENOS en la piel (rojos y amarillos); los rojos incluso bajan un poco para calmar
+    # manchas y rojeces. Subirla pareja ponía la frente naranja y roja.
     return (f"colorchannelmixer=rr={r}:gg={g}:bb={b},curves=all='{curva(a)}',"
-            f"eq=saturation={a['saturacion']}")
+            f"huesaturation=saturation={a['saturacion'] - 1:.4f}:colors=g+c+b+m,"
+            f"huesaturation=saturation=-0.05:colors=r")
 
 
 def main():
