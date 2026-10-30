@@ -5,8 +5,9 @@ Uso: python3 nucleo/color.py <reel> [--base base_adobe.mp4] [--salida base_color
 Mide cada tramo de trabajo/encuadre_tramos.json (cada toma tiene su luz: cocina, cuarto, pasillo) y corrige:
 1. Balance de blancos: promedio de las superficies casi grises (paredes, techo) -> la mitad del camino a neutro,
    como mucho ±6 % por canal. No se busca blanco perfecto: un poco de calidez se ve natural.
-2. Niveles: negros que no llegan a negro se bajan un poco y blancos apagados se suben un poco (nunca se queman).
-3. Medios: si la toma quedó oscura, la curva sube un poco los medios (piel más viva).
+2. Niveles: negros que no llegan a negro se bajan un poco. Los blancos NO se estiran.
+3. Brillo: los medios se ajustan para que el brillo medio quede igual o un poco más bajo que el original
+   (--brillo 0.97). Corrección de Sebas: la primera versión subía blancos y medios y "se veía muy brillante".
 4. Contraste: curva en S suave (±3 % en los cuartos).
 5. Saturación: hacia ~0,34 de saturación media, entre +8 % y +18 % (la primera prueba, +4..14 %, casi no se notaba).
 Todo con fuerza ajustable (--fuerza 0.5 = la mitad). Corta por cuadros exactos (trim + concat), el audio se copia.
@@ -48,26 +49,32 @@ def medir(img):
             "sat": float(sat.mean()), "gris": [float(v) for v in rgb_gris]}
 
 
-def ajustes(m, fuerza):
+def ajustes(m, fuerza, y, brillo):
     g = np.array(m["gris"])
     ganancia = np.clip(1 + (g.mean() / g - 1) * 0.5 * fuerza, 0.94, 1.06)
     negro = min(0.06, max(0.0, (m["p1"] - 0.02) * 0.6)) * fuerza
-    blanco = 1.0 if m["p99"] >= 0.97 else max(0.88, 1 - (1 - m["p99"]) * 0.6 * fuerza)
-    medio = float(np.clip((0.45 - m["p50"]) * 0.3, -0.03, 0.05)) * fuerza
+    blanco = 1.0
     sat = float(np.clip(1 + (0.34 - m["sat"]) * 0.8, 1.08, 1.18))
     sat = 1 + (sat - 1) * fuerza
-    return {"ganancia": [round(float(v), 4) for v in ganancia], "negro": round(negro, 4), "blanco": round(blanco, 4),
-            "medio": round(medio, 4), "saturacion": round(sat, 4), "contraste": round(0.03 * fuerza, 4)}
+    a = {"ganancia": [round(float(v), 4) for v in ganancia], "negro": round(negro, 4), "blanco": blanco,
+         "medio": 0.0, "saturacion": round(sat, 4), "contraste": round(0.03 * fuerza, 4)}
+    # Medios que dejan el brillo medio en `brillo` x el original (la S y los niveles no deben aclarar la toma).
+    meta = y.mean() * brillo
+    a["medio"] = round(float(min(np.arange(-0.12, 0.031, 0.005), key=lambda md: abs(aplicar(y, {**a, "medio": md}).mean() - meta))), 4)
+    return a
+
+
+def aplicar(x, a):
+    """La curva de niveles + medios + S (vale para un número o un arreglo)."""
+    v = np.clip((x - a["negro"]) / (a["blanco"] - a["negro"]), 0, 1)
+    v = v + a["medio"] * 4 * v * (1 - v)                    # sube/baja los medios, extremos quietos
+    return np.clip(v - a["contraste"] * np.sin(2 * np.pi * v), 0, 1)  # S: baja 1/4, sube 3/4
 
 
 def curva(a):
     """Niveles + medios + S suave en una sola curva (puntos para el filtro curves de ffmpeg)."""
-    def f(x):
-        v = np.clip((x - a["negro"]) / (a["blanco"] - a["negro"]), 0, 1)
-        v = v + a["medio"] * 4 * v * (1 - v)                    # sube/baja los medios, extremos quietos
-        return float(np.clip(v - a["contraste"] * np.sin(2 * np.pi * v), 0, 1))  # S: baja 1/4, sube 3/4
     xs = [0, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 0.9, 1]
-    return " ".join(f"{x}/{f(x):.4f}" for x in xs)
+    return " ".join(f"{x}/{float(aplicar(x, a)):.4f}" for x in xs)
 
 
 def filtro(a):
@@ -83,6 +90,7 @@ def main():
     ap.add_argument("--salida", default="base_color.mp4")
     ap.add_argument("--fuerza", type=float, default=1.0)
     ap.add_argument("--hoja", action="store_true")
+    ap.add_argument("--brillo", type=float, default=0.97, help="brillo medio final / original")
     a = ap.parse_args()
     t = Path(a.reel) / "trabajo"
     base = t / a.base
@@ -94,8 +102,10 @@ def main():
     tramos = json.loads((t / "encuadre_tramos.json").read_text())
     registro, partes = [], []
     for i, tr in enumerate(tramos):
-        m = medir(cuadros(base, tr["desde"], tr["hasta"]))
-        aj = ajustes(m, a.fuerza)
+        img = cuadros(base, tr["desde"], tr["hasta"])
+        m = medir(img)
+        y = (0.2126 * img[..., 0] + 0.7152 * img[..., 1] + 0.0722 * img[..., 2])[:, ::4, ::4].ravel()
+        aj = ajustes(m, a.fuerza, y, a.brillo)
         registro.append({"desde": tr["desde"], "hasta": tr["hasta"], "medida": m, "ajuste": aj})
         f0, f1 = round(tr["desde"] * fps), round(tr["hasta"] * fps)
         partes.append(f"[s{i}]trim=start_frame={f0}:end_frame={f1},setpts=PTS-STARTPTS,{filtro(aj)}[c{i}]")
