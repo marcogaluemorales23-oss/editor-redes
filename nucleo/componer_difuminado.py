@@ -108,7 +108,11 @@ def main():
         actual, k = f"[cp{j}]", k + 1
     if not arriba:
         g.append("[mz0]nullsink")
-    entradas = ["-i", str(t / a.base), "-loop", "1", "-i", str(zona), "-loop", "1", "-i", str(borde)]
+    # Las máscaras fijas se repiten solo lo que dura la base: con "-loop 1" sin límite, una máscara que no se usa
+    # (va a nullsink) corre para siempre y el archivo nunca se cierra (sin moov).
+    dur = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
+                          str(t / a.base)], capture_output=True, text=True, check=True).stdout.strip()
+    entradas = ["-i", str(t / a.base), "-loop", "1", "-t", dur, "-i", str(zona), "-loop", "1", "-t", dur, "-i", str(borde)]
     # "sin_persona": tramos con b-roll encima, donde el recorte de la persona no debe pegarse.
     sin_persona = "+".join(f"between(t,{x:.3f},{z:.3f})" for x, z in c.get("sin_persona", [])) or "0"
     if a.detras:
