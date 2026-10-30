@@ -67,3 +67,6 @@ Reglas aprendidas de sus correcciones. Base: `CRITERIO.md`, `estilos/heras.md`, 
 20. **Pantalla completa de una oferta (clase gratis)**: fondo naranja de marca que entra y sale por **iris** (círculo
     con aro crema) y whoosh. La miniatura de la clase es propia y **en pausa** (título simple, botón de play, barra al
     inicio), nunca la foto de perfil.
+21. **Corrección de color suave, toma por toma** (`nucleo/color.py`): balance de blancos a medio camino de neutro,
+    niveles, medios un poco arriba si la toma quedó oscura, S de contraste ±3 % y saturación +8..18 %. Que se note
+    (la primera prueba con +4..14 % casi no se veía) pero sin exagerar. Va antes de silueta.py y de componer.

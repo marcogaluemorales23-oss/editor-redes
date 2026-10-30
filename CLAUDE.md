@@ -12,7 +12,7 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
    Desde la prueba-01 es **visual**: hoja de cuadros reales con el estilo ya aplicado (base + gráficos como fotos
    fijas), numerados arriba a la derecha y con el segundo abajo. Se corrige ahí; el render completo solo sale con
    el storyboard aprobado, y después solo se tocan detalles. También en cada corrección: storyboard primero.
-6. **Editar**: cortar por huecos entre palabras (no por volumen) → base sin textos → limpiar la voz (`nucleo/limpiar_voz.py`) → capa de textos/animación encima. Render de prueba de 12 s antes del completo.
+6. **Editar**: cortar por huecos entre palabras (no por volumen) → base sin textos → limpiar la voz (`nucleo/limpiar_voz.py`) → color suave por toma (`nucleo/color.py`) → capa de textos/animación encima. Render de prueba de 12 s antes del completo.
 7. **Revisar y aprender**: hoja de contactos, máximo 3 vueltas, `nucleo/verificar.sh` antes de decir "listo". Cada corrección de Sebastián se escribe como regla en `estilo.md` de la marca.
 
 ## Reglas técnicas
