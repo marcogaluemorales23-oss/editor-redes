@@ -4,7 +4,9 @@
 Uso: python3 nucleo/broll.py <reel> [--tiempos corte_check.json]
 Lee <reel>/trabajo/brolls.json:
     {"brolls": [{"archivo": "assets/broll2.mp4", "desde": 5, "hasta": 9, "inicio_clip": 0.0}]}
-"desde"/"hasta" son índices de palabra en la línea de tiempo del corte. El audio de la base no se toca.
+"desde"/"hasta" son índices de palabra en la línea de tiempo del corte, o "t0"/"t1" en segundos del video.
+"difuminar": [x, y, ancho, alto] (en el cuadro de 1080x1920) tapa un dato privado (número de casa, placa).
+"nitidez": false para clips en 4K (el enfoque suave es para b-rolls de baja resolución). El audio de la base no se toca.
 Escribe <reel>/trabajo/base_broll.mp4.
 """
 import argparse
@@ -17,20 +19,27 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("reel")
     ap.add_argument("--tiempos", default="corte_check.json")
+    ap.add_argument("--base", default="base.mp4")
     a = ap.parse_args()
     reel = Path(a.reel)
     trabajo = reel / "trabajo"
     w = json.loads((trabajo / a.tiempos).read_text())["palabras"]
     brolls = json.loads((trabajo / "brolls.json").read_text())["brolls"]
 
-    entradas, filtros, previo = ["-i", str(trabajo / "base.mp4")], [], "[0:v]"
+    entradas, filtros, previo = ["-i", str(trabajo / a.base)], [], "[0:v]"
     for k, b in enumerate(brolls, start=1):
-        t0 = w[b["desde"]]["inicio"] - 0.05
-        t1 = w[b["hasta"]]["fin"] + 0.05
+        t0 = b["t0"] if "t0" in b else w[b["desde"]]["inicio"] - 0.05
+        t1 = b["t1"] if "t1" in b else w[b["hasta"]]["fin"] + 0.05
         entradas += ["-ss", str(b.get("inicio_clip", 0)), "-t", f"{t1 - t0:.3f}", "-i", str(reel / b["archivo"])]
         # Cubrir 1080x1920 sin deformar y desplazar el clip a su segundo en la línea de tiempo.
-        filtros.append(f"[{k}:v]scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,"
-                       f"crop=1080:1920,unsharp=5:5:0.9:5:5:0.0,setsar=1,setpts=PTS-STARTPTS+{t0:.3f}/TB[b{k}]")
+        nitidez = ",unsharp=5:5:0.9:5:5:0.0" if b.get("nitidez", True) else ""
+        cadena = (f"[{k}:v]scale=1080:1920:force_original_aspect_ratio=increase:flags=lanczos,"
+                  f"crop=1080:1920{nitidez},setsar=1")
+        if "difuminar" in b:
+            x, y, dw, dh = b["difuminar"]
+            cadena += (f",split[o{k}][d{k}];[d{k}]crop={dw}:{dh}:{x}:{y},boxblur=8:2[db{k}];"
+                       f"[o{k}][db{k}]overlay={x}:{y}")
+        filtros.append(cadena + f",setpts=PTS-STARTPTS+{t0:.3f}/TB[b{k}]")
         filtros.append(f"{previo}[b{k}]overlay=eof_action=pass:enable='between(t,{t0:.3f},{t1:.3f})'[v{k}]")
         previo = f"[v{k}]"
         print(f"b-roll {k}: {b['archivo']} de {t0:.2f}s a {t1:.2f}s")

@@ -109,10 +109,13 @@ def main():
     if not arriba:
         g.append("[mz0]nullsink")
     entradas = ["-i", str(t / a.base), "-loop", "1", "-i", str(zona), "-loop", "1", "-i", str(borde)]
+    # "sin_persona": tramos con b-roll encima, donde el recorte de la persona no debe pegarse.
+    sin_persona = "+".join(f"between(t,{x:.3f},{z:.3f})" for x, z in c.get("sin_persona", [])) or "0"
     if a.detras:
         entradas += ["-i", str(t / a.detras), "-i", str(t / a.persona)]
         g[1:1] = [f"[3:v]format=rgba,setpts=PTS-STARTPTS+{a.detras_desde:.3f}/TB[dt]", "[4:v]format=rgba[pe]",
-                  "[comp0][dt]overlay=0:0:eof_action=pass[comp1]", "[comp1][pe]overlay=0:0:eof_action=pass[comp]"]
+                  "[comp0][dt]overlay=0:0:eof_action=pass[comp1]",
+                  f"[comp1][pe]overlay=0:0:eof_action=pass:enable='not({sin_persona})'[comp]"]
     if a.sin_graficos:
         g.append(f"{actual}format=yuv420p[out]")
         salida = t / "base_difuminada.mp4"

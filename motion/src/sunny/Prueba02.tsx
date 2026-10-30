@@ -11,6 +11,7 @@ export const DURACION_S = 48.38;
 const AMARILLO = "#FCF304";
 const NEGRO = "#111111";
 const TEXTO = "#1c1a17";
+const CREMA = "#F4F0E8";
 const c = (s: number) => Math.round(s * FPS);
 const CURVA = Easing.bezier(0.22, 1, 0.36, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
@@ -108,35 +109,37 @@ const Comparativa: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta 
   const barraFlip = 560 * (k / 100000);
   const sello = spring({ frame: f - c(30.3), fps: FPS, config: { damping: 9, stiffness: 240 } });
   const BASE = 1420;
+  const velo = interpolate(f, [c(desde), c(desde + 0.3)], [0, 1], clamp);
+  const tarjeta: React.CSSProperties = { position: "absolute", top: 300, width: 410, height: 640, background: "rgba(244,240,232,0.96)",
+    boxShadow: "0 24px 60px rgba(0,0,0,0.35)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 18 };
   return (
     <AbsoluteFill style={{ opacity: 1 - sale, filter: `blur(${sale * 14}px)`, fontFamily: "Inter" }}>
-      {/* Columna renta */}
-      <div style={{ position: "absolute", left: 120, width: 400, top: 330, display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
-        opacity: renta, transform: `translateY(${(1 - renta) * 40}px)` }}>
+      {/* Fondo: la toma aérea del dron (en la base) oscurecida, para que se lean las tarjetas */}
+      <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.6) 100%)", opacity: velo }} />
+      {/* Tarjeta renta */}
+      <div style={{ ...tarjeta, left: 110, opacity: renta, transform: `translateY(${(1 - renta) * 40}px)` }}>
         <Casa tam={150} color={TEXTO} detalle="llave" />
         <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 66, color: TEXTO }}>RENTA</div>
         <Contador valor={quinientos} sufijo="" tam={92} color={TEXTO} />
         <div style={{ fontWeight: 700, fontSize: 34, color: "rgba(28,26,23,0.65)" }}>al mes</div>
       </div>
-      {/* Columna fix & flip */}
-      <div style={{ position: "absolute", left: 560, width: 400, top: 330, display: "flex", flexDirection: "column", alignItems: "center", gap: 18,
-        opacity: flip, transform: `translateY(${(1 - flip) * 40}px)` }}>
+      {/* Tarjeta fix & flip */}
+      <div style={{ ...tarjeta, left: 560, opacity: flip, transform: `translateY(${(1 - flip) * 40}px)` }}>
         <Casa tam={150} color={TEXTO} detalle="dolar" />
         <div style={{ background: NEGRO, color: AMARILLO, fontWeight: 900, fontStyle: "italic", fontSize: 58, padding: "4px 16px 0" }}>FIX & FLIP</div>
         <Contador valor={k} sufijo="" tam={92} color={TEXTO} />
         <div style={{ fontWeight: 700, fontSize: 34, color: "rgba(28,26,23,0.65)" }}>por casa</div>
       </div>
       {/* Barras: la renta casi no se ve al lado del flip */}
-      <div style={{ position: "absolute", left: 120, width: 840, top: BASE, height: 4, background: "rgba(28,26,23,0.25)" }} />
-      <div style={{ position: "absolute", left: 250, width: 140, top: BASE - 10 * Math.min(1, quinientos / 500), height: 10 * Math.min(1, quinientos / 500), background: TEXTO, opacity: renta }} />
-      <div style={{ position: "absolute", left: 690, width: 140, top: BASE - barraFlip, height: barraFlip, background: NEGRO, opacity: flip }}>
-        <div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 14, background: AMARILLO }} />
-      </div>
+      <div style={{ position: "absolute", left: 110, width: 860, top: BASE, height: 4, background: "rgba(255,255,255,0.6)", opacity: renta }} />
+      <div style={{ position: "absolute", left: 245, width: 140, top: BASE - 10 * Math.min(1, quinientos / 500), height: 10 * Math.min(1, quinientos / 500), background: CREMA, opacity: renta }} />
+      <div style={{ position: "absolute", left: 695, width: 140, top: BASE - barraFlip * 0.8, height: barraFlip * 0.8, background: AMARILLO, opacity: flip,
+        boxShadow: "0 0 30px rgba(252,243,4,0.35)" }} />
       {/* Sello en "una sola transacción" */}
       {f >= c(30.3) && (
-        <div style={{ position: "absolute", top: 1480, width: 1080, display: "flex", justifyContent: "center" }}>
-          <div style={{ background: AMARILLO, color: NEGRO, fontWeight: 900, fontStyle: "italic", fontSize: 54, padding: "8px 22px 2px",
-            transform: `scale(${sello}) rotate(-4deg)`, boxShadow: "0 14px 30px rgba(0,0,0,0.25)" }}>EN UNA SOLA VENTA</div>
+        <div style={{ position: "absolute", top: 1450, width: 1080, display: "flex", justifyContent: "center" }}>
+          <div style={{ background: NEGRO, color: AMARILLO, fontWeight: 900, fontStyle: "italic", fontSize: 58, padding: "8px 22px 2px",
+            transform: `scale(${sello}) rotate(-4deg)`, boxShadow: "0 14px 30px rgba(0,0,0,0.35)" }}>EN UNA SOLA VENTA</div>
         </div>
       )}
     </AbsoluteFill>
