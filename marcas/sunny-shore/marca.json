@@ -1,6 +1,6 @@
 {
   "nombre": "Sunny Shore Solutions",
-  "usuario": "(pendiente: Instagram de Sunny Shore)",
+  "usuario": "@sunnyshoresolutions",
   "sensacion": [
     "confiable",
     "cercano",
@@ -59,13 +59,13 @@
     "solo_sube": 60,
     "bajo_barbilla": 215,
     "y_max": 1585,
-    "caja_auto": true,
-    "caja_siempre": true,
+    "caja_auto": false,
+    "caja_siempre": false,
     "caja_radio": 0
   },
   "zona_abajo": {
     "ancho": 640,
     "ancho_l2": 620
   },
-  "nota": "Cliente de Sebastián (bienes raíces, fix & flip, Florida). Mismo estilo que Sebastián por pedido suyo: Inter, amarillo #FCF304 en caja negra recta. Logos e imágenes del cliente NO van a git (reels/prueba-02/marca y motion/public/sunny)."
+  "nota": "Cliente de Sebastián (bienes raíces, fix & flip, Florida). Mismo estilo que Sebastián por pedido suyo: Inter, amarillo #FCF304; palabras clave SIN caja negra (corrección de Sebas en prueba-02). Logos e imágenes del cliente NO van a git (reels/prueba-02/marca y motion/public/sunny)."
 }

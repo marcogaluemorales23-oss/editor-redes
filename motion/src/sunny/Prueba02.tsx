@@ -1,7 +1,8 @@
 import React from "react";
 import { AbsoluteFill, Easing, Img, interpolate, spring, staticFile, useCurrentFrame } from "remotion";
 
-// Prueba-02 (Sunny Shore, cliente de Sebas): mismo estilo que Sebas (Inter, amarillo #FCF304 en caja negra recta).
+// Prueba-02 (Sunny Shore, cliente de Sebas): mismo estilo que Sebas (Inter, amarillo #FCF304), pero las palabras clave
+// SIN caja negra (corrección de Sebas): amarillas con resplandor oscuro difuso para que se lean sobre el cielo.
 // Dos capas:
 //  - "detras": títulos GRANDES arriba, DETRÁS de las personas (debajo del recorte persona.mov de nucleo/silueta.py).
 //    Son la palabra fuerte de la frase; el resto de la frase va en los subtítulos fijos del pecho (subtitulos.py).
@@ -13,6 +14,8 @@ const NEGRO = "#111111";
 const TEXTO = "#1c1a17";
 const CREMA = "#F4F0E8";
 const c = (s: number) => Math.round(s * FPS);
+// Resplandor oscuro difuso (nada de contorno pegado): deja leer el amarillo sobre cielo y árboles claros.
+const RESPLANDOR = "0 0 46px rgba(0,0,0,0.55), 0 0 18px rgba(0,0,0,0.35), 0 6px 14px rgba(0,0,0,0.3)";
 const CURVA = Easing.bezier(0.22, 1, 0.36, 1);
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
@@ -24,7 +27,7 @@ const useVida = (desde: number, hasta: number, entra = 0.28, sale = 0.2) => {
   return { f, p, q, visible: f >= c(desde) && f < c(hasta) };
 };
 
-/** Palabra fuerte arriba, detrás de las personas: amarilla Inter Black Italic en caja negra recta (regla de Sebas). */
+/** Palabra fuerte arriba, detrás de las personas: amarilla Inter Black Italic, sin caja (corrección de Sebas). */
 const Arriba: React.FC<{ desde: number; hasta: number; texto: string; y?: number; max?: number }> = ({ desde, hasta, texto, y = 470, max = 230 }) => {
   const { p, q, visible } = useVida(desde, hasta);
   if (!visible) return null;
@@ -34,8 +37,8 @@ const Arriba: React.FC<{ desde: number; hasta: number; texto: string; y?: number
     <div style={{ position: "absolute", left: 0, width: 1080, top: y, display: "flex", justifyContent: "center",
       transform: `translateY(-50%) translateY(${(1 - p) * 40 - q * 20}px) scale(${0.9 + 0.1 * p})`,
       opacity: Math.min(1, p * 1.5) * (1 - q), filter: `blur(${(1 - Math.min(1, p)) * 10 + q * 12}px)` }}>
-      <div style={{ background: NEGRO, padding: `${tam * 0.06}px ${tam * 0.16}px ${tam * 0.02}px`, fontFamily: "Inter", fontWeight: 900,
-        fontStyle: "italic", fontSize: tam, lineHeight: 1, color: AMARILLO, letterSpacing: -tam * 0.03, whiteSpace: "nowrap" }}>{texto}</div>
+      <div style={{ padding: `0 ${tam * 0.06}px`, fontFamily: "Inter", fontWeight: 900, fontStyle: "italic", fontSize: tam, lineHeight: 1,
+        color: AMARILLO, letterSpacing: -tam * 0.03, whiteSpace: "nowrap", textShadow: RESPLANDOR }}>{texto}</div>
     </div>
   );
 };
@@ -51,8 +54,8 @@ const NoNoNo: React.FC = () => {
       {tiempos.map((t, i) => {
         const s = spring({ frame: f - c(t), fps: FPS, config: { damping: 10, stiffness: 260 } });
         return f >= c(t) ? (
-          <div key={i} style={{ background: NEGRO, padding: "10px 26px 2px", fontFamily: "Inter", fontWeight: 900, fontStyle: "italic", fontSize: 200,
-            lineHeight: 1, color: AMARILLO, transform: `scale(${s}) rotate(${(i - 1) * 4}deg)` }}>NO</div>
+          <div key={i} style={{ padding: "0 10px", fontFamily: "Inter", fontWeight: 900, fontStyle: "italic", fontSize: 200,
+            lineHeight: 1, color: AMARILLO, textShadow: RESPLANDOR, transform: `scale(${s}) rotate(${(i - 1) * 4}deg)` }}>NO</div>
         ) : null;
       })}
     </div>
@@ -99,9 +102,10 @@ const Comparativa: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta 
   if (f < c(desde) || f >= c(hasta)) return null;
   const sale = interpolate(f, [c(hasta - 0.25), c(hasta)], [0, 1], { ...clamp, easing: CURVA });
   const entra = (t: number) => interpolate(f, [c(t), c(t + 0.35)], [0, 1], { ...clamp, easing: Easing.bezier(0.34, 1.3, 0.64, 1) });
-  // Renta: aparece en "renta" y su número en "500 ... al mes".
+  // Renta: aparece en "renta"; "500, mil dólares de cash flow al mes" = $500 a $1.000 de ganancia (Sebas).
   const renta = entra(desde);
-  const quinientos = interpolate(f, [c(24.62), c(25.3)], [0, 500], { ...clamp, easing: CURVA });
+  const quinientos = f < c(24.94) ? interpolate(f, [c(24.62), c(24.88)], [0, 500], { ...clamp, easing: CURVA })
+    : interpolate(f, [c(24.94), c(25.3)], [500, 1000], { ...clamp, easing: CURVA });
   // Fix & flip: aparece en "nosotros podemos hacer"; el contador salta 60K -> 70K -> 100K con la voz.
   const flip = entra(26.64);
   const k = f < c(27.92) ? 0 : f < c(28.6) ? interpolate(f, [c(27.92), c(28.25)], [0, 60000], { ...clamp, easing: CURVA })
@@ -122,7 +126,7 @@ const Comparativa: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta 
         <Casa tam={150} color={TEXTO} detalle="llave" />
         <div style={{ fontWeight: 900, fontStyle: "italic", fontSize: 66, color: TEXTO }}>RENTA</div>
         <Contador valor={quinientos} sufijo="" tam={92} color={TEXTO} />
-        <div style={{ fontWeight: 700, fontSize: 34, color: "rgba(28,26,23,0.65)" }}>al mes</div>
+        <div style={{ fontWeight: 700, fontSize: 34, color: "rgba(28,26,23,0.65)" }}>ganancia al mes</div>
       </div>
       {/* Tarjeta fix & flip */}
       <div style={{ ...tarjeta, left: 560, opacity: flip, transform: `translateY(${(1 - flip) * 40}px)` }}>
@@ -133,7 +137,7 @@ const Comparativa: React.FC<{ desde: number; hasta: number }> = ({ desde, hasta 
       </div>
       {/* Barras: la renta casi no se ve al lado del flip */}
       <div style={{ position: "absolute", left: 110, width: 860, top: BASE, height: 4, background: "rgba(255,255,255,0.6)", opacity: renta }} />
-      <div style={{ position: "absolute", left: 245, width: 140, top: BASE - 10 * Math.min(1, quinientos / 500), height: 10 * Math.min(1, quinientos / 500), background: CREMA, opacity: renta }} />
+      <div style={{ position: "absolute", left: 245, width: 140, top: BASE - 10 * Math.min(1, quinientos / 1000), height: 10 * Math.min(1, quinientos / 1000), background: CREMA, opacity: renta }} />
       <div style={{ position: "absolute", left: 695, width: 140, top: BASE - barraFlip * 0.8, height: barraFlip * 0.8, background: AMARILLO, opacity: flip,
         boxShadow: "0 0 30px rgba(252,243,4,0.35)" }} />
       {/* Sello en "una sola transacción" */}
