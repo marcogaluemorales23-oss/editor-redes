@@ -1,0 +1,71 @@
+{
+  "nombre": "Sunny Shore Solutions",
+  "usuario": "(pendiente: Instagram de Sunny Shore)",
+  "sensacion": [
+    "confiable",
+    "cercano",
+    "ambicioso"
+  ],
+  "colores": {
+    "acento": "#FCF304",
+    "texto": "#FFFFFF",
+    "sombra": "difusa y suave (resplandor oscuro, sin contorno)"
+  },
+  "fuentes": {
+    "subtitulos": {
+      "familia": "Inter",
+      "archivo": "fuentes/Inter-Bold.ttf",
+      "peso": 700,
+      "nota": "apoyo en Inter Bold blanco"
+    },
+    "titulos": {
+      "familia": "Inter",
+      "archivo": "fuentes/Inter-BlackItalic.ttf"
+    },
+    "palabras_clave": {
+      "familia": "Inter",
+      "archivo": "fuentes/Inter-BlackItalic.ttf",
+      "peso": 900,
+      "italica": true,
+      "mayusculas": true,
+      "color": "acento",
+      "nota": "palabra clave enorme en MAYÚSCULA itálica amarilla, apoyo pequeño blanco encima (referencia Pixel 11 Pro)"
+    }
+  },
+  "sonido": {
+    "efectos": "whoosh, pop en listas, ding/dinero en cifras",
+    "musica": "tensión en el gancho y ritmo después; avisar riesgo de derechos si es comercial"
+  },
+  "subtitulos": {
+    "modo": "compuesto",
+    "l1_px": 70,
+    "solo_px": 82,
+    "l2_px": 150,
+    "tracking": -0.03,
+    "interlinea_clave": 0.88,
+    "aire_apoyo": -6,
+    "corto": 0.7,
+    "ancho_clave": 660,
+    "ancho_apoyo": 740,
+    "sombra_opacidad": 0.85,
+    "sombra_desenfoque": 18,
+    "sombra_distancia": 2,
+    "sombra_tamano": 0,
+    "entrada_ms": 160,
+    "salida_ms": 120,
+    "deslizar_px": 40,
+    "nota": "máximo 3 palabras por línea; la clave siempre en UNA línea (se achica si no cabe, nunca se parte)",
+    "ancho_total": 720,
+    "solo_sube": 60,
+    "bajo_barbilla": 215,
+    "y_max": 1585,
+    "caja_auto": true,
+    "caja_siempre": true,
+    "caja_radio": 0
+  },
+  "zona_abajo": {
+    "ancho": 640,
+    "ancho_l2": 620
+  },
+  "nota": "Cliente de Sebastián (bienes raíces, fix & flip, Florida). Mismo estilo que Sebastián por pedido suyo: Inter, amarillo #FCF304 en caja negra recta. Logos e imágenes del cliente NO van a git (reels/prueba-02/marca y motion/public/sunny)."
+}

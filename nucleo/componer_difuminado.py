@@ -84,22 +84,25 @@ def main():
     ]
     actual, k = "[c0]", 1
     claro = c.get("tema", "oscuro") == "claro"
+    # El tinte se genera a los mismos fps de la base (60 en prueba-01, 23,976 en prueba-02).
+    fps = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=r_frame_rate",
+                          "-of", "csv=p=0", str(t / a.base)], capture_output=True, text=True, check=True).stdout.strip()
     # Tema claro (el que eligió Sebas, como vd2): el desenfoque se lava hacia crema. Oscuro: vidrio ahumado.
     # En blend la opacidad es de la PRIMERA entrada (la de arriba): la crema va primero, si no se lava al revés.
-    tinte_arriba = ("[{e}]gblur=sigma=26[{e}b];color=c=0xF4F0E8:s=1080x1920:r=60[{e}c];"
+    tinte_arriba = ("[{e}]gblur=sigma=26[{e}b];color=c=0xF4F0E8:s=1080x1920:r={fps}[{e}c];"
                     "[{e}c][{e}b]blend=all_mode=normal:all_opacity=0.70:shortest=1,format=rgba") if claro else \
                    "[{e}]gblur=sigma=26,colorchannelmixer=rr=0.42:gg=0.42:bb=0.45,format=rgba"
-    tinte_pantalla = ("[{e}]gblur=sigma=40[{e}b];color=c=0xF4F0E8:s=1080x1920:r=60[{e}c];"
+    tinte_pantalla = ("[{e}]gblur=sigma=40[{e}b];color=c=0xF4F0E8:s=1080x1920:r={fps}[{e}c];"
                       "[{e}c][{e}b]blend=all_mode=normal:all_opacity=0.88:shortest=1,format=rgba") if claro else \
                      "[{e}]gblur=sigma=40,colorchannelmixer=rr=0.22:gg=0.22:bb=0.24,format=rgba"
     for i, (a0, b0) in enumerate(arriba):
-        g += [tinte_arriba.format(e=f"c{k}") + f"[bz{i}]",
+        g += [tinte_arriba.format(e=f"c{k}", fps=fps) + f"[bz{i}]",
               f"[bz{i}][mz{i}]alphamerge,fade=t=in:st={a0:.3f}:d={f}:alpha=1,"
               f"fade=t=out:st={b0 - f:.3f}:d={f}:alpha=1[za{i}]",
               f"{actual}[za{i}]overlay=0:0[ca{i}]"]
         actual, k = f"[ca{i}]", k + 1
     for j, (a0, b0) in enumerate(pantallas):
-        g += [tinte_pantalla.format(e=f"c{k}") + f",fade=t=in:st={a0:.3f}:d={f}:alpha=1,"
+        g += [tinte_pantalla.format(e=f"c{k}", fps=fps) + f",fade=t=in:st={a0:.3f}:d={f}:alpha=1,"
               f"fade=t=out:st={b0 - f:.3f}:d={f}:alpha=1[zp{j}]",
               f"{actual}[zp{j}]overlay=0:0[cp{j}]"]
         actual, k = f"[cp{j}]", k + 1
