@@ -5,6 +5,7 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 ## Flujo (7 pasos, no saltarse ninguno)
 
 1. **Marca**: usar `marcas/<marca>/marca.json` y `marcas/<marca>/estilo.md` en todo.
+   Formato dynamic: partir SIEMPRE de `marcas/sebastian/formato-dynamic.md` (estilo de Sebas, aprobado por cliente).
 2. **Guion**: si Sebastián trae guion, armar el guion técnico (filas de 3–6 s, nada quieto más de 4 s).
 3. **Grabación**: la hace Sebastián siguiendo `CHECKLIST-GRABACION.md`.
 4. **Transcripción e inventario**: `nucleo/sondear.py` + `nucleo/transcribir.py`. Inventario: qué clip es cara y cuál pantalla, frases repetidas o cortadas, mejor toma de cada frase (la última buena, o la que termina en "buena"), y si se ve algún dato privado.
