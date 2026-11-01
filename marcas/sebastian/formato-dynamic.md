@@ -73,6 +73,17 @@ una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni r
   whoosh ×1 (logo), riser ×1 (gancho); probables: zoom in en cada b-roll de la lista y en "FLIP".
 - Referencia de estilo sonoro: Víctor Era (pendiente: analizar videos suyos con nucleo/escuchar.py).
 
+## 3b. Correcciones de Sebas en prueba-02 v2 (aprobado el storyboard)
+
+- **Animación suave y fluida, nunca brusca**: textos entran en ~0,3 s (7 cuadros a 24 fps) con frenado suave,
+  desplazamiento corto (~45 px) y desenfoque moderado; salen en ~0,25 s. En los gráficos, nada de rebotes ni
+  sacudones: pulsos de escala ≤ 5 %, resortes amortiguados. Lo que ya está en pantalla no se corre cuando entra
+  un piso nuevo (cada piso reserva su lugar desde el principio).
+- **Efectos de sonido suaves**: la voz siempre manda; nadie debe tener que bajar el volumen para oírla. Cada efecto
+  queda al menos ~5 dB bajo la voz hablando (se mide, no se adivina). Golpes (impacto) mucho más abajo
+  (~-21 dB), dinero y whoosh ~-16 dB, transición ~-14,5 dB, ding/pop/zoom ~-12/-14 dB.
+- **Música**: ~17–18 LU bajo la voz mientras hablan y ~10 LU en el montaje del gráfico.
+
 ## 4. Llamada a la acción
 
 "COMENTA" → "COMENTA LA PALABRA" (palabra por palabra, negro, mayúsculas, Bold, arriba) y debajo **"FLIP"** entre

@@ -24,8 +24,9 @@ export const COLORES = {
 const TAM = { s: 50, m: 68, l: 96, xl: 140 };
 const PESO = { s: 500, m: 600, l: 700, xl: 700 };
 export const RESPLANDOR = "0 0 44px rgba(0,0,0,0.5), 0 0 16px rgba(0,0,0,0.32), 0 4px 12px rgba(0,0,0,0.28)";
-const ENTRA = 4; // cuadros
-const SALE = 4;
+// Suave y fluido (Sebas: "animado, pero no tan brusco, más suavecito"): ~0,3 s de entrada, ~0,25 s de salida.
+const ENTRA = 7; // cuadros
+const SALE = 6;
 
 // Centro del bloque (zona centro): debajo de las barbillas en las tomas de Sunny Shore, sobre el pecho.
 const ZONAS = { arriba: { top: 370 }, centro: { centro: 1000 }, cta: { top: 285 } };
@@ -56,12 +57,14 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number }> =
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const c = (s: number) => Math.round(s * fps);
-  if (f < c(p.t)) return null;
+  // Antes de su palabra el piso ya ocupa su lugar (transparente): así lo que ya está no se corre cuando entra.
   const e = interpolate(f, [c(p.t), c(p.t) + ENTRA], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const facil = 1 - Math.pow(1 - e, 3);
-  const mancha = (1 - facil) * 26; // desenfoque horizontal de la entrada
+  const mancha = (1 - facil) * 16; // desenfoque horizontal de la entrada
   const palabras = p.texto.split(" ");
-  const visibles = p.progresivo && p.tiempos ? palabras.filter((_, k) => f >= c(p.tiempos![Math.min(k, p.tiempos!.length - 1)])).length : palabras.length;
+  // "progresivo": cada palabra aparece (con fundido corto) cuando se dice; las que faltan guardan su lugar.
+  const alfa = (k: number) => !p.progresivo || !p.tiempos ? 1
+    : interpolate(f, [c(p.tiempos[Math.min(k, p.tiempos.length - 1)]), c(p.tiempos[Math.min(k, p.tiempos.length - 1)]) + 4], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const color = COLORES[p.color ?? "blanco"];
   const oscuro = p.color === "negro";
   return (
@@ -76,10 +79,10 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number }> =
         fontWeight: p.tam === "xl" && p.it ? 900 : PESO[p.tam], fontStyle: p.it ? "italic" : "normal", color,
         letterSpacing: -px * 0.025, textShadow: p.caja ? "none" : oscuro ? "0 0 30px rgba(255,255,255,0.55)" : RESPLANDOR,
         background: p.caja ? "rgba(52,52,52,0.92)" : undefined, padding: p.caja ? `${px * 0.1}px ${px * 0.22}px ${px * 0.02}px` : undefined,
-        transform: `translateX(${(1 - facil) * -80}px)`, opacity: Math.min(1, e * 1.6) * (1 - salida),
-        filter: mancha > 0.05 || salida > 0 ? `url(#${id}) blur(${salida * 6}px)` : undefined,
+        transform: `translateX(${(1 - facil) * -45}px)`, opacity: Math.min(1, e * 1.4) * (1 - salida),
+        filter: mancha > 0.05 || salida > 0 ? `url(#${id}) blur(${salida * 5}px)` : undefined,
       }}>
-        {palabras.slice(0, visibles).join(" ")}
+        {palabras.map((w, k) => <span key={k} style={{ opacity: alfa(k) }}>{w}{k < palabras.length - 1 ? " " : ""}</span>)}
       </span>
     </>
   );

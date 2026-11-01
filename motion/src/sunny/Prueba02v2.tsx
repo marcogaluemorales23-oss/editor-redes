@@ -14,7 +14,7 @@ const SALE = Easing.bezier(0.22, 1, 0.36, 1);
 const { amarillo: AMARILLO, rojo: ROJO, naranja: NARANJA, lima: LIMA, verde: VERDE } = COLORES;
 
 /** 0..1 de entrada y salida (borrosa), para piezas del gráfico. */
-const vida = (f: number, desde: number, hasta: number, entra = 0.18, sale = 0.18) => ({
+const vida = (f: number, desde: number, hasta: number, entra = 0.3, sale = 0.25) => ({
   p: interpolate(f, [c(desde), c(desde + entra)], [0, 1], { ...clamp, easing: SALE }),
   q: interpolate(f, [c(hasta - sale), c(hasta)], [0, 1], clamp),
   visible: f >= c(desde) && f < c(hasta),
@@ -25,8 +25,8 @@ const Entra: React.FC<{ f: number; desde: number; hasta: number; children: React
   const { p, q, visible } = vida(f, desde, hasta);
   if (!visible) return null;
   return (
-    <div style={{ transform: `translateX(${(1 - p) * -80}px) translateY(${-q * 30}px)`, opacity: Math.min(1, p * 1.6) * (1 - q),
-      filter: `blur(${(1 - p) * 8 + q * 10}px)`, ...style }}>{children}</div>
+    <div style={{ transform: `translateX(${(1 - p) * -45}px) translateY(${-q * 18}px)`, opacity: Math.min(1, p * 1.4) * (1 - q),
+      filter: `blur(${(1 - p) * 6 + q * 8}px)`, ...style }}>{children}</div>
   );
 };
 
@@ -44,10 +44,10 @@ const casa = (f: number) => {
 /** Contorno que se dibuja alrededor de la casa + brillo que la barre. */
 const ContornoCasa: React.FC<{ f: number; color: string }> = ({ f, color }) => {
   const k = casa(f);
-  const dibujo = interpolate(f, [c(23.7), c(24.3)], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
+  const dibujo = interpolate(f, [c(23.6), c(24.5)], [0, 1], { ...clamp, easing: Easing.inOut(Easing.cubic) });
   const barrido = interpolate(f, [c(24.2), c(24.9)], [-0.3, 1.3], clamp);
   const largo = 2 * (k.w + k.h);
-  const vendida = spring({ frame: f - c(30.62), fps: FPS, config: { damping: 9, stiffness: 220 } });
+  const vendida = spring({ frame: f - c(30.62), fps: FPS, config: { damping: 18, stiffness: 140 } });
   const latido = f >= c(30.62) ? 1 + 0.04 * Math.sin((f - c(30.62)) / 3) * Math.exp(-(f - c(30.62)) / 14) : 1;
   return (
     <div style={{ position: "absolute", left: k.x - k.w / 2, top: k.y - k.h / 2, width: k.w, height: k.h, transform: `rotate(${k.giro}deg) scale(${latido})` }}>
@@ -62,7 +62,7 @@ const ContornoCasa: React.FC<{ f: number; color: string }> = ({ f, color }) => {
       </div>
       {/* Etiqueta pegada al contorno */}
       <div style={{ position: "absolute", left: 40, top: -38, ...texto(44, "#111", 900, true), textShadow: "none", background: color,
-        padding: "8px 22px 4px", transform: `scale(${interpolate(f, [c(23.9), c(24.15)], [0, 1], { ...clamp, easing: Easing.back(2) })})`, transformOrigin: "left center" }}>
+        padding: "8px 22px 4px", transform: `scale(${interpolate(f, [c(23.9), c(24.25)], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) })})`, transformOrigin: "left center" }}>
         {f < c(26.64) ? "RENTA" : "FIX & FLIP"}
       </div>
       {f >= c(30.62) && (
@@ -111,7 +111,7 @@ const Grafico: React.FC = () => {
     : f < c(29.34) ? interpolate(f, [c(28.6), c(28.82)], [60, 70], { ...clamp, easing: SALE })
     : interpolate(f, [c(29.34), c(29.75)], [70, 100], { ...clamp, easing: SALE });
   const colorFlip = interpolateColors(k, [0, 60, 100], [LIMA, LIMA, VERDE]);
-  const golpe = (t: number) => (f >= c(t) ? 1 + 0.12 * Math.exp(-(f - c(t)) / 3) : 1);
+  const golpe = (t: number) => (f >= c(t) ? 1 + 0.05 * Math.exp(-(f - c(t)) / 5) : 1); // pulso leve, sin sacudón
   const colorContorno = f < c(26.64) ? (renta > 0 ? colorRenta : AMARILLO) : f < c(30.62) ? colorFlip : VERDE;
   return (
     <AbsoluteFill style={{ opacity: 1 - sale, filter: `blur(${sale * 12}px)` }}>
