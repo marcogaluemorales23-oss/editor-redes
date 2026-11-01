@@ -44,8 +44,11 @@ inventario (quién habla en cada toma, dónde están las caras, datos privados p
 ## 6. Música de fondo
 - De la carpeta de música de Sebas (Drive, carpeta "musica"). Empieza desde el principio del video o en un
   momento perfecto (p. ej. cuando arranca la explicación).
-- **Entra suave: el volumen va apareciendo súper despacio** (fundido de entrada largo, 3–4 s: `"entrada"` en
-  `"musicas"` de `trabajo/transiciones.json`).
+- **Aparición progresiva**: la música NUNCA arranca de golpe (de fábrica muchas pistas empiezan durísimo). Sube desde
+  silencio hasta su volumen normal en 3–4 s (por defecto 3,5 s en la primera música de `transiciones.json`;
+  `"entrada"` lo cambia). Después se queda en su nivel de siempre.
+- **Música de stock para tensión**: cuerdas en staccato que repiten ("ta-ta-ta-ta tan"), pulsos de cine, suspense.
+  Por ahora entra por la carpeta "musica" del Drive (no hay acceso automático a bibliotecas de música).
 - Debajo de la voz: ~17–18 LU bajo la voz al hablar, ~10 LU en montajes de b-roll o gráficos.
 
 ## 7. Imágenes y b-rolls

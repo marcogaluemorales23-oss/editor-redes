@@ -106,12 +106,14 @@ def main():
     musicas = conf.get("musicas") or ([{**conf["musica"], "desde": 0, "hasta": total}] if "musica" in conf else [])
     if musicas:
         partes = []
-        for m in musicas:
+        for k, m in enumerate(musicas):
             desde, hasta = m.get("desde", 0), min(m.get("hasta", total), total)
             inicio = m.get("inicio", 0)
             if "golpe_en_pista" in m:
                 inicio = m["golpe_en_pista"] - (m["golpe_en_video"] - desde)
-            ent, sal = m.get("entrada", 0.6), m.get("salida", 1.5)
+            # La primera música entra con una aparición progresiva (Sebas: que no arranque de golpe, "súper despacio");
+            # los tramos que siguen ya vienen sonando y pasan con un fundido corto.
+            ent, sal = m.get("entrada", 3.5 if k == 0 else 0.6), m.get("salida", 1.5)
             entradas += ["-ss", f"{inicio:.3f}", "-t", f"{hasta - desde:.3f}", "-i", str(reel / m["archivo"])]
             ms = round(desde * 1000)
             filtros.append(f"[{n}:a]aresample=48000,volume={m.get('db', -20)}dB,afade=t=in:d={ent},"
