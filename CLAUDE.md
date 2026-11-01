@@ -6,6 +6,7 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 
 1. **Marca**: usar `marcas/<marca>/marca.json` y `marcas/<marca>/estilo.md` en todo.
    Formato dynamic: partir SIEMPRE de `marcas/sebastian/formato-dynamic.md` (estilo de Sebas, aprobado por cliente).
+   Paso a paso con los comandos: `GUIA-PASO-A-PASO.md`. B-roll de stock: `nucleo/stock.py` (Pexels/Pixabay).
 2. **Guion**: si Sebastián trae guion, armar el guion técnico (filas de 3–6 s, nada quieto más de 4 s).
 3. **Grabación**: la hace Sebastián siguiendo `CHECKLIST-GRABACION.md`.
 4. **Transcripción e inventario**: `nucleo/sondear.py` + `nucleo/transcribir.py`. Inventario: qué clip es cara y cuál pantalla, frases repetidas o cortadas, mejor toma de cada frase (la última buena, o la que termina en "buena"), y si se ve algún dato privado.
@@ -42,11 +43,17 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 5. **Material de terceros**: no usar clips con marca de agua de TikTok/Instagram ni anuncios ajenos.
 6. **Fps de entrega = fps de grabación.** Nada de interpolar a 60 fps: Sebastián lo probó y a 24 fps se ve más
    natural y profesional.
-7. **Transición de Sebastián**: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
+7. **Transición por defecto: FLASH blanco** (`nucleo/flash.py`, la de la edición de Sebas para Sunny Shore) en los
+   cambios de toma, sobre todo en videos de clientes. La de **película quemada** queda guardada y se usa SOLO cuando
+   Sebas lo pida. Detalle de la quemada: destello corto de película quemada (overlay 0,0–0,6 s, pico en 0,3, modo Trama
    mezclado en RGB) + sonido "transicion" que **arranca 0,3 s antes del corte** (medido en su edición).
    En video-01 va en cada cambio de clip bruto (`"en_cada_clip"`). **Pero no es regla fija**: muchos videos
    (sobre todo los minimalistas) van solo con cortes simples. La transición se piensa según el momento del
    video; si no hay un cambio de idea o de energía que la justifique, corte simple. Preguntar si hay duda.
+
+18. **Zooms de tensión mientras hablan**: en todo el video, no solo en el gancho. Empuje lento en las frases que
+    suben y golpe de zoom (+8–12 %) en la palabra importante, anclado en los ojos y sacado del crudo 4K
+    (`nucleo/zoom_crudo.py`). Detalle en `marcas/sebastian/formato-dynamic.md`.
 
 ### Formato Reel de negocio
 17. **Recorte para gráficos detrás** (`nucleo/silueta.py`, Robust Video Matting): persona, muebles pegados a ella

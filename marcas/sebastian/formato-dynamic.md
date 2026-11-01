@@ -42,11 +42,22 @@ una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni r
 ## 2. Imagen y cortes
 
 - 18 planos, ~21 cortes por minuto. Se respeta el montaje del crudo y se le suman b-rolls.
-- **Transición en cada cambio de toma de cámara** (2,2 / 7,7 / 11,0 / 31,2 s): destello blanco de luz
-  (quema a blanco ~4 cuadros antes y después del corte) + sonido "transicion".
+- **Transición FLASH en cada cambio de toma de cámara** (2,2 / 7,7 / 11,0 / 31,2 s): destello blanco de luz
+  (quema a blanco ~5 cuadros antes y después del corte) + sonido "transicion". Herramienta: `nucleo/flash.py`
+  (`--cortes` la pone sola en cada cambio de toma). **Es la transición por defecto, sobre todo en videos de
+  clientes** (Sebas: "esa sí me gustaría aplicarla más que todo seguido"). La de película quemada solo cuando
+  Sebas lo diga.
 - **Entrada a la secuencia de b-rolls**: la toma nueva sube desde abajo empujando a la anterior (~7 cuadros), y el
   texto ("Fix and Flip") queda quieto encima.
-- **Zoom suave** que se va cerrando en las frases fuertes ("Sin gastar ni un $1").
+- **Zooms de tensión mientras hablan (regla de Sebas, lo que le faltó a prueba-02 v2)**: en TODO el video, no solo
+  en el gancho. Cada toma de alguien hablando lleva movimiento:
+  - **empuje lento** durante la frase que va subiendo (de 1,00 a 1,06–1,10 en 2–4 s, curva suave);
+  - **golpe de zoom** en la palabra importante (+8–12 % en ~0,15 s, se suelta despacio en ~0,35 s), uno por toma
+    como mucho, sobre la palabra amarilla o la cifra ("$1", "deja dinero?", "una casa", "rápido", "más fácil",
+    "dinero", "FLIP");
+  - alternar: empuje en una frase, golpe en la siguiente, a veces nada (para que el golpe se sienta);
+  - siempre anclado entre los ojos de quien habla y sacado del crudo 4K (`nucleo/zoom_crudo.py` + `trabajo/zoom.json`),
+    para que no pierda nitidez; sonido "zoom in" suave (~-14 dB) solo en los golpes.
 - **B-rolls que cuentan una historia, no que tapan**: palabra "propiedad" → la casa desde el piso; renta y cash flow →
   obra en demolición; "nosotros podemos hacer… 100.000 $" → baño terminado (el después); "en una sola transacción" →
   cartel FOR SALE; lista "adquisición / remodelación / salida" → dron, obra, FOR SALE (una toma por palabra).
@@ -79,9 +90,10 @@ una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni r
   desplazamiento corto (~45 px) y desenfoque moderado; salen en ~0,25 s. En los gráficos, nada de rebotes ni
   sacudones: pulsos de escala ≤ 5 %, resortes amortiguados. Lo que ya está en pantalla no se corre cuando entra
   un piso nuevo (cada piso reserva su lugar desde el principio).
-- **Efectos de sonido suaves**: la voz siempre manda; nadie debe tener que bajar el volumen para oírla. Cada efecto
-  queda al menos ~5 dB bajo la voz hablando (se mide, no se adivina). Golpes (impacto) mucho más abajo
-  (~-21 dB), dinero y whoosh ~-16 dB, transición ~-14,5 dB, ding/pop/zoom ~-12/-14 dB.
+- **Efectos de sonido suaves**: la voz siempre manda; nadie debe tener que bajar el volumen para oírla. Se mide con
+  `nucleo/medir_efectos.py` contra el nivel normal de la voz en todo el video. Lo aprobado por Sebas (prueba-02 v2):
+  efectos 1,5–3 dB bajo la voz y el golpe ("$1") parejo con ella, nunca por encima. Volúmenes de partida en
+  transiciones.json: impacto ~-21 dB, dinero y whoosh ~-16, riser ~-16,5, transición ~-14,5, ding/pop/zoom ~-12/-14.
 - **Música**: ~17–18 LU bajo la voz mientras hablan y ~10 LU en el montaje del gráfico.
 
 ## 4. Llamada a la acción
