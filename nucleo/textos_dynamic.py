@@ -13,7 +13,9 @@ Lee <reel>/trabajo/textos.json:
 - "texto": lo que se escribe (corregido: "$1", "deja dinero?"). Con "progresivo" aparece palabra por palabra
   (una palabra del texto por cada palabra dicha del rango).
 - "en_linea": va en la misma línea que el piso anterior (p. ej. "ni un" chico + "$1" gigante).
-- tam: s / m / l / xl. color: blanco, amarillo, rojo, naranja, lima, verde, negro. "it": itálica. "caja": caja gris.
+- tam: s / m / l / xl. color: blanco, amarillo, claude (naranja de Claude), rojo, naranja, lima, verde, negro.
+  Palabra clave según la acción: verde = dinero o ganar, rojo = perder dinero o error, el resto amarillo o claude.
+  "it": itálica. "caja": caja gris.
 El bloque se va cuando empieza el siguiente de la misma zona, o como mucho 0,8 s después de su última palabra.
 Escribe motion/src/generado/<nombre>.gen.ts (no va a git: es el texto del cliente).
 """

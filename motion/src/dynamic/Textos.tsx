@@ -9,7 +9,7 @@ export type Piso = {
   texto: string;
   t: number;
   tam: "s" | "m" | "l" | "xl";
-  color?: "blanco" | "amarillo" | "rojo" | "naranja" | "lima" | "verde" | "negro";
+  color?: "blanco" | "amarillo" | "claude" | "rojo" | "naranja" | "lima" | "verde" | "negro";
   it?: boolean;
   caja?: boolean;
   en_linea?: boolean;
@@ -18,8 +18,10 @@ export type Piso = {
 };
 export type Bloque = { zona: "arriba" | "centro" | "cta"; t0: number; t1: number; pisos: Piso[] };
 
+// Color de la palabra clave según la acción (flujo de Sebas): verde = dinero o ganar algo, rojo = perder dinero o
+// error, el resto amarillo o "claude" (el naranja de Claude).
 export const COLORES = {
-  blanco: "#FFFFFF", amarillo: "#FCF304", rojo: "#FF4D6D", naranja: "#FFA41B", lima: "#D4F53C", verde: "#2BFF5C", negro: "#141414",
+  blanco: "#FFFFFF", amarillo: "#FCF304", claude: "#D97757", rojo: "#FF4D6D", naranja: "#FFA41B", lima: "#D4F53C", verde: "#2BFF5C", negro: "#141414",
 };
 const TAM = { s: 50, m: 68, l: 96, xl: 140 };
 const PESO = { s: 500, m: 600, l: 700, xl: 700 };

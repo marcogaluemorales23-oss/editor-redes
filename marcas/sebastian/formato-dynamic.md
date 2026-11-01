@@ -31,6 +31,9 @@ y empieza el siguiente. Bloques de 0,3–1,5 s.
   verdoso, 100.000 $ verde fuerte (mucho). El color cuenta si la cifra es buena o mala.
 - Las cifras se escriben como número aunque se digan en palabras: "ni un solo dólar" → "ni un **$1**".
 
+**Color según la acción (flujo de Sebas)**: verde = dinero o ganar algo; rojo = perder dinero o un error; todo lo
+demás en amarillo o en el naranja de Claude (`"claude"`, #D97757).
+
 **Itálica** para lo que tiene velocidad o énfasis: "rápido", "dinero", "y hasta", "PODEMOS HACER", "la remodelación".
 **Sin caja** en ningún texto de voz; solo resplandor oscuro difuso.
 **Signos** (Sebas): las preguntas llevan SOLO el "?" del final, nunca el "¿" de apertura; el "$" va SIEMPRE.
