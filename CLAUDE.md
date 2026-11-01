@@ -55,6 +55,7 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
 
 ### Subtítulos
 8. **Sin signos**: ni puntos, ni comas, ni ¿?, ¡!, guiones ni barras. Las tildes sí se quedan.
+   En el formato dynamic: "?" solo al final de las preguntas (nunca "¿") y "$" siempre (ver formato-dynamic.md).
 9. **Como los de Sebastián** (Premiere, secuencia 1440x2560): blanca Playfair Regular 111, clave Bold 142
    amarilla, tracking -49, líneas casi pegadas. En 1080: 83 px y 106 px de em. Ojo: en ASS el tamaño no es el em
    (Playfair: x1,36), lo convierte `metricas()`. Copiar cómo parte las frases (ver video-01/trabajo/subtitulos.json):

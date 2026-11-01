@@ -11,6 +11,7 @@ const AMARILLO = "#FCF304";
 
 export const cargarFuentesSebastian = () =>
   Promise.all([
+    loadFont({ family: "Inter", url: staticFile("fuentes/Inter-Medium.ttf"), weight: "500" }),
     loadFont({ family: "Inter", url: staticFile("fuentes/Inter-SemiBold.ttf"), weight: "600" }),
     loadFont({ family: "Inter", url: staticFile("fuentes/Inter-Bold.ttf"), weight: "700" }),
     loadFont({ family: "Inter", url: staticFile("fuentes/Inter-BlackItalic.ttf"), weight: "900", style: "italic" }),

@@ -32,7 +32,9 @@ y empieza el siguiente. Bloques de 0,3–1,5 s.
 - Las cifras se escriben como número aunque se digan en palabras: "ni un solo dólar" → "ni un **$1**".
 
 **Itálica** para lo que tiene velocidad o énfasis: "rápido", "dinero", "y hasta", "PODEMOS HACER", "la remodelación".
-**Sin caja** en ningún texto de voz; solo resplandor oscuro difuso. Sí lleva signos de pregunta y "$".
+**Sin caja** en ningún texto de voz; solo resplandor oscuro difuso.
+**Signos** (Sebas): las preguntas llevan SOLO el "?" del final, nunca el "¿" de apertura; el "$" va SIEMPRE.
+Ningún otro signo (ni puntos, ni comas, ni ¡!). Esto reemplaza la regla 8 de CLAUDE.md en el formato dynamic.
 
 **Animación de los textos.** Entran deslizando de lado con mucho desenfoque de movimiento (~4 cuadros, se ve como
 una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni rebotar.
@@ -51,6 +53,10 @@ una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni r
 - **Logo** (versión a color, sin caja) aparece sobre el pecho cuando lo nombran y CRUZA el corte hacia la toma aérea
   del dron; se va con desenfoque.
 - No hay tarjetas, barras, íconos, comentarios falsos ni flechas: las cifras grandes de colores hacen ese trabajo.
+- **Motion graphics (pedido de Sebas)**: si no hay b-rolls que cuenten la historia, se puede usar un gráfico,
+  pero MUY animado, nunca seco: cámara que se mueve, contador que corre (como el 0 → 10.000 de prueba-01, que le
+  gustó), subrayado/barrido que dibuja la casa en la toma de dron, textos que se reubican y se apilan con ritmo.
+  Las tarjetas quietas con barras de la v1 de prueba-02 se veían "tan secas".
 
 ## 3. Sonido
 

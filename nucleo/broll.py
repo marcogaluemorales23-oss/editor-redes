@@ -7,6 +7,8 @@ Lee <reel>/trabajo/brolls.json:
 "desde"/"hasta" son índices de palabra en la línea de tiempo del corte, o "t0"/"t1" en segundos del video.
 "difuminar": [x, y, ancho, alto] (en el cuadro de 1080x1920) tapa un dato privado (número de casa, placa).
 "nitidez": false para clips en 4K (el enfoque suave es para b-rolls de baja resolución). El audio de la base no se toca.
+"entrada": "sube" -> la toma entra subiendo desde abajo y tapa a la anterior (en "entrada_s", 0,3 s por defecto),
+como la transición de Sebas al entrar a la secuencia de b-rolls de Sunny Shore.
 Escribe <reel>/trabajo/base_broll.mp4.
 """
 import argparse
@@ -40,7 +42,12 @@ def main():
             cadena += (f",split[o{k}][d{k}];[d{k}]crop={dw}:{dh}:{x}:{y},boxblur=8:2[db{k}];"
                        f"[o{k}][db{k}]overlay={x}:{y}")
         filtros.append(cadena + f",setpts=PTS-STARTPTS+{t0:.3f}/TB[b{k}]")
-        filtros.append(f"{previo}[b{k}]overlay=eof_action=pass:enable='between(t,{t0:.3f},{t1:.3f})'[v{k}]")
+        y = "0"
+        if b.get("entrada") == "sube":
+            d = b.get("entrada_s", 0.3)
+            y = f"'1920*pow(1-min(max((t-{t0:.3f})/{d},0),1),3)'"  # frena al llegar arriba
+        filtros.append(f"{previo}[b{k}]overlay=x=0:y={y}:eval=frame:eof_action=pass:"
+                       f"enable='between(t,{t0:.3f},{t1:.3f})'[v{k}]")
         previo = f"[v{k}]"
         print(f"b-roll {k}: {b['archivo']} de {t0:.2f}s a {t1:.2f}s")
     salida = trabajo / "base_broll.mp4"
