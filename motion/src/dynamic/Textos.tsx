@@ -26,6 +26,9 @@ export const COLORES = {
 const TAM = { s: 50, m: 68, l: 96, xl: 140 };
 const PESO = { s: 500, m: 600, l: 700, xl: 700 };
 export const RESPLANDOR = "0 0 44px rgba(0,0,0,0.5), 0 0 16px rgba(0,0,0,0.32), 0 4px 12px rgba(0,0,0,0.28)";
+// Para palabras de color sobre ropa o fondos del mismo tono (camisa vino tinto de Andy): halo oscuro más denso y
+// pegado, que separa la letra del fondo sin llegar a ser un contorno.
+export const RESPLANDOR_FUERTE = "0 0 10px rgba(0,0,0,0.85), 0 0 22px rgba(0,0,0,0.7), 0 0 48px rgba(0,0,0,0.55), 0 4px 10px rgba(0,0,0,0.5)";
 // Suave y fluido (Sebas: "animado, pero no tan brusco, más suavecito"): ~0,3 s de entrada, ~0,25 s de salida.
 const ENTRA = 7; // cuadros
 const SALE = 6;
@@ -55,7 +58,7 @@ const lineas = (b: Bloque) => {
   return ls;
 };
 
-const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number }> = ({ p, px, id, salida }) => {
+const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number; contraste?: boolean }> = ({ p, px, id, salida, contraste }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const c = (s: number) => Math.round(s * fps);
@@ -79,7 +82,8 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number }> =
       <span style={{
         display: "inline-block", fontFamily: "Inter", fontSize: px, lineHeight: 1, whiteSpace: "nowrap",
         fontWeight: p.tam === "xl" && p.it ? 900 : PESO[p.tam], fontStyle: p.it ? "italic" : "normal", color,
-        letterSpacing: -px * 0.025, textShadow: p.caja ? "none" : oscuro ? "0 0 30px rgba(255,255,255,0.55)" : RESPLANDOR,
+        letterSpacing: -px * 0.025, textShadow: p.caja ? "none" : oscuro ? "0 0 30px rgba(255,255,255,0.55)"
+          : contraste && p.color && p.color !== "blanco" ? RESPLANDOR_FUERTE : RESPLANDOR,
         background: p.caja ? "rgba(52,52,52,0.92)" : undefined, padding: p.caja ? `${px * 0.1}px ${px * 0.22}px ${px * 0.02}px` : undefined,
         transform: `translateX(${(1 - facil) * -45}px)`, opacity: Math.min(1, e * 1.4) * (1 - salida),
         filter: mancha > 0.05 || salida > 0 ? `url(#${id}) blur(${salida * 5}px)` : undefined,
@@ -90,7 +94,7 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number }> =
   );
 };
 
-const BloqueVista: React.FC<{ b: Bloque; n: number }> = ({ b, n }) => {
+const BloqueVista: React.FC<{ b: Bloque; n: number; contraste?: boolean }> = ({ b, n, contraste }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const c = (s: number) => Math.round(s * fps);
@@ -104,13 +108,14 @@ const BloqueVista: React.FC<{ b: Bloque; n: number }> = ({ b, n }) => {
     <div style={{ position: "absolute", left: 0, width: 1080, top, display: "flex", flexDirection: "column", alignItems: "center" }}>
       {ls.map((l, k) => (
         <div key={k} style={{ height: l.alto, display: "flex", alignItems: "baseline", justifyContent: "center", gap: 14 * l.escala }}>
-          {l.pisos.map(({ p, i }) => <PisoVista key={i} p={p} px={TAM[p.tam] * l.escala} id={`mb-${n}-${i}`} salida={salida} />)}
+          {l.pisos.map(({ p, i }) => <PisoVista key={i} p={p} px={TAM[p.tam] * l.escala} id={`mb-${n}-${i}`} salida={salida} contraste={contraste} />)}
         </div>
       ))}
     </div>
   );
 };
 
-export const Textos: React.FC<{ bloques: Bloque[] }> = ({ bloques }) => (
-  <>{bloques.map((b, n) => <BloqueVista key={n} b={b} n={n} />)}</>
+/** contraste: halo más fuerte en las palabras de color (cuando el fondo o la ropa es del mismo tono). */
+export const Textos: React.FC<{ bloques: Bloque[]; contraste?: boolean }> = ({ bloques, contraste }) => (
+  <>{bloques.map((b, n) => <BloqueVista key={n} b={b} n={n} contraste={contraste} />)}</>
 );

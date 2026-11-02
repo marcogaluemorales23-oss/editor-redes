@@ -194,7 +194,7 @@ const CapaFrente: React.FC<{ storyboard?: boolean }> = ({ storyboard }) => (
     <Lista desde={50.9} hasta={54.6} top={1150} items={[{ t: 51.06, texto: "Ideas" }, { t: 52.0, texto: "Scripts" },
       { t: 53.04, texto: "Grabación" }, { t: 54.04, texto: "Edición" }]} />
     <Marca desde={55.9} hasta={57.77} />
-    <Textos bloques={BLOQUES} />
+    <Textos bloques={BLOQUES} contraste />
   </AbsoluteFill>
 );
 
