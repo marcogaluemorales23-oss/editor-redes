@@ -99,6 +99,15 @@ una mancha de color que se asienta) y salen con desenfoque. Nada de escalar ni r
   transiciones.json: impacto ~-21 dB, dinero y whoosh ~-16, riser ~-16,5, transición ~-14,5, ding/pop/zoom ~-12/-14.
 - **Música**: ~17–18 LU bajo la voz mientras hablan y ~10 LU en el montaje del gráfico.
 
+## 3c. Correcciones de Sebas en el storyboard de Andy (VisualPRO)
+
+- El texto del pecho nunca a la altura de la cara: en tomas cerradas o cuando la persona se inclina, ese bloque baja
+  (altura por bloque, `"centro"` en textos.json).
+- Íconos y animaciones solo cuando la frase habla literalmente de eso.
+- Palabras negadas ("no tienes que ir **corriendo**"): animar la misma palabra (tachada y partida a la mitad),
+  sin b-roll encima del personaje.
+- Textos grandes DETRÁS de la persona cuando el fondo es liso y oscuro (estudio): "3 TIPS", "01/02/03".
+
 ## 4. Llamada a la acción
 
 "COMENTA" → "COMENTA LA PALABRA" (palabra por palabra, negro, mayúsculas, Bold, arriba) y debajo **"FLIP"** entre
