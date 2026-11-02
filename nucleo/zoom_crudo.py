@@ -53,13 +53,16 @@ def main():
     ancho, alto, fps_txt = int(info[0]), int(info[1]), info[2]
     n, d = (int(v) for v in fps_txt.split("/"))
     fps = n / d
-    lector = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(crudo), "-f", "rawvideo", "-pix_fmt", "bgr24", "-"],
+    # -fps_mode passthrough: no descartar ni duplicar cuadros. Con un video unido por pedazos (concat) ffmpeg botaba
+    # un cuadro en algunas uniones y la imagen se adelantaba a la voz (3 cuadros perdidos en el corte de Andy).
+    lector = subprocess.Popen(["ffmpeg", "-v", "error", "-i", str(crudo), "-fps_mode", "passthrough", "-f", "rawvideo",
+                               "-pix_fmt", "bgr24", "-"],
                               stdout=subprocess.PIPE)
     salida = reel / "trabajo" / a.salida
     escritor = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{W}x{H}",
                                  "-r", fps_txt, "-i", "-", "-i", str(crudo), "-map", "0:v", "-map", "1:a",
                                  "-c:v", "libx264", "-preset", "medium", "-crf", "15", "-pix_fmt", "yuv420p",
-                                 "-c:a", "copy", "-shortest", str(salida)], stdin=subprocess.PIPE)
+                                 "-c:a", "copy", str(salida)], stdin=subprocess.PIPE)
     tam, i = ancho * alto * 3, 0
     while True:
         crudo_b = lector.stdout.read(tam)

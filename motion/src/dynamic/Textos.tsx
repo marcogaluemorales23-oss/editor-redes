@@ -16,6 +16,7 @@ export type Piso = {
   progresivo?: boolean;
   tiempos?: number[];
   tachar?: boolean;
+  caja_fondo?: string;
 };
 export type Bloque = { zona: "arriba" | "centro" | "cta"; t0: number; t1: number; pisos: Piso[]; centro?: number };
 
@@ -109,7 +110,7 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number; con
         fontWeight: p.tam === "xl" && p.it ? 900 : PESO[p.tam], fontStyle: p.it ? "italic" : "normal", color,
         letterSpacing: -px * 0.025, textShadow: p.caja ? "none" : oscuro ? "0 0 30px rgba(255,255,255,0.55)"
           : contraste && p.color && p.color !== "blanco" ? RESPLANDOR_FUERTE : RESPLANDOR,
-        background: p.caja ? "rgba(52,52,52,0.92)" : undefined, padding: p.caja ? `${px * 0.1}px ${px * 0.22}px ${px * 0.02}px` : undefined,
+        background: p.caja ? p.caja_fondo ?? "rgba(52,52,52,0.92)" : undefined, padding: p.caja ? `${px * 0.1}px ${px * 0.22}px ${px * 0.02}px` : undefined,
         transform: `translateX(${(1 - facil) * -45}px)`, opacity: Math.min(1, e * 1.4) * (1 - salida),
         filter: mancha > 0.05 || salida > 0 ? `url(#${id}) blur(${salida * 5}px)` : undefined,
       }}>
