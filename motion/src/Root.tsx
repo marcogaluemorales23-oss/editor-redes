@@ -9,6 +9,7 @@ import { DURACION_S as DUR_P01B, Prueba01b } from "./sebastian/Prueba01b";
 import { DURACION_S as DUR_P01C, Prueba01c } from "./sebastian/Prueba01c";
 import { DURACION_S as DUR_P02, FPS as FPS_P02, Prueba02 } from "./sunny/Prueba02";
 import { Prueba02v2 } from "./sunny/Prueba02v2";
+import { Andy, DURACION_S as DUR_ANDY, FPS as FPS_ANDY } from "./visualpro/Andy";
 
 // Capas transparentes (ProRes 4444) que después se componen con ffmpeg sobre el video.
 const transparente: CalculateMetadataFunction<Record<string, unknown>> = async () => {
@@ -41,6 +42,19 @@ export const RemotionRoot: React.FC = () => (
       width={1080}
       height={1920}
       durationInFrames={Math.round(DUR_P02 * FPS_P02)}
+      calculateMetadata={async () => {
+        await cargarFuentesSebastian();
+        return { defaultCodec: "prores", defaultVideoImageFormat: "png", defaultPixelFormat: "yuva444p10le", defaultProResProfile: "4444" };
+      }}
+    />
+    <Composition
+      id="VisualproAndy"
+      component={Andy}
+      defaultProps={{ capa: "frente" as const, storyboard: false }}
+      fps={FPS_ANDY}
+      width={1080}
+      height={1920}
+      durationInFrames={Math.round(DUR_ANDY * FPS_ANDY)}
       calculateMetadata={async () => {
         await cargarFuentesSebastian();
         return { defaultCodec: "prores", defaultVideoImageFormat: "png", defaultPixelFormat: "yuva444p10le", defaultProResProfile: "4444" };

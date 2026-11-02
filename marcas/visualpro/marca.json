@@ -1,0 +1,17 @@
+{
+  "nombre": "VisualPRO Marketing",
+  "usuario": "@visualpromarketing",
+  "persona": "Andy (dueño de la agencia, sale a cámara)",
+  "servicios": ["social media", "video production", "design", "branding", "photography"],
+  "zona": "Florida, español e inglés",
+  "colores": {
+    "rojo_marca": "#E3262E",
+    "blanco": "#FFFFFF",
+    "fondo": "#2B2B2B",
+    "acento_subtitulos": "#FCF304",
+    "claude": "#D97757"
+  },
+  "fuentes": {"subtitulos": "Inter", "titulos": "Inter Black Italic"},
+  "logo": "(pendiente: logo oficial en PNG; en el perfil: 'Visual' blanco + 'PRO' blanco en caja roja, sobre círculo gris oscuro)",
+  "nota": "Cliente de Sebas. Formato dynamic de Sebas (marcas/sebastian/formato-dynamic.md). Material del cliente: no sale del servidor ni va a git."
+}

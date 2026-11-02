@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Máscara de la persona (blanco = persona, negro = fondo) para poner gráficos DETRÁS de ella.
 
-Uso: python3 nucleo/silueta.py <video> <salida.mkv> <desde-hasta[@y_escritorio]> [...] [--zona]
+Uso: python3 nucleo/silueta.py <video> <salida.mkv> <desde-hasta[@y_escritorio]> [...] [--zona] [--sin-persona]
 Ej.: python3 nucleo/silueta.py trabajo/base.mp4 trabajo/silueta.mkv 3.71-6.30@1765 10.59-12.30@1735 21.7-26.5
 @y_escritorio: todo lo que está debajo de esa altura (el escritorio y lo que tiene encima) se cuenta como frente,
 así persona, sillón y escritorio quedan como un solo bloque y los gráficos solo tapan la pared del fondo.
@@ -58,7 +58,7 @@ def info(video):
     return ancho, alto, num / den, fps
 
 
-def main(video, destino, tramos_txt, usar_zona=False):
+def main(video, destino, tramos_txt, usar_zona=False, sin_persona=False):
     import cv2
     import mediapipe as mp
     import onnxruntime as ort
@@ -79,9 +79,10 @@ def main(video, destino, tramos_txt, usar_zona=False):
                                  "-s", f"{ancho}x{alto}", "-r", fps_txt, "-i", "-",
                                  "-c:v", "ffv1", "-pix_fmt", "gray", destino], stdin=subprocess.PIPE)
     persona_mov = str(Path(destino).with_name("persona.mov"))
-    persona = subprocess.Popen(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba",
-                                "-s", f"{ancho}x{alto}", "-r", fps_txt, "-i", "-", "-c:v", "prores_ks",
-                                "-profile:v", "4444", "-pix_fmt", "yuva444p10le", persona_mov], stdin=subprocess.PIPE)
+    # --sin-persona: solo la máscara (liviana); el recorte se arma después con alphamerge (base + máscara).
+    persona = None if sin_persona else subprocess.Popen(
+        ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", f"{ancho}x{alto}", "-r", fps_txt,
+         "-i", "-", "-c:v", "prores_ks", "-profile:v", "4444", "-pix_fmt", "yuva444p10le", persona_mov], stdin=subprocess.PIPE)
     filas = np.arange(alto, dtype=np.float32)[:, None]
     vacio_rgba = bytes(ancho * alto * 4)
     vacio = np.zeros((1, 1, 1, 1), np.float32)
@@ -118,20 +119,22 @@ def main(video, destino, tramos_txt, usar_zona=False):
             limpio = frente[0].transpose(1, 2, 0)
             color = original * nucleo[..., None] + limpio * (1 - nucleo[..., None])
             rgba = np.dstack([np.clip(color, 0, 1), final[..., None]])
-            persona.stdin.write((rgba * 255).astype(np.uint8).tobytes())
+            if persona:
+                persona.stdin.write((rgba * 255).astype(np.uint8).tobytes())
             escritor.stdin.write((final * 255).astype(np.uint8).tobytes())
             calculados += 1
         else:
             memoria = None  # se reinicia la memoria entre tramos (otro clip, otro fondo)
             escritor.stdin.write(negro)
-            persona.stdin.write(vacio_rgba)
+            if persona:
+                persona.stdin.write(vacio_rgba)
         i += 1
-    for proceso in (escritor, persona):
+    for proceso in (p for p in (escritor, persona) if p):
         proceso.stdin.close()
         proceso.wait()
     print(f"silueta: {calculados} de {i} cuadros calculados -> {destino}")
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--zona"]
-    main(args[0], args[1], args[2:], usar_zona="--zona" in sys.argv)
+    args = [a for a in sys.argv[1:] if a not in ("--zona", "--sin-persona")]
+    main(args[0], args[1], args[2:], usar_zona="--zona" in sys.argv, sin_persona="--sin-persona" in sys.argv)
