@@ -188,7 +188,7 @@ const CapaFrente: React.FC<{ storyboard?: boolean }> = ({ storyboard }) => (
     <Lista desde={14.3} hasta={19.75} items={[{ t: 14.36, texto: "Camina" }, { t: 15.12, texto: "Respira" },
       { t: 16.16, texto: "Habla con alguien" }, { t: 18.6, texto: "Di un chiste" }]} />
     <Seccion desde={23.75} hasta={24.3} texto="HAZ PAUSAS" />
-    <Pausa desde={24.3} hasta={26.25} />
+    <Pausa desde={24.3} hasta={24.95} />
     <Seccion desde={30.15} hasta={32.0} texto="HABLA COMO CON UN AMIGO" />
     <Multitud />
     <Lista desde={50.9} hasta={54.6} top={1150} items={[{ t: 51.06, texto: "Ideas" }, { t: 52.0, texto: "Scripts" },

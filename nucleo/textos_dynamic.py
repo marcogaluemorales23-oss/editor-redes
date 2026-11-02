@@ -13,6 +13,8 @@ Lee <reel>/trabajo/textos.json:
 - "texto": lo que se escribe (corregido: "$1", "deja dinero?"). Con "progresivo" aparece palabra por palabra
   (una palabra del texto por cada palabra dicha del rango).
 - "en_linea": va en la misma línea que el piso anterior (p. ej. "ni un" chico + "$1" gigante).
+- "centro" (en el bloque): altura del centro del bloque en px, solo para ese bloque (por defecto 1000).
+- "tachar" (en el piso): una línea tacha la palabra y la corta a la mitad (palabras negadas: "no tienes que ir corriendo").
 - tam: s / m / l / xl. color: blanco, amarillo, claude (naranja de Claude), rojo, naranja, lima, verde, negro.
   Palabra clave según la acción: verde = dinero o ganar, rojo = perder dinero o error, el resto amarillo o claude.
   "it": itálica. "caja": caja gris.
@@ -48,7 +50,10 @@ def main():
                 piso["tiempos"] = [round(w[k]["inicio"], 3) for k in range(i, j + 1)]
             piso["fin_voz"] = w[j]["fin"]
             pisos.append(piso)
-        salida.append({"zona": b.get("zona", "centro"), "t0": pisos[0]["t"], "hasta": b.get("hasta"), "pisos": pisos})
+        bloque = {"zona": b.get("zona", "centro"), "t0": pisos[0]["t"], "hasta": b.get("hasta"), "pisos": pisos}
+        if "centro" in b:   # altura propia del bloque (p. ej. más abajo en una toma donde la persona se inclina)
+            bloque["centro"] = b["centro"]
+        salida.append(bloque)
 
     for k, b in enumerate(salida):
         siguiente = next((x["t0"] for x in salida[k + 1:] if x["zona"] == b["zona"]), None)

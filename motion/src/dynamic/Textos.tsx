@@ -15,8 +15,9 @@ export type Piso = {
   en_linea?: boolean;
   progresivo?: boolean;
   tiempos?: number[];
+  tachar?: boolean;
 };
-export type Bloque = { zona: "arriba" | "centro" | "cta"; t0: number; t1: number; pisos: Piso[] };
+export type Bloque = { zona: "arriba" | "centro" | "cta"; t0: number; t1: number; pisos: Piso[]; centro?: number };
 
 // Color de la palabra clave según la acción (flujo de Sebas): verde = dinero o ganar algo, rojo = perder dinero o
 // error, el resto amarillo o "claude" (el naranja de Claude).
@@ -58,6 +59,30 @@ const lineas = (b: Bloque) => {
   return ls;
 };
 
+/** Palabra negada: entra entera, una línea la tacha de izquierda a derecha y la parte en dos mitades que se separan. */
+const Tachada: React.FC<{ texto: string; px: number; t: number }> = ({ texto, px, t }) => {
+  const f = useCurrentFrame();
+  const { fps } = useVideoConfig();
+  const c = (s: number) => Math.round(s * fps);
+  const facil = (x: number) => 1 - Math.pow(1 - x, 3);
+  const linea = facil(interpolate(f, [c(t + 0.18), c(t + 0.38)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
+  const corte = facil(interpolate(f, [c(t + 0.34), c(t + 0.58)], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }));
+  const mitad = (arriba: boolean): React.CSSProperties => ({
+    position: "absolute", left: 0, top: 0, clipPath: arriba ? "inset(-20% -5% 50% -5%)" : "inset(50% -5% -20% -5%)",
+    transform: `translate(${(arriba ? -1 : 1) * 12 * corte}px, ${(arriba ? -1 : 1) * 9 * corte}px) rotate(${(arriba ? -1 : 1) * 1.5 * corte}deg)`,
+  });
+  return (
+    <span style={{ position: "relative", display: "inline-block" }}>
+      <span style={{ visibility: "hidden" }}>{texto}</span>
+      <span style={mitad(true)}>{texto}</span>
+      <span style={mitad(false)}>{texto}</span>
+      <span style={{ position: "absolute", left: -px * 0.06, top: "52%", height: Math.max(6, px * 0.085), width: `${linea * 112}%`,
+        background: "#FFFFFF", borderRadius: 4, transform: "translateY(-50%) rotate(-4deg)", transformOrigin: "left center",
+        boxShadow: "0 0 14px rgba(0,0,0,0.6)" }} />
+    </span>
+  );
+};
+
 const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number; contraste?: boolean }> = ({ p, px, id, salida, contraste }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -88,7 +113,8 @@ const PisoVista: React.FC<{ p: Piso; px: number; id: string; salida: number; con
         transform: `translateX(${(1 - facil) * -45}px)`, opacity: Math.min(1, e * 1.4) * (1 - salida),
         filter: mancha > 0.05 || salida > 0 ? `url(#${id}) blur(${salida * 5}px)` : undefined,
       }}>
-        {palabras.map((w, k) => <span key={k} style={{ opacity: alfa(k) }}>{w}{k < palabras.length - 1 ? " " : ""}</span>)}
+        {p.tachar ? <Tachada texto={p.texto} px={px} t={p.t} /> :
+          palabras.map((w, k) => <span key={k} style={{ opacity: alfa(k) }}>{w}{k < palabras.length - 1 ? " " : ""}</span>)}
       </span>
     </>
   );
@@ -103,7 +129,7 @@ const BloqueVista: React.FC<{ b: Bloque; n: number; contraste?: boolean }> = ({ 
   const ls = lineas(b);
   const alto = ls.reduce((s, l) => s + l.alto, 0);
   const zona = ZONAS[b.zona];
-  const top = "centro" in zona ? zona.centro - alto / 2 : zona.top;
+  const top = b.centro !== undefined ? b.centro - alto / 2 : "centro" in zona ? zona.centro - alto / 2 : zona.top;
   return (
     <div style={{ position: "absolute", left: 0, width: 1080, top, display: "flex", flexDirection: "column", alignItems: "center" }}>
       {ls.map((l, k) => (
