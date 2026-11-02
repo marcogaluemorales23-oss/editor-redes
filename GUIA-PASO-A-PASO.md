@@ -13,6 +13,16 @@ inventario (quién habla en cada toma, dónde están las caras, datos privados p
 - Herramientas: `nucleo/cortar.py`, `nucleo/montar.py` (cuadros enteros, voz y labios en sincronía).
 - Si el cliente ya lo entrega cortado: no se toca.
 
+- **Corte al milisegundo** (cuando el trabajo es solo cortar, o antes de editar):
+  1. Elegir la mejor toma de cada frase en `trabajo/edl.json` (`{"in", "out", "texto"}`): completa, sin trabarse,
+     mirando a cámara (revisar cuadros de inicio, medio y final de cada toma).
+  2. `python3 nucleo/afinar_cortes.py reels/<nombre> --crudo crudos/<crudo> [--quieto <n>]`: bordes de 50/100 ms,
+     pausas internas a 0,20 s, saca arranques en falso; `--quieto n` deja hasta 5 s de imagen quieta después del
+     tramo n para insertar un clip.
+  3. `python3 nucleo/exportar_cortes.py reels/<nombre> --crudo crudos/<crudo> --salida salida/<nombre>.mp4` (mismo
+     formato del crudo; `--crf 19` para que pese menos de 400 MB y se pueda mandar por el chat).
+  4. Transcribir el corte final y medir silencios: el texto debe salir completo y sin repeticiones.
+
 ## 2. Limpiar y acomodar el audio
 - `nucleo/limpiar_voz.py` (voz limpia, nada del camarógrafo).
 - **Si el diálogo va muy rápido: bajar la velocidad a x0,9**:

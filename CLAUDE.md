@@ -57,6 +57,12 @@ Agente que edita videos para Instagram, TikTok y YouTube. Todo se habla en espa�
     suben y golpe de zoom (+8–12 %) en la palabra importante, anclado en los ojos y sacado del crudo 4K
     (`nucleo/zoom_crudo.py`). Detalle en `marcas/sebastian/formato-dynamic.md`.
 
+19. **Cortes al milisegundo** (Andy, prueba-03): nada de silencios de más ni sílabas sueltas. Cada pedazo de voz
+    se transcribe por separado para cazar arranques en falso ("Lo-… Lo importante"); el corte entra 50 ms antes de
+    la voz y sale 100 ms después; pausas internas de más de 0,30 s quedan en 0,20 s. Si después de una frase viene
+    un clip para insertar ("solo mira esto"), se deja la imagen mientras la persona siga quieta, máximo 5 s.
+    Herramientas: `nucleo/afinar_cortes.py` → `nucleo/exportar_cortes.py`. Verificar transcribiendo el corte final.
+
 ### Formato Reel de negocio
 17. **Recorte para gráficos detrás** (`nucleo/silueta.py`, Robust Video Matting): persona, muebles pegados a ella
     (sillón) y escritorio con lo que tiene encima van juntos como un solo frente (`@y_escritorio` por tramo);
