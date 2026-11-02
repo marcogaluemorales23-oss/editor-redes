@@ -57,7 +57,7 @@ export const RemotionRoot: React.FC = () => (
       durationInFrames={Math.round(DUR_ANDY * FPS_ANDY)}
       calculateMetadata={async () => {
         await cargarFuentesSebastian();
-        return { defaultCodec: "prores", defaultVideoImageFormat: "png", defaultPixelFormat: "yuva444p10le", defaultProResProfile: "4444" };
+        return { defaultCodec: "vp9", defaultVideoImageFormat: "png", defaultPixelFormat: "yuva420p" }; // VP9 con transparencia: pesa mucho menos que ProRes
       }}
     />
     <Composition
