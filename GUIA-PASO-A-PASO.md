@@ -23,6 +23,14 @@ inventario (quién habla en cada toma, dónde están las caras, datos privados p
      formato del crudo; `--crf 19` para que pese menos de 400 MB y se pueda mandar por el chat).
   4. Transcribir el corte final y medir silencios: el texto debe salir completo y sin repeticiones.
 
+- **Segunda cámara** (multicámara, Andy prueba-03): `python3 nucleo/multicam.py reels/<nombre> --a crudos/<A> --b crudos/<B>
+  --desfase <s> [--girar-b 1]` aplica los MISMOS cortes de edl.json a la cámara B y arma `_camB` (solo B) e
+  `_intercalado` (cambia de cámara en cada corte; donde B no grabó, A con acercamiento de 1,3x). El audio es siempre
+  el de A. El desfase se mide correlacionando el audio de B contra el de A en varios puntos (debe dar igual en todos;
+  un punto que no coincide suele ser una toma repetida, no un desfase real). Si B grabó acostada sin marca de
+  rotación: `--girar-b 1`. Si el crudo no entra en el disco o Drive limita las descargas: copia rala con
+  `nucleo/drive_ralo.py` (solo baja el índice y los pedazos de cada corte).
+
 ## 2. Limpiar y acomodar el audio
 - `nucleo/limpiar_voz.py` (voz limpia, nada del camarógrafo).
 - **Si el diálogo va muy rápido: bajar la velocidad a x0,9**:

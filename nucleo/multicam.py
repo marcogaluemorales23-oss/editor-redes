@@ -110,7 +110,7 @@ def main():
 
     def armar(nombre, eleccion):
         lista = pdir / f"{nombre}.txt"
-        lista.write_text("".join(f"file '{p}'\n" for p in eleccion))
+        lista.write_text("".join(f"file '{Path(p).resolve()}'\n" for p in eleccion))
         salida = reel / "salida" / f"{a.nombre}_{nombre}.mp4"
         correr(["ffmpeg", "-v", "error", "-y", "-f", "concat", "-safe", "0", "-i", str(lista), "-i", str(audio),
                 "-map", "0:v", "-map", "1:a", "-c:v", "copy", "-c:a", "aac", "-b:a", "320k", "-movflags", "+faststart", str(salida)])
