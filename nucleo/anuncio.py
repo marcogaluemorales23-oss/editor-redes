@@ -220,11 +220,13 @@ def leer_plano(crudo, p, fps):
     """Cuadros del plano ya recortados a la franja vertical (alto completo, ancho 9:16)."""
     info = sonda(crudo)
     cw, ch = info["w"], info["h"]
-    fw = min(int(round(ch * 9 / 16 / 2) * 2), cw)
+    fw = cw if p.get("marco") else min(int(round(ch * 9 / 16 / 2) * 2), cw)
     cx = int(np.clip(p.get("x", 0.5) * cw - fw / 2, 0, cw - fw))
-    filtro = f"crop={fw}:{ch}:{cx}:0" if fw < cw else "null"   # crudo vertical: entero (x se usa en el zoom)
+    filtro = f"crop={fw}:{ch}:{cx}:0" if fw < cw else "null"   # crudo vertical u horizontal en marco: entero
     if p.get("filtro"):
         filtro = p["filtro"] + "," + filtro
+    if abs(info["fps"] - fps) > 0.01:          # material de otra cámara (celular): llevarlo a los fps del lote
+        filtro += f",fps={fps:.6f}"
     n = int(round(p["dur"] * fps))
     cmd = ["ffmpeg", "-nostdin", "-v", "error", "-ss", f'{p["desde"]:.3f}', "-i", str(crudo), "-frames:v", str(n),
            "-vf", filtro, "-pix_fmt", "bgr24", "-f", "rawvideo", "-"]
@@ -247,6 +249,29 @@ def encuadrar(fr, z, ay, ax=0.5):
     y0 = np.clip(ay * h - ch / 2, 0, h - ch)
     m = np.array([[W / cw, 0, -x0 * W / cw], [0, H / ch, -y0 * H / ch]], np.float32)
     return cv2.warpAffine(fr, m, (W, H), flags=cv2.INTER_AREA if z < 1.6 else cv2.INTER_CUBIC)
+
+
+def enmarcar(fr, z, ancho=1000, cy=960, ax=0.5, ay=0.5):
+    """Video horizontal (p. ej. de celular) como recuadro centrado sobre el mismo video ampliado y desenfocado."""
+    h, w = fr.shape[:2]
+    peq = cv2.resize(fr, (w // 4, h // 4), interpolation=cv2.INTER_AREA)
+    sw = int(peq.shape[0] * 9 / 16)                     # recorte 9:16 del centro para llenar la pantalla
+    peq = peq[:, (peq.shape[1] - sw) // 2:(peq.shape[1] + sw) // 2]
+    fondo = cv2.resize(peq, (W, H), interpolation=cv2.INTER_LINEAR).astype(np.float32)
+    fondo = cv2.GaussianBlur(fondo, (0, 0), 18) * 0.55
+    cw, ch = w / z, h / z                      # zoom dentro del recuadro, anclado en (ax, ay)
+    x0, y0 = np.clip(ax * w - cw / 2, 0, w - cw), np.clip(ay * h - ch / 2, 0, h - ch)
+    alto = int(round(ancho * h / w))
+    m = np.array([[ancho / cw, 0, -x0 * ancho / cw], [0, alto / ch, -y0 * alto / ch]], np.float32)
+    cuadro = cv2.warpAffine(fr, m, (ancho, alto), flags=cv2.INTER_CUBIC).astype(np.float32)
+    cuadro = cv2.filter2D(cuadro, -1, np.array([[0, -0.25, 0], [-0.25, 2, -0.25], [0, -0.25, 0]], np.float32))
+    x, y = (W - ancho) // 2, int(cy - alto / 2)
+    sombra = np.zeros((H, W), np.float32)
+    sombra[y + 12:y + alto + 12, x:x + ancho] = 1
+    sombra = cv2.GaussianBlur(sombra, (0, 0), 22)[..., None]
+    fondo = fondo * (1 - 0.6 * sombra)
+    fondo[y:y + alto, x:x + ancho] = cuadro
+    return fondo
 
 
 @lru_cache(None)
@@ -293,8 +318,12 @@ def cuadros(reel, g, fps, limite=None, solo=None):
                 continue
             u = k / max(n - 1, 1)
             vertical = sonda(crudo)["w"] < sonda(crudo)["h"]
-            img = encuadrar(fr, z0 + (z1 - z0) * suave(u), p.get("y", 0.5),
-                            p.get("x", 0.5) if vertical else 0.5).astype(np.float32)
+            if p.get("marco"):
+                img = enmarcar(fr, z0 + (z1 - z0) * suave(u), p.get("ancho_marco", 1000), p.get("y_marco", 960),
+                               p.get("x", 0.5), p.get("y", 0.5))
+            else:
+                img = encuadrar(fr, z0 + (z1 - z0) * suave(u), p.get("y", 0.5),
+                                p.get("x", 0.5) if vertical else 0.5).astype(np.float32)
             if p.get("desenfoque"):
                 a, b = p["desenfoque"]
                 r = suave((k / fps - a) / (b - a))
@@ -407,14 +436,17 @@ def mezclar_audio(reel, g, dur, destino):
                             "loudnorm=print_format=json", "-f", "null", "-"], capture_output=True, text=True).stderr
         j = json.loads(e[e.rindex("{"):e.rindex("}") + 1])
         return float(j["input_i"]), float(j["input_tp"])
-    ganancia = -14 - medir(crudo)[0]
-    for _ in range(3):
+    ganancia, limite = -14 - medir(crudo)[0], 0.7
+    for _ in range(6):
         subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", crudo, "-af",
-                        f"volume={ganancia:.2f}dB,alimiter=limit=0.7:attack=2:release=60:level=disabled",
+                        f"volume={ganancia:.2f}dB,alimiter=limit={limite:.3f}:attack=1:release=60:level=disabled",
                         "-ar", "48000", str(destino)], check=True)
         i, tp = medir(str(destino))
-        if abs(i + 14) < 0.3:
+        ok_i, ok_tp = abs(i + 14) < 0.3, tp <= -2.5        # margen: el AAC sube el pico ~1 dB (BOF-2 salió a -0,6)
+        if ok_i and ok_tp:
             break
+        if not ok_tp:
+            limite *= 10 ** ((-2.5 - tp - 0.3) / 20)
         ganancia += -14 - i
 
 
@@ -482,7 +514,11 @@ def main():
     ap.add_argument("--prueba", type=float)
     a = ap.parse_args()
     g = json.loads((Path(a.reel) / "trabajo" / a.guion).read_text())
-    info = sonda(Path(a.reel) / "crudos" / f'{g["planos"][0]["clip"]}.MP4')
+    # fps del lote = los que más se repiten entre los planos (no los del primero: un clip de celular trae 600/1)
+    from collections import Counter
+    info = Counter((sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps_txt"],
+                    sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps"]) for p in g["planos"]).most_common(1)[0][0]
+    info = {"fps_txt": info[0], "fps": info[1]}
     if a.storyboard:
         storyboard(a.reel, g, info["fps"])
     else:

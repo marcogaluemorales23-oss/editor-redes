@@ -40,5 +40,9 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 
 ## Reparto del lote (4-nov-2026)
 - **Andy**: TOF-5, MOF-1, MOF-2.  **Sebas**: TOF-1, TOF-2, TOF-3.  NO tocarlos.
-- **Claude**: BOF-1 ✅, MOF-3 ✅ (a Andy le gustó más que el suyo), BOF-3 ✅, BOF-2, SMS "More than one way",
+- **Claude**: BOF-1 ✅, MOF-3 ✅ (a Andy le gustó más que el suyo), BOF-3 ✅, BOF-2 ✅, SMS "More than one way",
   "What to expect" A (ya agendaron) y B (aún no agendan), TOF-4 (al final: faltan los videos de Izzy).
+10. **Textos partidos en dos** (BOF-2): la palabra de apoyo arriba SIN caja y un poco más grande cuando es la que
+    atrae ("SPINAL"), la clave abajo CON caja ("DECOMPRESSION"); en la placa: "BOOK YOUR FIRST" sin caja / "VISIT NOW" con caja.
+11. **Material de celular** (videos de Izzy, horizontales y de baja resolución): va como recuadro centrado sobre el
+    mismo video desenfocado (`"marco": true`), con zoom en la persona para que no se vean las marcas del evento.
