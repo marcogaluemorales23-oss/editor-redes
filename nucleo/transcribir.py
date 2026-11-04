@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Transcribe un clip palabra por palabra, con inicio y fin de cada palabra.
 
-Uso: python3 nucleo/transcribir.py <clip> <salida.json> [modelo]
+Uso: python3 nucleo/transcribir.py <clip> <salida.json> [modelo] [idioma]
 Modelo por defecto: small (rápido en CPU). Para más precisión: medium o large-v3.
+Idioma por defecto: es (en para clientes de EE. UU., p. ej. Spine Labs).
 """
 import json
 import subprocess
@@ -21,10 +22,10 @@ def leer_audio(clip):
     return np.frombuffer(crudo, np.int16).astype(np.float32) / 32768.0
 
 
-def transcribir(clip, modelo="small"):
+def transcribir(clip, modelo="small", idioma="es"):
     whisper = WhisperModel(modelo, device="cpu", compute_type="int8")
     segmentos, info = whisper.transcribe(
-        leer_audio(clip), language="es", word_timestamps=True, vad_filter=False, beam_size=5,
+        leer_audio(clip), language=idioma, word_timestamps=True, vad_filter=False, beam_size=5,
     )
     palabras = []
     for seg in segmentos:
@@ -38,7 +39,8 @@ def transcribir(clip, modelo="small"):
 if __name__ == "__main__":
     clip, destino = sys.argv[1], sys.argv[2]
     modelo = sys.argv[3] if len(sys.argv) > 3 else "small"
-    resultado = transcribir(clip, modelo)
+    idioma = sys.argv[4] if len(sys.argv) > 4 else "es"
+    resultado = transcribir(clip, modelo, idioma)
     with open(destino, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, indent=1)
     print(f'{len(resultado["palabras"])} palabras -> {destino}')
