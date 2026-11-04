@@ -288,6 +288,32 @@ def sonda(crudo):
     return {"w": w, "h": h, "fps": int(a) / int(b), "fps_txt": s["r_frame_rate"]}
 
 
+def estabilizar(reel, crudo, p):
+    """Estabilización suave con vid.stab (2 pasadas) del tramo del plano + 1 s a cada lado (pedido de Sebas, BOF-2:
+    tomas a mano movidas). "estabilizar": N = cuadros de suavizado (15 suave … 30 fuerte). optzoom=1 aplica el zoom
+    mínimo fijo para que no aparezcan bordes. Se guarda en trabajo/estab/ y se reutiliza."""
+    suave = int(p["estabilizar"]) if p["estabilizar"] is not True else 20
+    if p.get("estab_rango"):                          # planos seguidos del mismo clip: misma estabilización
+        ini, fin = p["estab_rango"]
+        largo = fin - ini
+    else:
+        ini = max(p["desde"] - 1.0, 0.0)
+        largo = p["dur"] + (p["desde"] - ini) + 1.0
+    carpeta = Path(reel) / "trabajo" / "estab"
+    carpeta.mkdir(exist_ok=True)
+    nombre = f'{p["clip"]}_{ini:.2f}_{largo:.2f}_{suave}'
+    destino, trf = carpeta / f"{nombre}.MP4", carpeta / f"{nombre}.trf"
+    if not destino.exists():
+        base = ["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", f"{ini:.3f}", "-t", f"{largo:.3f}", "-i", str(crudo)]
+        escala = "scale=1440:-2:flags=lanczos"         # 1440 de ancho: sobra para entregar en 1080 y es 2x más rápido
+        subprocess.run(base + ["-vf", f"{escala},vidstabdetect=shakiness=6:accuracy=15:result={trf}",
+                               "-f", "null", "-"], check=True)
+        subprocess.run(base + ["-vf", f"{escala},vidstabtransform=input={trf}:smoothing={suave}:optzoom=1:"
+                               f"interpol=bicubic,unsharp=5:5:0.4", "-an", "-c:v", "libx264", "-preset", "fast",
+                               "-crf", "14", "-pix_fmt", "yuv420p", str(destino)], check=True)
+    return destino, dict(p, desde=round(p["desde"] - ini, 3))
+
+
 def cuadros(reel, g, fps, limite=None, solo=None):
     """Genera (t, cuadro BGR float) del anuncio completo, o solo los tiempos de `solo`."""
     t0 = 0.0
@@ -310,6 +336,8 @@ def cuadros(reel, g, fps, limite=None, solo=None):
             k_global += n
             continue
         z0, z1 = p.get("zoom", [1.0, 1.0])
+        if p.get("estabilizar"):
+            crudo, p = estabilizar(reel, crudo, p)
         for k, fr in enumerate(leer_plano(crudo, p, fps)):
             t = tiempos[k]
             if limite and t >= limite:

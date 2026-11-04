@@ -46,3 +46,7 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     atrae ("SPINAL"), la clave abajo CON caja ("DECOMPRESSION"); en la placa: "BOOK YOUR FIRST" sin caja / "VISIT NOW" con caja.
 11. **Material de celular** (videos de Izzy, horizontales y de baja resolución): va como recuadro centrado sobre el
     mismo video desenfocado (`"marco": true`), con zoom en la persona para que no se vean las marcas del evento.
+12. **Estabilización suave** (BOF-2): tomas a mano movidas → `"estabilizar": 20` (vid.stab, zoom mínimo automático).
+    Medir el temblor en el FONDO antes/después; "fuerte" (40) casi nunca mejora y agranda el zoom, que Sebas no quiere.
+    Planos seguidos del mismo clip comparten `"estab_rango"` para que no salte el zoom en el corte.
+13. **Persona a cámara centrada en x** (BOF-2): la doctora alineada al centro del video; la altura se respeta.
