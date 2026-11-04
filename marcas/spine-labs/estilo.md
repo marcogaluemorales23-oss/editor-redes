@@ -67,3 +67,6 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     "listo, vamos con el siguiente". "Tofu cubano" = TOF-4 (así suena "tofu cuatro" en su dictado).
 20. **Toda toma arranca en movimiento real** (TOF-4, tomas 3 y 4): medir el movimiento cuadro a cuadro y entrar
     cuando la persona ya camina con decisión, no en los pasos titubeantes de "dale, ya estoy grabando" (se ve actuado).
+21. **What to expect** (A y B): visita de Izzy con sus diálogos reales; etiqueta del paso arriba ("1 · ARRIVE"…),
+    tomas 4-5 a media altura (1050) y 7-10 a 700; apertura A: toma 1 a media pantalla, toma 2 debajo de "1 · ARRIVE".
+    Recortar colas de otra frase ("And what…") y silencios internos de más de 0,3 s al inicio de una toma hablada.
