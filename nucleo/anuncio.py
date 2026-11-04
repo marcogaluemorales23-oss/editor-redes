@@ -340,15 +340,21 @@ def mezclar_audio(reel, g, dur, destino):
     crudo = str(destino).replace(".wav", "_mez.wav")
     subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", *entradas, "-filter_complex", ";".join(cadenas),
                     "-map", "[mez]", "-ar", "48000", crudo], check=True)
-    # loudnorm en dos pasadas
-    med = subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", "-i", crudo, "-af",
-                          "loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json", "-f", "null", "-"],
-                         capture_output=True, text=True).stderr
-    j = json.loads(med[med.rindex("{"):med.rindex("}") + 1])
-    ln = (f'loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={j["input_i"]}:measured_TP={j["input_tp"]}:'
-          f'measured_LRA={j["input_lra"]}:measured_thresh={j["input_thresh"]}:offset={j["target_offset"]}:linear=true')
-    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", crudo, "-af", ln + ",alimiter=limit=0.89",
-                    "-ar", "48000", str(destino)], check=True)
+    # sonoridad: ganancia fija hasta -14 LUFS y limitador con margen para el AAC (pico final <= -1 dBTP)
+    def medir(f):
+        e = subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", "-i", f, "-af",
+                            "loudnorm=print_format=json", "-f", "null", "-"], capture_output=True, text=True).stderr
+        j = json.loads(e[e.rindex("{"):e.rindex("}") + 1])
+        return float(j["input_i"]), float(j["input_tp"])
+    ganancia = -14 - medir(crudo)[0]
+    for _ in range(3):
+        subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-i", crudo, "-af",
+                        f"volume={ganancia:.2f}dB,alimiter=limit=0.7:attack=2:release=60:level=disabled",
+                        "-ar", "48000", str(destino)], check=True)
+        i, tp = medir(str(destino))
+        if abs(i + 14) < 0.3:
+            break
+        ganancia += -14 - i
 
 
 # ---------- principal ----------
