@@ -32,3 +32,6 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 5. **Texto sobre pantallas**: no tapar lo que muestra el celular/tablet (MOF-3 toma 4: título arriba del teléfono).
 6. **Sin puntos** en palabras sueltas en pantalla (BONE, MUSCLE, NERVE).
 7. **Voces que no se grabaron**: van como texto en pantalla; nunca se genera la voz de la doctora con IA.
+8. **La voz manda** (MOF-3 v2): cuando alguien habla, se escucha la voz primero que todo. Cada tramo de voz a -16 LUFS
+   y la música 18 dB más baja mientras hay voz (rampa de 0,25 s); sube de nuevo solo donde no hay voz.
+   Verificar con stems: voz vs música en cada medio segundo (diferencia ~20 dB).

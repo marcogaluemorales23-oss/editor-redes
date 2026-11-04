@@ -327,34 +327,62 @@ def cuadros(reel, g, fps, limite=None, solo=None):
 
 # ---------- audio ----------
 
+VOZ_LUFS = -16          # nivel de cada tramo de voz antes de la mezcla
+BAJO_VOZ_DB = 18        # cuánto baja la música mientras alguien habla (pedido de Sebas: la voz manda)
+
+
+def retrasar(seg):
+    """Mueve el audio a `seg` segundos con silencio REAL delante. Solo adelay deja un hueco de tiempo que amix
+    borra después (la voz de MOF-3 sonaba en el segundo 0, encima del gancho, y faltaba en el clip 8)."""
+    return f"aresample=48000,adelay={int(round(seg * 1000))}:all=1,aresample=async=1:first_pts=0"
+
+
+def lufs(cmd_in, filtro):
+    """Sonoridad integrada de una entrada de ffmpeg pasada por `filtro`."""
+    e = subprocess.run(["ffmpeg", "-nostdin", "-hide_banner", *cmd_in, "-af", f"{filtro},loudnorm=print_format=json",
+                        "-f", "null", "-"], capture_output=True, text=True).stderr
+    return float(json.loads(e[e.rindex("{"):e.rindex("}") + 1])["input_i"])
+
+
 def mezclar_audio(reel, g, dur, destino):
-    """Voz (de los crudos), música con ducking y efectos -> wav a -14 LUFS / -1 dBTP."""
+    """Voz (de los crudos) a nivel fijo, música que baja BAJO_VOZ_DB mientras hay voz, efectos -> -14 LUFS."""
     A = g.get("audio", {})
-    entradas, cadenas, voces = [], [], []
+    entradas, cadenas, voces, ventanas = [], [], [], []
     for j, v in enumerate(A.get("voz", [])):
-        entradas += ["-i", str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')]
+        crudo = str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')
+        entradas += ["-i", crudo]
         largo = v["hasta"] - v["desde"]
+        limpia = (f'aformat=channel_layouts=mono,highpass=f=80,afftdn=nf=-30,'
+                  f'acompressor=threshold=-24dB:ratio=3:attack=8:release=120')
+        nivel = lufs(["-ss", str(v["desde"]), "-t", str(largo), "-i", crudo], limpia)
+        gan = VOZ_LUFS - nivel + v.get("db", 0)
         cadenas.append(
-            f'[{len(entradas)//2 - 1}:a]atrim={v["desde"]}:{v["hasta"]},asetpts=PTS-STARTPTS,aformat=channel_layouts=mono,'
-            f'highpass=f=80,afftdn=nf=-30,acompressor=threshold=-20dB:ratio=3:attack=8:release=120,'
-            f'volume={v.get("db", 0)}dB,afade=t=in:d=0.04,afade=t=out:st={max(largo - 0.06, 0)}:d=0.06,'
-            f'adelay={int(v["en"] * 1000)}:all=1,apad=whole_dur={dur}[v{j}]')
+            f'[{len(entradas)//2 - 1}:a]atrim={v["desde"]}:{v["hasta"]},asetpts=PTS-STARTPTS,{limpia},'
+            f'volume={gan:.2f}dB,alimiter=limit=0.9:level=disabled,'
+            f'afade=t=in:d=0.04,afade=t=out:st={max(largo - 0.06, 0)}:d=0.06,'
+            f'{retrasar(v["en"])},apad=whole_dur={dur}[v{j}]')
         voces.append(f"[v{j}]")
+        ventanas.append((v["en"], v["en"] + largo))
     pistas = []
     if voces:
         cadenas.append(f'{"".join(voces)}amix=inputs={len(voces)}:normalize=0,atrim=0:{dur}[voz]')
     M = A.get("musica")
     if M:
-        entradas += ["-i", str(Path(reel) / "trabajo" / M["archivo"])]
+        musica = str(Path(reel) / "trabajo" / M["archivo"])
+        entradas += ["-i", musica]
         idx = len(entradas) // 2 - 1
+        eq = M.get("eq", "anull")
+        nivel = lufs(["-ss", str(M.get("desde", 0)), "-t", str(dur), "-i", musica], eq)
+        base = VOZ_LUFS - nivel + M.get("db_libre", 0)      # sin voz: la música suena al nivel de la voz
+        env = "0"
+        for a, b in ventanas:                                # rampa de 0,25 s al entrar y 0,35 s al salir
+            e = f"clip((t-({a:.3f}-0.25))/0.25,0,1)*clip((({b:.3f}+0.35)-t)/0.35,0,1)"
+            env = f"max({env},{e})"
+        baja = M.get("bajo_voz", BAJO_VOZ_DB) if M.get("duck", True) else 0
         cadenas.append(f'[{idx}:a]atrim={M.get("desde", 0)}:{M.get("desde", 0) + dur},asetpts=PTS-STARTPTS,'
-                       f'aformat=channel_layouts=stereo,{M.get("eq", "anull")},volume={M.get("db", -18)}dB,'
-                       f'afade=t=out:st={max(dur - M.get("fade", 0.8), 0)}:d={M.get("fade", 0.8)}[mus0]')
-        if voces and M.get("duck", True):
-            cadenas.append("[voz]asplit[voz][vsc]")
-            cadenas.append("[mus0][vsc]sidechaincompress=threshold=0.03:ratio=6:attack=20:release=300[mus]")
-        else:
-            cadenas.append("[mus0]anull[mus]")
+                       f'aformat=channel_layouts=stereo,{eq},volume={base:.2f}dB,'
+                       f"volume=eval=frame:volume='pow(10,-{baja}*{env}/20)',"
+                       f'afade=t=out:st={max(dur - M.get("fade", 0.8), 0)}:d={M.get("fade", 0.8)}[mus]')
         pistas.append("[mus]")
     if voces:
         pistas.append("[voz]")
@@ -362,7 +390,7 @@ def mezclar_audio(reel, g, dur, destino):
         entradas += ["-i", str(Path(reel) / "trabajo" / s["archivo"])]
         idx = len(entradas) // 2 - 1
         cadenas.append(f'[{idx}:a]aformat=channel_layouts=stereo,volume={s.get("db", -4.4)}dB,'
-                       f'adelay={int(s["en"] * 1000)}:all=1[s{j}]')
+                       f'{retrasar(s["en"])}[s{j}]')
         pistas.append(f"[s{j}]")
     if not pistas:
         subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", "-f", "lavfi", "-i",
