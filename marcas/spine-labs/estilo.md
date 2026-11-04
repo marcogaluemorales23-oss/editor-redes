@@ -35,3 +35,5 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 8. **La voz manda** (MOF-3 v2): cuando alguien habla, se escucha la voz primero que todo. Cada tramo de voz a -16 LUFS
    y la música 18 dB más baja mientras hay voz (rampa de 0,25 s); sube de nuevo solo donde no hay voz.
    Verificar con stems: voz vs música en cada medio segundo (diferencia ~20 dB).
+9. **Cero silencio al entrar a la toma de quien habla** (MOF-3 v3): la toma entra 50 ms antes de la primera palabra
+   (medir el arranque de la voz con energía, no con el tiempo de Whisper, que se adelanta ~0,5 s).
