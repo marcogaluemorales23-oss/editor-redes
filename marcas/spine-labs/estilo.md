@@ -70,3 +70,5 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 21. **What to expect** (A y B): visita de Izzy con sus diálogos reales; etiqueta del paso arriba ("1 · ARRIVE"…),
     tomas 4-5 a media altura (1050) y 7-10 a 700; apertura A: toma 1 a media pantalla, toma 2 debajo de "1 · ARRIVE".
     Recortar colas de otra frase ("And what…") y silencios internos de más de 0,3 s al inicio de una toma hablada.
+22. **Descompresión = piernas elevadas en el cojín** (What to expect, toma 10): Sebas espera ver la camilla haciendo
+    su trabajo (C7785 2,9–5,65: piernas arriba + logo SPINE LABS de la máquina), no solo a la persona acostada.
