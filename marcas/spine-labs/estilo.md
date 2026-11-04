@@ -56,3 +56,8 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 15. **Animación por palabra** (TOF-4): cada segmento puede traer su `"anim"` (si no, la del bloque):
     `izq_der` (BONE/MUSCLE/NERVE), `subir` (frases que suben desde abajo con desvanecido, toma 1 y tomas 8–10),
     `bajar` (TO YOU cae desde arriba debajo de IMPORTANT que entra izq_der). Sebas mezcla animaciones según la toma.
+16. **Gancho con sonido de escena** (TOF-4): aplausos + murmullo de público + brillo de coronación generados con
+    `nucleo/sfx_sintetico.py` (nunca el audio del video del celular). Música 9 dB abajo en el gancho (`"bajar"`),
+    y el gancho a ~3 dB del resto para que no se sienta flojo.
+17. **Nada de tomas "esperando la orden"**: arrancar cuando la persona ya se mueve (medir movimiento cuadro a
+    cuadro). Si camina hacia la cámara y casi no se nota, sumar un acercamiento suave.

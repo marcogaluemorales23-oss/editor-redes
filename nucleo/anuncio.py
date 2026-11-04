@@ -446,9 +446,12 @@ def mezclar_audio(reel, g, dur, destino):
             e = f"clip((t-({a:.3f}-0.25))/0.25,0,1)*clip((({b:.3f}+0.35)-t)/0.35,0,1)"
             env = f"max({env},{e})"
         baja = M.get("bajo_voz", BAJO_VOZ_DB) if M.get("duck", True) else 0
+        db_expr = f"-{baja}*{env}"
+        for a, b, d in M.get("bajar", []):                  # tramos con la música más baja (p. ej. aplausos del gancho)
+            db_expr += f"-{abs(d)}*clip((t-({a:.3f}-0.2))/0.2,0,1)*clip((({b:.3f}+0.4)-t)/0.4,0,1)"
         cadenas.append(f'[{idx}:a]atrim={M.get("desde", 0)}:{M.get("desde", 0) + dur},asetpts=PTS-STARTPTS,'
                        f'aformat=channel_layouts=stereo,{eq},volume={base:.2f}dB,'
-                       f"volume=eval=frame:volume='pow(10,-{baja}*{env}/20)',"
+                       f"volume=eval=frame:volume='pow(10,({db_expr})/20)',"
                        f'afade=t=out:st={max(dur - M.get("fade", 0.8), 0)}:d={M.get("fade", 0.8)}[mus]')
         pistas.append("[mus]")
     if voces:
