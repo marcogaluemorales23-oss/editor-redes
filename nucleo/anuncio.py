@@ -15,7 +15,8 @@ Uso:
      "zoom": [1.0, 1.06],                                  # zoom al inicio y al final del plano (1.0 = 9:16 completo)
      "filtro": "eq=contrast=1.12:saturation=1.2",          # opcional: ffmpeg sobre el crudo (perfil plano)
      "entrada": "barrido",                                 # opcional: barrido con desenfoque de movimiento (0,17 s)
-     "desenfoque": [0.2, 0.6]}                             # opcional: se desenfoca de 0,2 s a 0,6 s (placa final)
+     "desenfoque": [0.2, 0.6],                             # opcional: se desenfoca de 0,2 s a 0,6 s (placa final)
+     "sigma": 16, "oscurecer": 0.3}                        # fuerza del desenfoque y cuánto se oscurece (0-1)
   ],
   "textos": [
     {"t": 0.15, "hasta": 3.3, "y": 820,                    # tiempo del video; y = centro del bloque (en 1080x1920)
@@ -186,9 +187,9 @@ def leer_plano(crudo, p, fps):
     """Cuadros del plano ya recortados a la franja vertical (alto completo, ancho 9:16)."""
     info = sonda(crudo)
     cw, ch = info["w"], info["h"]
-    fw = int(round(ch * 9 / 16 / 2) * 2)
+    fw = min(int(round(ch * 9 / 16 / 2) * 2), cw)
     cx = int(np.clip(p.get("x", 0.5) * cw - fw / 2, 0, cw - fw))
-    filtro = f"crop={fw}:{ch}:{cx}:0"
+    filtro = f"crop={fw}:{ch}:{cx}:0" if fw < cw else "null"   # crudo vertical: entero (x se usa en el zoom)
     if p.get("filtro"):
         filtro = p["filtro"] + "," + filtro
     n = int(round(p["dur"] * fps))
@@ -205,11 +206,11 @@ def leer_plano(crudo, p, fps):
     proc.wait()
 
 
-def encuadrar(fr, z, ay):
-    """Zoom z (>=1) dentro de la franja vertical, anclado en ay (fracción vertical), a 1080x1920."""
+def encuadrar(fr, z, ay, ax=0.5):
+    """Zoom z (>=1) dentro de la franja vertical, anclado en (ax, ay) (fracción del cuadro), a 1080x1920."""
     h, w = fr.shape[:2]
     cw, ch = w / z, h / z
-    x0 = (w - cw) / 2
+    x0 = np.clip(ax * w - cw / 2, 0, w - cw)
     y0 = np.clip(ay * h - ch / 2, 0, h - ch)
     m = np.array([[W / cw, 0, -x0 * W / cw], [0, H / ch, -y0 * H / ch]], np.float32)
     return cv2.warpAffine(fr, m, (W, H), flags=cv2.INTER_AREA if z < 1.6 else cv2.INTER_CUBIC)
@@ -218,11 +219,15 @@ def encuadrar(fr, z, ay):
 @lru_cache(None)
 def sonda(crudo):
     out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries",
-                          "stream=width,height,r_frame_rate", "-of", "json", str(crudo)],
+                          "stream=width,height,r_frame_rate:stream_side_data=rotation", "-of", "json", str(crudo)],
                          capture_output=True, text=True, check=True).stdout
     s = json.loads(out)["streams"][0]
     a, b = s["r_frame_rate"].split("/")
-    return {"w": s["width"], "h": s["height"], "fps": int(a) / int(b), "fps_txt": s["r_frame_rate"]}
+    w, h = s["width"], s["height"]
+    rot = next((abs(int(d.get("rotation", 0))) for d in s.get("side_data_list", [])), 0)
+    if rot in (90, 270):          # cámara girada (Sony en vertical): ffmpeg la endereza al decodificar
+        w, h = h, w
+    return {"w": w, "h": h, "fps": int(a) / int(b), "fps_txt": s["r_frame_rate"]}
 
 
 def cuadros(reel, g, fps, limite=None, solo=None):
@@ -254,12 +259,16 @@ def cuadros(reel, g, fps, limite=None, solo=None):
             if solo is not None and not any(abs(t - s) < 0.5 / fps for s in solo):
                 continue
             u = k / max(n - 1, 1)
-            img = encuadrar(fr, z0 + (z1 - z0) * suave(u), p.get("y", 0.5)).astype(np.float32)
+            vertical = sonda(crudo)["w"] < sonda(crudo)["h"]
+            img = encuadrar(fr, z0 + (z1 - z0) * suave(u), p.get("y", 0.5),
+                            p.get("x", 0.5) if vertical else 0.5).astype(np.float32)
             if p.get("desenfoque"):
                 a, b = p["desenfoque"]
-                sig = 16 * suave((k / fps - a) / (b - a))
+                r = suave((k / fps - a) / (b - a))
+                sig = p.get("sigma", 16) * r
                 if sig > 0.3:
                     img = cv2.GaussianBlur(img, (0, 0), sig)
+                img *= 1 - p.get("oscurecer", 0) * r          # fondo más oscuro para que el blanco resalte
             if p.get("entrada") == "barrido" and k / fps < BARRIDO_S:
                 v = 1 - sale(k / fps / BARRIDO_S)
                 largo = int(140 * v)
