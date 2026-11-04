@@ -1,0 +1,33 @@
+{
+  "nombre": "Spine Labs",
+  "cliente_de": "Andy (editor) — clínica de quiropráctica y descompresión espinal en EE. UU.",
+  "idioma": "inglés (todo texto en pantalla y voz en inglés)",
+  "sensacion": ["limpio", "moderno", "clínico pero cercano"],
+  "colores": {
+    "texto": "#FFFFFF",
+    "caja": "#000000",
+    "clave_sin_caja": "#000000",
+    "sombra": "resplandor oscuro muy difuso detrás del texto blanco (sin contorno)"
+  },
+  "fuentes": {
+    "textos": {"familia": "Inter", "peso": "Bold/ExtraBold", "nota": "sans geométrica, tracking apretado"}
+  },
+  "textos": {
+    "estilo": "frase partida en líneas de distinto tamaño, centrada; la palabra clave más grande en blanco sobre caja negra recta (\"adjustment\", \"FOR A SPINE\") o en negro sin caja (\"CARE\"); palabras pequeñas de apoyo (\"like this?\")",
+    "posicion": "centro de la pantalla (y≈550–1120 en 1080x1920), nunca sobre la cara",
+    "entrada": "palabra por palabra / línea por línea"
+  },
+  "placa_final": {
+    "fondo": "último plano desenfocado (cámara sigue corriendo)",
+    "texto": "THERE'S MORE THAN / ONE WAY TO CARE / FOR A SPINE",
+    "logo": "PENDIENTE: el guion pide SPINE LABS LOGO en todas las placas; pedir PNG transparente a Andy"
+  },
+  "entrega": {
+    "resolucion": "2160x3840 (como las ediciones de Sebas) — vertical 9:16",
+    "fps": "23,976 (fps del crudo Sony)",
+    "codec": "H.264 + AAC 48 kHz",
+    "volumen": "-14 LUFS, pico -1 dBTP (las v1 de Sebas salieron a -25/-24 LUFS: muy bajas)"
+  },
+  "material": "Carpeta 'andy spine' (110 clips C7645–C7814). C7645–C7669 en perfil plano (gris): necesitan LUT. No usar C7658/C7659 (precios) ni C7698.",
+  "nota": "Material confidencial del cliente: no va a git ni se publica. Referencia de estilo: TOFU_1 y TOFU_2 editados por Sebas (4-nov-2026)."
+}
