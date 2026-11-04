@@ -37,3 +37,8 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
    Verificar con stems: voz vs música en cada medio segundo (diferencia ~20 dB).
 9. **Cero silencio al entrar a la toma de quien habla** (MOF-3 v3): la toma entra 50 ms antes de la primera palabra
    (medir el arranque de la voz con energía, no con el tiempo de Whisper, que se adelanta ~0,5 s).
+
+## Reparto del lote (4-nov-2026)
+- **Andy**: TOF-5, MOF-1, MOF-2.  **Sebas**: TOF-1, TOF-2, TOF-3.  NO tocarlos.
+- **Claude**: BOF-1 ✅, MOF-3 ✅ (a Andy le gustó más que el suyo), BOF-2, BOF-3, SMS "More than one way",
+  "What to expect" A (ya agendaron) y B (aún no agendan), TOF-4 (al final: faltan los videos de Izzy).
