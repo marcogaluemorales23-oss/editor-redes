@@ -50,3 +50,6 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     Medir el temblor en el FONDO antes/después; "fuerte" (40) casi nunca mejora y agranda el zoom, que Sebas no quiere.
     Planos seguidos del mismo clip comparten `"estab_rango"` para que no salte el zoom en el corte.
 13. **Persona a cámara centrada en x** (BOF-2): la doctora alineada al centro del video; la altura se respeta.
+14. **Antes de estabilizar, buscar otro tramo del mismo clip** (BOF-2, check-in): medir el temblor a lo largo del
+    clip y usar el tramo más quieto que muestre la acción (C7682 18,0–19,4: la mano tocando la pantalla, 1,5 px).
+    La estabilización deja un bamboleo que Sebas nota; un tramo quieto no.
