@@ -167,6 +167,9 @@ def dibujar_textos(fr, t, bloques):
         if t < b["t"] - 0.01 or t >= b.get("hasta", 1e9):
             continue
         u_sal = (t - (b.get("hasta", 1e9) - SALE_S)) / SALE_S
+        if b.get("anim") == "izq_der":
+            dibujar_izq_der(fr, t, b)
+            continue
         for s in b["_segs"]:
             u = (t - s["t"]) / ENTRA_S
             if u < 0:
@@ -180,6 +183,35 @@ def dibujar_textos(fr, t, bloques):
                 borr = max(borr, 40 * suave(u_sal))
                 alfa *= 1 - suave(u_sal)
             pegar(fr, barrer(img, borr), s["x"] + dx, s["y"], alfa)
+
+
+IZQ_ENTRA_S, IZQ_SALE_S, IZQ_DX = 0.38, 0.3, 90
+
+
+def revelar(img, desde, hasta, borde=28):
+    """Deja visible solo la franja horizontal [desde, hasta] (fracciones del ancho), con borde suave."""
+    w = img.shape[1]
+    x = np.arange(w, dtype=np.float32)
+    m = np.clip((x - desde * w) / borde + 0.5, 0, 1) * np.clip((hasta * w - x) / borde + 0.5, 0, 1)
+    out = img.copy()
+    out[..., 3] = (out[..., 3].astype(np.float32) * m[None, :]).astype(np.uint8)
+    return out
+
+
+def dibujar_izq_der(fr, t, b):
+    """Pedido de Sebas (MOF-3): el texto aparece de izquierda a derecha deslizando suave, se detiene en el centro
+    y antes del corte sigue hacia la derecha y se va borrándose también de izquierda a derecha."""
+    hasta = b.get("hasta", 1e9)
+    v = suave((t - (hasta - IZQ_SALE_S)) / IZQ_SALE_S) if hasta < 1e8 else 0.0
+    for s in b["_segs"]:
+        u = (t - s["t"]) / IZQ_ENTRA_S
+        if u < 0:
+            continue
+        ue = sale(u)
+        dx = -IZQ_DX * (1 - ue) + IZQ_DX * v
+        img = revelar(s["img"], v, ue * 1.08)
+        borr = 22 * (1 - ue) + 22 * v
+        pegar(fr, barrer(img, borr), s["x"] + dx, s["y"])
 
 
 # ---------- imagen ----------

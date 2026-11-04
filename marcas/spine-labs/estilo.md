@@ -26,3 +26,9 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 2. **Cortes sobre el golpe** de la música (planos de 3 tiempos ≈ 1,8 s a 99 BPM; placa final 5 tiempos).
 3. **Sin precios en pantalla**: la clínica tiene carteles de $29/$59 y listas de precios en la sala de espera;
    los anuncios dicen "first visit is always free". Encuadrar para que no se vean.
+4. **Animación de textos "izq_der"** (MOF-3): el texto aparece revelándose de izquierda a derecha con un deslizamiento
+   suave, se detiene en el centro y antes del corte sigue hacia la derecha borrándose (`"anim": "izq_der"` en el bloque).
+   Cada plano con texto necesita al menos ~1,1 s para que se lea entre la entrada y la salida.
+5. **Texto sobre pantallas**: no tapar lo que muestra el celular/tablet (MOF-3 toma 4: título arriba del teléfono).
+6. **Sin puntos** en palabras sueltas en pantalla (BONE, MUSCLE, NERVE).
+7. **Voces que no se grabaron**: van como texto en pantalla; nunca se genera la voz de la doctora con IA.
