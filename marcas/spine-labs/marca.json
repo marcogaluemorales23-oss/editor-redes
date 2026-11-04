@@ -2,7 +2,11 @@
   "nombre": "Spine Labs",
   "cliente_de": "Andy (editor) — clínica de quiropráctica y descompresión espinal en EE. UU.",
   "idioma": "inglés (todo texto en pantalla y voz en inglés)",
-  "sensacion": ["limpio", "moderno", "clínico pero cercano"],
+  "sensacion": [
+    "limpio",
+    "moderno",
+    "clínico pero cercano"
+  ],
   "colores": {
     "texto": "#FFFFFF",
     "caja": "#000000",
@@ -10,7 +14,11 @@
     "sombra": "resplandor oscuro muy difuso detrás del texto blanco (sin contorno)"
   },
   "fuentes": {
-    "textos": {"familia": "Inter", "peso": "Bold/ExtraBold", "nota": "sans geométrica, tracking apretado"}
+    "textos": {
+      "familia": "Inter",
+      "peso": "Bold/ExtraBold",
+      "nota": "sans geométrica, tracking apretado"
+    }
   },
   "textos": {
     "estilo": "frase partida en líneas de distinto tamaño, centrada; la palabra clave más grande en blanco sobre caja negra recta (\"adjustment\", \"FOR A SPINE\") o en negro sin caja (\"CARE\"); palabras pequeñas de apoyo (\"like this?\")",
@@ -20,7 +28,7 @@
   "placa_final": {
     "fondo": "último plano desenfocado (cámara sigue corriendo)",
     "texto": "THERE'S MORE THAN / ONE WAY TO CARE / FOR A SPINE",
-    "logo": "PENDIENTE: el guion pide SPINE LABS LOGO en todas las placas; pedir PNG transparente a Andy"
+    "logo": "reels/spine-labs/trabajo/marca/logo_blanco.png y logo_negro.png (wordmark SPINE LABS + línea + 'CHIROPRACTIC CARE, SIMPLIFIED', sacado de su web; no va a git). Blanco sobre tomas oscuras/desenfocadas, negro sobre fondos claros. No alterar el logo."
   },
   "entrega": {
     "resolucion": "2160x3840 (como las ediciones de Sebas) — vertical 9:16",
