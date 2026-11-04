@@ -130,7 +130,8 @@ def maquetar(bloque):
             base = y0 + yl + cap_max                       # línea base de la fila
             arriba_cap = y0 + yl + cap_max * 0.22 if s.get("arriba") else base - g["cap_h"]   # borde superior de las mayúsculas
             t = s.get("t", bloque["t"] + k * bloque.get("paso", 0.2))
-            lineas.append({"img": img, "x": x - g["m"], "y": arriba_cap - g["m"] - g["py"], "t": t})
+            lineas.append({"img": img, "x": x - g["m"], "y": arriba_cap - g["m"] - g["py"], "t": t,
+                           "anim": s.get("anim")})
             x += g["w"] + e
             k += 1
     return lineas
@@ -148,12 +149,12 @@ def pegar(fr, img, x, y, alfa=1.0):
     fr[y0:y1, x0:x1] = fr[y0:y1, x0:x1] * (1 - a) + sub[..., 2::-1] * a
 
 
-def barrer(img, largo):
-    """Desenfoque de movimiento horizontal sobre un RGBA (premultiplicado para no ensuciar bordes)."""
+def barrer(img, largo, vertical=False):
+    """Desenfoque de movimiento (horizontal o vertical) sobre un RGBA, premultiplicado para no ensuciar bordes."""
     largo = int(largo)
     if largo < 2:
         return img
-    k = np.ones((1, largo), np.float32) / largo
+    k = np.ones((largo, 1) if vertical else (1, largo), np.float32) / largo
     f = img.astype(np.float32)
     a = f[..., 3:4] / 255.0
     pre = np.concatenate([f[..., :3] * a, f[..., 3:4]], axis=2)
@@ -162,30 +163,8 @@ def barrer(img, largo):
     return np.concatenate([pre[..., :3] / a2, pre[..., 3:4]], axis=2).clip(0, 255).astype(np.uint8)
 
 
-def dibujar_textos(fr, t, bloques):
-    for b in bloques:
-        if t < b["t"] - 0.01 or t >= b.get("hasta", 1e9):
-            continue
-        u_sal = (t - (b.get("hasta", 1e9) - SALE_S)) / SALE_S
-        if b.get("anim") == "izq_der":
-            dibujar_izq_der(fr, t, b)
-            continue
-        for s in b["_segs"]:
-            u = (t - s["t"]) / ENTRA_S
-            if u < 0:
-                continue
-            ue = sale(u)
-            img = s["img"]
-            dx = -46 * (1 - ue)
-            borr = 48 * (1 - ue)
-            alfa = min(1.0, u * 1.6)
-            if u_sal > 0:                                  # salida borrosa
-                borr = max(borr, 40 * suave(u_sal))
-                alfa *= 1 - suave(u_sal)
-            pegar(fr, barrer(img, borr), s["x"] + dx, s["y"], alfa)
-
-
-IZQ_ENTRA_S, IZQ_SALE_S, IZQ_DX = 0.38, 0.3, 90
+IZQ_ENTRA_S, IZQ_SALE_S, IZQ_DX = 0.38, 0.3, 90       # "izq_der" (MOF-3)
+VERT_ENTRA_S, VERT_SALE_S, VERT_DY = 0.4, 0.28, 70    # "subir" / "bajar" (TOF-4)
 
 
 def revelar(img, desde, hasta, borde=28):
@@ -198,20 +177,51 @@ def revelar(img, desde, hasta, borde=28):
     return out
 
 
-def dibujar_izq_der(fr, t, b):
-    """Pedido de Sebas (MOF-3): el texto aparece de izquierda a derecha deslizando suave, se detiene en el centro
-    y antes del corte sigue hacia la derecha y se va borrándose también de izquierda a derecha."""
-    hasta = b.get("hasta", 1e9)
-    v = suave((t - (hasta - IZQ_SALE_S)) / IZQ_SALE_S) if hasta < 1e8 else 0.0
-    for s in b["_segs"]:
+def dibujar_seg(fr, t, s, anim, hasta):
+    """Un segmento de texto con su animación:
+    None      entra deslizando desde la izquierda con desenfoque y sale borroso (BOF-1)
+    "izq_der" se revela de izquierda a derecha, se detiene en el centro y sigue a la derecha al salir (MOF-3)
+    "subir"   sube desde abajo apareciendo (desvanecido + desenfoque vertical) y al salir se desvanece subiendo
+    "bajar"   cae desde arriba apareciendo y al salir se desvanece bajando"""
+    img = s["img"]
+    if anim == "izq_der":
         u = (t - s["t"]) / IZQ_ENTRA_S
         if u < 0:
-            continue
+            return
         ue = sale(u)
+        v = suave((t - (hasta - IZQ_SALE_S)) / IZQ_SALE_S) if hasta < 1e8 else 0.0
         dx = -IZQ_DX * (1 - ue) + IZQ_DX * v
-        img = revelar(s["img"], v, ue * 1.08)
-        borr = 22 * (1 - ue) + 22 * v
-        pegar(fr, barrer(img, borr), s["x"] + dx, s["y"])
+        pegar(fr, barrer(revelar(img, v, ue * 1.08), 22 * (1 - ue) + 22 * v), s["x"] + dx, s["y"])
+    elif anim in ("subir", "bajar"):
+        u = (t - s["t"]) / VERT_ENTRA_S
+        if u < 0:
+            return
+        ue = sale(u)
+        v = suave((t - (hasta - VERT_SALE_S)) / VERT_SALE_S) if hasta < 1e8 else 0.0
+        signo = 1 if anim == "subir" else -1               # subir: viene de abajo (+y) y se va hacia arriba
+        dy = signo * VERT_DY * (1 - ue) - signo * 0.6 * VERT_DY * v
+        alfa = min(1.0, u * 1.4) * (1 - v)
+        pegar(fr, barrer(img, 30 * (1 - ue) + 26 * v, vertical=True), s["x"], s["y"] + dy, alfa)
+    else:
+        u = (t - s["t"]) / ENTRA_S
+        if u < 0:
+            return
+        ue = sale(u)
+        borr, alfa = 48 * (1 - ue), min(1.0, u * 1.6)
+        u_sal = (t - (hasta - SALE_S)) / SALE_S
+        if u_sal > 0:                                      # salida borrosa
+            borr = max(borr, 40 * suave(u_sal))
+            alfa *= 1 - suave(u_sal)
+        pegar(fr, barrer(img, borr), s["x"] - 46 * (1 - ue), s["y"], alfa)
+
+
+def dibujar_textos(fr, t, bloques):
+    for b in bloques:
+        hasta = b.get("hasta", 1e9)
+        if t < b["t"] - 0.01 or t >= hasta:
+            continue
+        for s in b["_segs"]:                               # cada palabra puede traer su propia "anim"
+            dibujar_seg(fr, t, s, s.get("anim") or b.get("anim"), hasta)
 
 
 # ---------- imagen ----------

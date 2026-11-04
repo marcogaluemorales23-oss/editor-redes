@@ -53,3 +53,6 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 14. **Antes de estabilizar, buscar otro tramo del mismo clip** (BOF-2, check-in): medir el temblor a lo largo del
     clip y usar el tramo más quieto que muestre la acción (C7682 18,0–19,4: la mano tocando la pantalla, 1,5 px).
     La estabilización deja un bamboleo que Sebas nota; un tramo quieto no.
+15. **Animación por palabra** (TOF-4): cada segmento puede traer su `"anim"` (si no, la del bloque):
+    `izq_der` (BONE/MUSCLE/NERVE), `subir` (frases que suben desde abajo con desvanecido, toma 1 y tomas 8–10),
+    `bajar` (TO YOU cae desde arriba debajo de IMPORTANT que entra izq_der). Sebas mezcla animaciones según la toma.
