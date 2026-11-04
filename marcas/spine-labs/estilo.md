@@ -63,3 +63,7 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     cuadro). Si camina hacia la cámara y casi no se nota, sumar un acercamiento suave.
 18. **TOF-4 v3** (aprobado): a Sebas no le gustaron los aplausos/brillo generados en el gancho; quedó solo música.
     Si se quiere sonido de escena, pedir efectos reales de Pixabay ("crowd applause cheering", "magic sparkle").
+19. **UN VIDEO A LA VEZ** (regla de Sebas): no mandar storyboards ni avances de otro video hasta que Sebas diga
+    "listo, vamos con el siguiente". "Tofu cubano" = TOF-4 (así suena "tofu cuatro" en su dictado).
+20. **Toda toma arranca en movimiento real** (TOF-4, tomas 3 y 4): medir el movimiento cuadro a cuadro y entrar
+    cuando la persona ya camina con decisión, no en los pasos titubeantes de "dale, ya estoy grabando" (se ve actuado).
