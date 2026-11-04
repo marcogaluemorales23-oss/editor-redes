@@ -41,7 +41,7 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
 ## Reparto del lote (4-nov-2026)
 - **Andy**: TOF-5, MOF-1, MOF-2.  **Sebas**: TOF-1, TOF-2, TOF-3.  NO tocarlos.
 - **Claude**: BOF-1 ✅, MOF-3 ✅ (a Andy le gustó más que el suyo), BOF-3 ✅, BOF-2 ✅, SMS "More than one way",
-  "What to expect" A (ya agendaron) y B (aún no agendan), TOF-4 (al final: faltan los videos de Izzy).
+  "What to expect" A (ya agendaron) y B (aún no agendan), TOF-4 ✅.
 10. **Textos partidos en dos** (BOF-2): la palabra de apoyo arriba SIN caja y un poco más grande cuando es la que
     atrae ("SPINAL"), la clave abajo CON caja ("DECOMPRESSION"); en la placa: "BOOK YOUR FIRST" sin caja / "VISIT NOW" con caja.
 11. **Material de celular** (videos de Izzy, horizontales y de baja resolución): va como recuadro centrado sobre el
@@ -61,3 +61,5 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     y el gancho a ~3 dB del resto para que no se sienta flojo.
 17. **Nada de tomas "esperando la orden"**: arrancar cuando la persona ya se mueve (medir movimiento cuadro a
     cuadro). Si camina hacia la cámara y casi no se nota, sumar un acercamiento suave.
+18. **TOF-4 v3** (aprobado): a Sebas no le gustaron los aplausos/brillo generados en el gancho; quedó solo música.
+    Si se quiere sonido de escena, pedir efectos reales de Pixabay ("crowd applause cheering", "magic sparkle").
