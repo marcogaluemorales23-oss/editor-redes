@@ -29,7 +29,8 @@ Uso:
   "logo": {"archivo": "marca/logo.png", "t": 9.0, "y": 1350, "ancho": 300},
   "audio": {
     "voz": [{"clip": "C7800", "desde": 1.2, "hasta": 4.6, "en": 0.0, "db": 0}],
-    "musica": {"archivo": "musica/pista.mp3", "desde": 0, "db": -18, "duck": true},
+    "musica": {"archivo": "musica/pista.mp3", "desde": 0, "db": -18, "duck": true,
+               "eq": "highshelf=f=5000:g=-4"},                 # opcional: ecualizador ffmpeg (suavizar agudos)
     "sfx": [{"archivo": "sfx/whoosh.wav", "en": 2.0, "db": -4.4}]
   }
 }
@@ -315,7 +316,7 @@ def mezclar_audio(reel, g, dur, destino):
         entradas += ["-i", str(Path(reel) / "trabajo" / M["archivo"])]
         idx = len(entradas) // 2 - 1
         cadenas.append(f'[{idx}:a]atrim={M.get("desde", 0)}:{M.get("desde", 0) + dur},asetpts=PTS-STARTPTS,'
-                       f'aformat=channel_layouts=stereo,volume={M.get("db", -18)}dB,'
+                       f'aformat=channel_layouts=stereo,{M.get("eq", "anull")},volume={M.get("db", -18)}dB,'
                        f'afade=t=out:st={max(dur - M.get("fade", 0.8), 0)}:d={M.get("fade", 0.8)}[mus0]')
         if voces and M.get("duck", True):
             cadenas.append("[voz]asplit[voz][vsc]")
