@@ -81,3 +81,7 @@ Estilo aprobado para probar (estilo 5): cursiva Cormorant (con sombra fuerte) en
 subtítulos en Montserrat 600-700 blanca con sombra oscura cercana (sombra 1.0, blur 0.2) — sin píldoras (a Sebas no le
 gustaron); `"grado": "cine"`. Música: Andy autoriza cualquier canción (sin licencia, riesgo asumido por él).
    **What to expect va SIN subtítulos** (Sebas). La función de subtítulos queda para otros videos (`subtitulos()` en reels/spine-labs/trabajo/estilos_wte.py).
+   **Estilo "referencia"** (medido en píxeles sobre el testimonio que mandó Andy): la fuente es **Raleway** (no
+   Montserrat: la W y la M lo delatan), peso ~650, MAYÚSCULAS, blanca, em 64 en 1080 (cap 45 px), tracking 0.02,
+   UNA línea a y≈1097 (57 % del alto), sombra proyectada abajo-derecha `"sombra_caida": [4, 5, 2, 0.95]`, entra y
+   sale en seco. Sin cursiva ni cajas. Generador: reels/spine-labs/trabajo/estilo_referencia.py.

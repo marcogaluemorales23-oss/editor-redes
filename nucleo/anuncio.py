@@ -51,7 +51,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 W, H = 1080, 1920
 FUENTES = {p: f"/usr/share/fonts/opentype/inter/Inter-{p}.otf" for p in ("Bold", "ExtraBold", "Black", "SemiBold")}
 # fuentes variables (Google Fonts, licencia OFL) en nucleo/fuentes: "peso": "Montserrat:300", "Jost:500", "Cormorant:500"
-VARIABLES = {"Montserrat": "Montserrat-VF.ttf", "Jost": "Jost-VF.ttf", "Cormorant": "CormorantGaramond-Italic-VF.ttf"}
+VARIABLES = {"Raleway": "Raleway-VF.ttf", "Montserrat": "Montserrat-VF.ttf", "Jost": "Jost-VF.ttf", "Cormorant": "CormorantGaramond-Italic-VF.ttf"}
 COLORES = {"blanco": (255, 255, 255), "negro": (0, 0, 0), "verde": (138, 168, 136)}   # verde salvia del logo "SL"
 ENTRA_S, SALE_S, BARRIDO_S = 0.2, 0.16, 0.17
 TRACKING = -0.035      # fracción del em, letras apretadas como en las ediciones de Sebas
@@ -111,6 +111,14 @@ def sprite_seg(seg):
         s = Image.new("RGBA", (iw, ih), tono + (0,))
         s.putalpha(sombra.point(lambda v: int(v * op)))
         img = Image.alpha_composite(img, s)
+    if seg.get("sombra_caida") and not caja:      # sombra proyectada como la referencia de la clínica: [dx, dy, blur, opacidad]
+        dx, dy, bl, op = seg["sombra_caida"]
+        caida = Image.new("L", (iw, ih), 0)
+        caida.paste(capa_txt, (int(dx), int(dy)))
+        caida = caida.filter(ImageFilter.GaussianBlur(bl))
+        sc = Image.new("RGBA", (iw, ih), (0, 0, 0, 0))
+        sc.putalpha(caida.point(lambda v: int(v * op)))
+        img = Image.alpha_composite(img, sc)
     letras = Image.new("RGBA", (iw, ih), color + (0,))
     letras.putalpha(capa_txt)
     img = Image.alpha_composite(img, letras)
