@@ -97,3 +97,4 @@ Raleway: apoyo fino (300), clave en negrita (700); en el gancho la clave ~1,7x m
 fino/negrita ("THERE'S MORE THAN / ONE **WAY** TO CARE / FOR **YOUR SPINE**"). Música con ritmo (~140 BPM), cortes
 sobre el golpe, whooshes y "text sound" en las entradas. Ayudantes: reels/spine-labs/trabajo/estilo_tofu2.py.
 Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What to expect B (un video a la vez).
+   **Máximo 3 líneas por toma** (Sebas, BOF-1): si una frase pide más, se parte entre dos tomas para que no se vea cargado.
