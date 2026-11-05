@@ -50,6 +50,9 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 W, H = 1080, 1920
 FUENTES = {p: f"/usr/share/fonts/opentype/inter/Inter-{p}.otf" for p in ("Bold", "ExtraBold", "Black", "SemiBold")}
+# fuentes variables (Google Fonts, licencia OFL) en nucleo/fuentes: "peso": "Montserrat:300", "Jost:500", "Cormorant:500"
+VARIABLES = {"Montserrat": "Montserrat-VF.ttf", "Jost": "Jost-VF.ttf", "Cormorant": "CormorantGaramond-Italic-VF.ttf"}
+COLORES = {"blanco": (255, 255, 255), "negro": (0, 0, 0), "verde": (138, 168, 136)}   # verde salvia del logo "SL"
 ENTRA_S, SALE_S, BARRIDO_S = 0.2, 0.16, 0.17
 TRACKING = -0.035      # fracción del em, letras apretadas como en las ediciones de Sebas
 
@@ -68,6 +71,11 @@ def sale(u):
 
 @lru_cache(None)
 def fuente(peso, tam):
+    if ":" in peso:                                # fuente variable con su peso: "Montserrat:300"
+        fam, w = peso.split(":")
+        f = ImageFont.truetype(str(Path(__file__).parent / "fuentes" / VARIABLES[fam]), tam)
+        f.set_variation_by_axes([int(w)])
+        return f
     return ImageFont.truetype(FUENTES[peso], tam)
 
 
@@ -76,7 +84,7 @@ def sprite_seg(seg):
     tam, peso = seg["tam"], seg.get("peso", "Bold")
     f = fuente(peso, tam)
     txt = seg["txt"]
-    track = TRACKING * tam
+    track = seg.get("tracking", TRACKING) * tam
     xs = [f.getlength(txt[:i]) + i * track for i in range(len(txt))]
     ancho = int(xs[-1] + f.getlength(txt[-1])) if txt else 0
     asc, desc = f.getmetrics()
@@ -90,7 +98,7 @@ def sprite_seg(seg):
     d = ImageDraw.Draw(capa_txt)
     for ch, x in zip(txt, xs):
         d.text((m + px + x, m + py - cap), ch, font=f, fill=255)
-    color = (0, 0, 0) if seg.get("color") == "negro" and not caja else (255, 255, 255)
+    color = (255, 255, 255) if caja else COLORES.get(seg.get("color", "blanco"), (255, 255, 255))
     img = Image.new("RGBA", (iw, ih), (0, 0, 0, 0))
     if caja:
         caja_img = Image.new("RGBA", (iw, ih), (0, 0, 0, 0))
@@ -98,8 +106,8 @@ def sprite_seg(seg):
         img = Image.alpha_composite(img, caja_img)
     else:
         # resplandor: oscuro detrás del blanco, claro detrás del negro (nunca contorno pegado)
-        sombra = capa_txt.filter(ImageFilter.GaussianBlur(tam * 0.16))
-        tono, op = ((0, 0, 0), 0.5) if color == (255, 255, 255) else ((255, 255, 255), 0.35)
+        sombra = capa_txt.filter(ImageFilter.GaussianBlur(tam * seg.get("sombra_blur", 0.16)))
+        tono, op = ((255, 255, 255), 0.35) if color == (0, 0, 0) else ((0, 0, 0), seg.get("sombra", 0.5))
         s = Image.new("RGBA", (iw, ih), tono + (0,))
         s.putalpha(sombra.point(lambda v: int(v * op)))
         img = Image.alpha_composite(img, s)
@@ -131,7 +139,7 @@ def maquetar(bloque):
             arriba_cap = y0 + yl + cap_max * 0.22 if s.get("arriba") else base - g["cap_h"]   # borde superior de las mayúsculas
             t = s.get("t", bloque["t"] + k * bloque.get("paso", 0.2))
             lineas.append({"img": img, "x": x - g["m"], "y": arriba_cap - g["m"] - g["py"], "t": t,
-                           "anim": s.get("anim")})
+                           "anim": s.get("anim"), "caja": (x, arriba_cap - g["py"], g["w"], g["h"])})
             x += g["w"] + e
             k += 1
     return lineas
@@ -215,11 +223,61 @@ def dibujar_seg(fr, t, s, anim, hasta):
         pegar(fr, barrer(img, borr), s["x"] - 46 * (1 - ue), s["y"], alfa)
 
 
+def _alfa_fondo(t, b, hasta):
+    u = sale((t - min(s["t"] for s in b["_segs"])) / 0.35)
+    v = suave((t - (hasta - 0.3)) / 0.3) if hasta < 1e8 else 0.0
+    return u * (1 - v)
+
+
+def dibujar_fondo(fr, t, b, hasta):
+    """Fondo detrás del bloque, en vez de la caja negra (pedido de la clienta de Andy: más delicado):
+    "degradado" sombra oscura muy difusa que solo oscurece la zona del texto (no se ve la forma);
+    "vidrio"    píldora de vidrio ahumado por línea: el video desenfocado y algo oscurecido, borde blanco fino."""
+    a = _alfa_fondo(t, b, hasta)
+    if a <= 0.01:
+        return
+    cajas = [s["caja"] for s in b["_segs"]]
+    if b["fondo"] == "degradado":
+        if "_mascara" not in b:
+            x0 = min(c[0] for c in cajas) - 150; x1 = max(c[0] + c[2] for c in cajas) + 150
+            y0 = min(c[1] for c in cajas) - 110; y1 = max(c[1] + c[3] for c in cajas) + 110
+            m = np.zeros((H, W), np.float32)
+            cv2.ellipse(m, ((int((x0 + x1) / 2), int((y0 + y1) / 2)), (int(x1 - x0), int(y1 - y0)), 0), 1.0, -1)
+            m = cv2.GaussianBlur(m, (0, 0), 70)
+            b["_mascara"] = (m / max(m.max(), 1e-6))[..., None]
+        fr *= 1 - b.get("fuerza", 0.5) * a * b["_mascara"]
+    elif b["fondo"] == "vidrio":
+        filas = {}
+        for c in cajas:                                   # una píldora por línea
+            k = round(c[1] / 10)
+            x0, y0, x1, y1 = c[0], c[1], c[0] + c[2], c[1] + c[3]
+            f = filas.get(k)
+            filas[k] = (min(f[0], x0), min(f[1], y0), max(f[2], x1), max(f[3], y1)) if f else (x0, y0, x1, y1)
+        for x0, y0, x1, y1 in filas.values():
+            px, py = 34, 20
+            X0, Y0 = int(max(x0 - px, 0)), int(max(y0 - py, 0))
+            X1, Y1 = int(min(x1 + px, W)), int(min(y1 + py, H))
+            hh, ww = Y1 - Y0, X1 - X0
+            m = np.zeros((hh, ww), np.float32)
+            r = hh // 2
+            cv2.rectangle(m, (r, 0), (ww - r, hh), 1.0, -1)
+            cv2.circle(m, (r, r), r, 1.0, -1); cv2.circle(m, (ww - r, r), r, 1.0, -1)
+            borde = cv2.GaussianBlur(m, (0, 0), 1.2) - cv2.GaussianBlur(cv2.erode(m, np.ones((5, 5))), (0, 0), 1.2)
+            m = cv2.GaussianBlur(m, (0, 0), 1.2)[..., None]
+            zona = fr[Y0:Y1, X0:X1]
+            vidrio = cv2.GaussianBlur(zona, (0, 0), 24) * b.get("oscuro", 0.62)
+            mezcla = zona * (1 - m * a) + vidrio * m * a
+            mezcla += (255 - mezcla) * (np.clip(borde, 0, 1)[..., None] * 0.35 * a)
+            fr[Y0:Y1, X0:X1] = mezcla
+
+
 def dibujar_textos(fr, t, bloques):
     for b in bloques:
         hasta = b.get("hasta", 1e9)
         if t < b["t"] - 0.01 or t >= hasta:
             continue
+        if b.get("fondo"):
+            dibujar_fondo(fr, t, b, hasta)
         for s in b["_segs"]:                               # cada palabra puede traer su propia "anim"
             dibujar_seg(fr, t, s, s.get("anim") or b.get("anim"), hasta)
 
@@ -298,6 +356,21 @@ def sonda(crudo):
     return {"w": w, "h": h, "fps": int(a) / int(b), "fps_txt": s["r_frame_rate"]}
 
 
+def graduar(img, k=1.0, rng=np.random.default_rng(3)):
+    """Color "cine" (pedido de la clienta: más cinematográfico y difuminado): negros levantados, contraste suave,
+    algo cálido y menos saturado, brillo difuso en las luces (tipo filtro Pro-Mist) y un grano fino. k = intensidad."""
+    x = img / 255.0
+    x = x * (1 - 0.06 * k) + 0.035 * k                                   # negros levantados, blancos sin quemar
+    x = 0.5 + (x - 0.5) * (1 - 0.08 * k)                                 # contraste más suave
+    gris = x.mean(2, keepdims=True)
+    x = gris + (x - gris) * (1 - 0.12 * k)                               # un poco menos saturado
+    x = x * np.array([1 - 0.035 * k, 1.0, 1 + 0.03 * k], np.float32)     # BGR: más cálido
+    luz = np.clip((x.mean(2, keepdims=True) - 0.62) / 0.38, 0, 1) * x
+    x = x + cv2.GaussianBlur(luz, (0, 0), 28) * 0.32 * k                 # difusión en las luces
+    x = x + rng.normal(0, 0.012 * k, (img.shape[0] // 2, img.shape[1] // 2, 1)).astype(np.float32).repeat(2, 0).repeat(2, 1)
+    return np.clip(x, 0, 1) * 255
+
+
 def estabilizar(reel, crudo, p):
     """Estabilización suave con vid.stab (2 pasadas) del tramo del plano + 1 s a cada lado (pedido de Sebas, BOF-2:
     tomas a mano movidas). "estabilizar": N = cuadros de suavizado (15 suave … 30 fuerte). optzoom=1 aplica el zoom
@@ -362,6 +435,8 @@ def cuadros(reel, g, fps, limite=None, solo=None):
             else:
                 img = encuadrar(fr, z0 + (z1 - z0) * suave(u), p.get("y", 0.5),
                                 p.get("x", 0.5) if vertical else 0.5).astype(np.float32)
+            if g.get("grado") == "cine":
+                img = graduar(img, g.get("grado_k", 1.0)).astype(np.float32)
             if p.get("desenfoque"):
                 a, b = p["desenfoque"]
                 r = suave((k / fps - a) / (b - a))
