@@ -98,3 +98,9 @@ fino/negrita ("THERE'S MORE THAN / ONE **WAY** TO CARE / FOR **YOUR SPINE**"). M
 sobre el golpe, whooshes y "text sound" en las entradas. Ayudantes: reels/spine-labs/trabajo/estilo_tofu2.py.
 Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What to expect B (un video a la vez).
    **Máximo 3 líneas por toma** (Sebas, BOF-1): si una frase pide más, se parte entre dos tomas para que no se vea cargado.
+   **Efectos de Sebas** (TOF-2): "text sound 2" al entrar cada palabra/línea, a veces "wosh suave" o "zoom in";
+   "ding" cuando aparece el logo de Spine Labs.
+   **Música (ronda 2)** — Andy aprobó "Ambiental Tech" (144 BPM, 31 s; ya va en el TOF-2) pero sin repetirlo mucho.
+   Plan: BOF-1 ANOTR "Talk To You" desde 19,30 s (129 BPM, tramo sin voz) · MOF-3 Be'le "algo bueno" (instrumental,
+   96 BPM) desde 13,21 · BOF-2 Ambiental Tech desde 10,03 · BOF-3 Jonas Blue "Edge Of Desire" desde 21,04 (tramo sin
+   voz) · TOF-4 ANOTR o Jonas Blue (drop) · What to expect A/B Be'le. Flo Rida "Right Round": NO (letra sexual).
