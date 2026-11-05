@@ -104,3 +104,8 @@ Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What 
    Plan: BOF-1 ANOTR "Talk To You" desde 19,30 s (129 BPM, tramo sin voz) · MOF-3 Be'le "algo bueno" (instrumental,
    96 BPM) desde 13,21 · BOF-2 Ambiental Tech desde 10,03 · BOF-3 Jonas Blue "Edge Of Desire" desde 21,04 (tramo sin
    voz) · TOF-4 ANOTR o Jonas Blue (drop) · What to expect A/B Be'le. Flo Rida "Right Round": NO (letra sexual).
+   **Sin transiciones** (Sebas, ronda 2): solo cortes secos entre tomas; nada de barridos ni su whoosh.
+   **BOF-1 ronda 2**: abre con el recorrido de arriba hacia abajo de C7732 (2,6-5,3 s, lo más estable) en vez de la
+   fachada temblorosa; la toma 2 sigue de corrido. Música elegida por Sebas: Be'le "algo bueno" desde 13,21 s
+   (96 BPM, 3 tiempos por toma ≈ 1,9 s). ANOTR le sonó "ranchera" en ese tramo; Jonas Blue no convenció.
+   Texto que no tape letreros que se mueven en la toma (BOF-1: el bloque bajó a y 1250 para que el letrero suba libre).
