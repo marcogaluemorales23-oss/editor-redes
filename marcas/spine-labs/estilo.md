@@ -89,3 +89,11 @@ gustaron); `"grado": "cine"`. Música: Andy autoriza cualquier canción (sin lic
    tomas 1 y 2 ("THANKS FOR SCHEDULING / YOUR FIRST VISIT!", "HERE'S WHAT YOU / CAN EXPECT"); TODOS los textos entran
    con `"anim": "rebote"` (suben ~46 px y se asientan con un sobrepaso suave de ~4 %, 0,5 s; salen desvaneciéndose);
    la placa final lleva las dos líneas juntas ("WE CAN'T WAIT / TO SEE YOU!"). Pasos numerados desde el check-in (1-7).
+
+## ESTILO APROBADO (5-nov-2026): el TOF-2 corregido de Sebas (le gustó a Andy y a la intermediaria)
+Raleway: apoyo fino (300), clave en negrita (700); en el gancho la clave ~1,7x más grande ("EVER SEEN AN" /
+**ADJUSTMENT** / LIKE THIS?). Sombra proyectada [4, 5, 2, 0.95]. Cada línea SUBE con desenfoque en 0,25 s
+(`"anim": "sube"`), una tras otra (paso ~0,14 s). Placa: logo arriba (y≈650, ancho 470) y la frase debajo mezclando
+fino/negrita ("THERE'S MORE THAN / ONE **WAY** TO CARE / FOR **YOUR SPINE**"). Música con ritmo (~140 BPM), cortes
+sobre el golpe, whooshes y "text sound" en las entradas. Ayudantes: reels/spine-labs/trabajo/estilo_tofu2.py.
+Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What to expect B (un video a la vez).

@@ -208,6 +208,14 @@ def dibujar_seg(fr, t, s, anim, hasta):
         v = suave((t - (hasta - IZQ_SALE_S)) / IZQ_SALE_S) if hasta < 1e8 else 0.0
         dx = -IZQ_DX * (1 - ue) + IZQ_DX * v
         pegar(fr, barrer(revelar(img, v, ue * 1.08), 22 * (1 - ue) + 22 * v), s["x"] + dx, s["y"])
+    elif anim == "sube":                                # TOF-2 corregido de Sebas: sube ~40 px con desenfoque vertical en 0,25 s
+        u = (t - s["t"]) / 0.25
+        if u < 0:
+            return
+        ue = sale(u)
+        v = suave((t - (hasta - 0.15)) / 0.15) if hasta < 1e8 else 0.0
+        alfa = min(1.0, u * 1.8) * (1 - v)
+        pegar(fr, barrer(img, 26 * (1 - ue), vertical=True), s["x"], s["y"] + 40 * (1 - ue), alfa)
     elif anim == "rebote":                              # sube desde abajo y se asienta con un rebote suave (Sebas)
         u = (t - s["t"]) / 0.5
         if u < 0:
