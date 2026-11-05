@@ -80,3 +80,4 @@ subtítulos de 2-3 palabras que aparecen en seco, color cálido suave, cierre co
 Estilo aprobado para probar (estilo 5): cursiva Cormorant (con sombra fuerte) en las frases grandes; etiquetas y
 subtítulos en Montserrat 600-700 blanca con sombra oscura cercana (sombra 1.0, blur 0.2) — sin píldoras (a Sebas no le
 gustaron); `"grado": "cine"`. Música: Andy autoriza cualquier canción (sin licencia, riesgo asumido por él).
+   **What to expect va SIN subtítulos** (Sebas). La función de subtítulos queda para otros videos (`subtitulos()` en reels/spine-labs/trabajo/estilos_wte.py).
