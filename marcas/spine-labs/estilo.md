@@ -72,3 +72,11 @@ Lote de 14 videos de Meta Ads + SMS/email para Andy (nov-2026). Guiones en la ca
     Recortar colas de otra frase ("And what…") y silencios internos de más de 0,3 s al inicio de una toma hablada.
 22. **Descompresión = piernas elevadas en el cojín** (What to expect, toma 10): Sebas espera ver la camilla haciendo
     su trabajo (C7785 2,9–5,65: piernas arriba + logo SPINE LABS de la máquina), no solo a la persona acostada.
+
+## Ronda de correcciones (5-nov-2026, clienta de Andy)
+Pidió: fuente más de marca y delicada, SIN cajas negras, color cinematográfico/difuminado, música moderna (no stock),
+más dinamismo con el audio. Referencia de la clínica (testimonio): Montserrat SemiBold MAYÚSCULAS blanca con sombra,
+subtítulos de 2-3 palabras que aparecen en seco, color cálido suave, cierre con logo 3D cromado (no lo tienen).
+Estilo aprobado para probar (estilo 5): cursiva Cormorant (con sombra fuerte) en las frases grandes; etiquetas y
+subtítulos en Montserrat 600-700 blanca con sombra oscura cercana (sombra 1.0, blur 0.2) — sin píldoras (a Sebas no le
+gustaron); `"grado": "cine"`. Música: Andy autoriza cualquier canción (sin licencia, riesgo asumido por él).

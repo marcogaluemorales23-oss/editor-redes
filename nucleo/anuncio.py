@@ -200,6 +200,11 @@ def dibujar_seg(fr, t, s, anim, hasta):
         v = suave((t - (hasta - IZQ_SALE_S)) / IZQ_SALE_S) if hasta < 1e8 else 0.0
         dx = -IZQ_DX * (1 - ue) + IZQ_DX * v
         pegar(fr, barrer(revelar(img, v, ue * 1.08), 22 * (1 - ue) + 22 * v), s["x"] + dx, s["y"])
+    elif anim == "corte":                               # subtítulo tipo referencia: aparece y se va en seco
+        if t < s["t"]:
+            return
+        alfa = min(1.0, (t - s["t"]) / 0.05) * min(1.0, max(0.0, (hasta - t) / 0.05))
+        pegar(fr, img, s["x"], s["y"], alfa)
     elif anim in ("subir", "bajar"):
         u = (t - s["t"]) / VERT_ENTRA_S
         if u < 0:
