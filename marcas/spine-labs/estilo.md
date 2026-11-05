@@ -85,3 +85,7 @@ gustaron); `"grado": "cine"`. Música: Andy autoriza cualquier canción (sin lic
    Montserrat: la W y la M lo delatan), peso ~650, MAYÚSCULAS, blanca, em 64 en 1080 (cap 45 px), tracking 0.02,
    UNA línea a y≈1097 (57 % del alto), sombra proyectada abajo-derecha `"sombra_caida": [4, 5, 2, 0.95]`, entra y
    sale en seco. Sin cursiva ni cajas. Generador: reels/spine-labs/trabajo/estilo_referencia.py.
+   Correcciones de Sebas sobre el estilo referencia: apertura en DOS líneas apiladas a mitad de pantalla (y 960) en las
+   tomas 1 y 2 ("THANKS FOR SCHEDULING / YOUR FIRST VISIT!", "HERE'S WHAT YOU / CAN EXPECT"); TODOS los textos entran
+   con `"anim": "rebote"` (suben ~46 px y se asientan con un sobrepaso suave de ~4 %, 0,5 s; salen desvaneciéndose);
+   la placa final lleva las dos líneas juntas ("WE CAN'T WAIT / TO SEE YOU!"). Pasos numerados desde el check-in (1-7).
