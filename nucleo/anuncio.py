@@ -40,6 +40,7 @@ Salida: <reel>/salida/<nombre>.mp4 (1080x1920, fps del crudo, H.264 + AAC, -14 L
 """
 import argparse
 import json
+import sys
 import subprocess
 from functools import lru_cache
 from pathlib import Path
@@ -652,6 +653,46 @@ def duracion(g, fps):
     return sum(int(round(p["dur"] * fps)) for p in g["planos"]) / fps
 
 
+def revisar_caras(reel, g, fps):
+    """Autorrevisión (Sebas: "el texto le tapa la cara"): detecta caras en los cuadros SIN textos y avisa si algún
+    texto las toca. Mira cada bloque al entrar, a la mitad y al salir. Cara = caja de MediaPipe agrandada (frente y
+    barbilla)."""
+    import mediapipe as mp
+    sys.path.insert(0, str(Path(__file__).parent))
+    from caras import detector
+    dur = sum(round(p["dur"] * fps) / fps for p in g["planos"])
+    muestras = []
+    for b in g.get("textos", []):
+        a, z = b["t"] + 0.3, min(b.get("hasta", dur), dur) - 0.1
+        for t in (a, (a + z) / 2, z):
+            if 0 <= t < dur:
+                muestras.append((round(round(t * fps) / fps, 3), b))
+    tiempos = sorted({t for t, _ in muestras})
+    base = dict(g, textos=[], logo=None)
+    caras_t = {}
+    for t, img in cuadros(reel, base, fps, solo=tiempos):
+        peq = cv2.cvtColor(cv2.resize(img.clip(0, 255).astype(np.uint8), (540, 960)), cv2.COLOR_BGR2RGB)
+        r = detector().detect(mp.Image(image_format=mp.ImageFormat.SRGB, data=np.ascontiguousarray(peq)))
+        cajas = []
+        for d in r.detections:
+            if d.categories[0].score < 0.6:                 # descarta dibujos (el tigre de la camiseta) y nucas
+                continue
+            bb = d.bounding_box
+            x, y, w, h = bb.origin_x * 2, bb.origin_y * 2, bb.width * 2, bb.height * 2
+            cajas.append((x - 0.1 * w, y - 0.25 * h, x + 1.1 * w, y + 1.25 * h))
+        caras_t[round(t, 3)] = cajas
+    for t, b in muestras:
+        cajas = caras_t.get(t) or min(caras_t.items(), key=lambda kv: abs(kv[0] - t))[1]
+        for (fx0, fy0, fx1, fy1) in cajas:
+            for sg in b.get("_segs", []):
+                x, y, w, h = sg["caja"]
+                ix = max(0, min(x + w, fx1) - max(x, fx0)); iy = max(0, min(y + h, fy1) - max(y, fy0))
+                if ix * iy > 0.04 * (fx1 - fx0) * (fy1 - fy0):
+                    txt = " / ".join(" ".join(s["txt"] for s in l["segs"]) for l in b["lineas"])
+                    AVISOS.append(f"«{txt}» tapa una cara (segundo {t:.1f})")
+                    break
+
+
 def storyboard(reel, g, fps, guias=False):
     """Hoja con un cuadro por plano (a 60 % del plano, o en "muestra"), numerado y con el segundo."""
     tiempos, t0 = [], 0.0
@@ -749,6 +790,8 @@ def main():
         return
     if a.storyboard:
         storyboard(a.reel, g, info["fps"], guias=a.guias)
+        if a.guias:
+            revisar_caras(a.reel, g, info["fps"])
     else:
         render(a.reel, g, info["fps"], info["fps_txt"], a.prueba)
     for x in dict.fromkeys(AVISOS):
