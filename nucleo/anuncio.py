@@ -786,6 +786,12 @@ def main():
     info = Counter((sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps_txt"],
                     sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps"]) for p in g["planos"]).most_common(1)[0][0]
     info = {"fps_txt": info[0], "fps": info[1]}
+    for k, p in enumerate(g["planos"]):                  # gorra: un plano más largo que su clip cortaba el video
+        largo = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
+                                      str(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')], capture_output=True,
+                                     text=True).stdout)
+        if p["desde"] + p["dur"] > largo + 0.01 and not p.get("filtro"):
+            AVISOS.append(f'toma {k + 1} ({p["clip"]}) pide hasta {p["desde"] + p["dur"]:.2f} s y el clip dura {largo:.2f} s')
     if a.voz:
         dur = sum(round(p["dur"] * info["fps"]) / info["fps"] for p in g["planos"])
         destino = Path(a.reel) / "salida" / f'{g["nombre"]}_VOZ.wav'
