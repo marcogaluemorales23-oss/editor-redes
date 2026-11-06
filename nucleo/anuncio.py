@@ -569,11 +569,16 @@ def mezclar_audio(reel, g, dur, destino):
         if A.get("voz_archivo"):                             # la voz viene ya limpia: solo las ventanas (ducking)
             ventanas.append((v["en"], v["en"] + largo))
             continue
-        crudo = str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')
+        if v.get("archivo"):                                 # tramo de una voz ya limpiada por Sebas (su nivel)
+            crudo = str(Path(reel) / "trabajo" / v["archivo"])
+            limpia = "aformat=channel_layouts=mono"
+            nivel = lufs(["-i", crudo], limpia)              # una sola ganancia para todo su archivo
+        else:
+            crudo = str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')
+            limpia = (f'aformat=channel_layouts=mono,highpass=f=80,afftdn=nf=-30,'
+                      f'acompressor=threshold=-24dB:ratio=3:attack=8:release=120')
+            nivel = lufs(["-ss", str(v["desde"]), "-t", str(largo), "-i", crudo], limpia)
         entradas += ["-i", crudo]
-        limpia = (f'aformat=channel_layouts=mono,highpass=f=80,afftdn=nf=-30,'
-                  f'acompressor=threshold=-24dB:ratio=3:attack=8:release=120')
-        nivel = lufs(["-ss", str(v["desde"]), "-t", str(largo), "-i", crudo], limpia)
         gan = VOZ_LUFS - nivel + v.get("db", 0)
         cadenas.append(
             f'[{len(entradas)//2 - 1}:a]atrim={v["desde"]}:{v["hasta"]},asetpts=PTS-STARTPTS,{limpia},'
