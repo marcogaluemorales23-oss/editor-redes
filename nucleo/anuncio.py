@@ -127,6 +127,30 @@ def sprite_seg(seg):
                            "base": linea_base - m, "cap_h": asc - cap}
 
 
+ANCHO_MAX = 900          # ningún texto pasa de 900 px: 90 px de margen a cada lado (recortes de Instagram/TikTok/Meta)
+ZONA_Y = (250, 1590)     # nada importante arriba de 250 ni debajo de 1590 (interfaz de las apps)
+AVISOS = []
+
+
+def revisar_zonas(bloques):
+    """Autorrevisión antes de entregar: cada bloque dentro de la zona segura (ancho y alto)."""
+    for b in bloques:
+        cajas = [s["caja"] for s in b.get("_segs", [])]
+        if not cajas:
+            continue
+        x0 = min(c[0] for c in cajas); x1 = max(c[0] + c[2] for c in cajas)
+        y0 = min(c[1] for c in cajas); y1 = max(c[1] + c[3] for c in cajas)
+        txt = " / ".join(" ".join(s["txt"] for s in l["segs"]) for l in b["lineas"])
+        if x0 < (W - ANCHO_MAX) / 2 - 2 or x1 > (W + ANCHO_MAX) / 2 + 2:
+            AVISOS.append(f"«{txt}» se sale del ancho seguro (x {x0:.0f}-{x1:.0f})")
+        for c in cajas:                                    # columna de likes/comentarios: x > 850 desde y = 1000
+            if c[1] + c[3] > 1000 and c[0] + c[2] > 852:
+                AVISOS.append(f"«{txt}» toca la columna de botones (x hasta {c[0] + c[2]:.0f} con y > 1000)")
+                break
+        if y0 < ZONA_Y[0] or y1 > ZONA_Y[1]:
+            AVISOS.append(f"«{txt}» se sale del alto seguro (y {y0:.0f}-{y1:.0f})")
+
+
 def maquetar(bloque):
     """Posición de cada segmento (centrado en x=540, bloque centrado en y)."""
     lineas, filas, y = [], [], 0.0
@@ -134,6 +158,15 @@ def maquetar(bloque):
         segs = [(s, *sprite_seg(s)) for s in li["segs"]]
         esp = [int(s["tam"] * 0.22) for s, _, _ in segs]
         ancho = sum(g["w"] for _, _, g in segs) + sum(esp[:-1])
+        if ancho > ANCHO_MAX:                              # zona segura: se achica la línea hasta que quepa
+            f = ANCHO_MAX / ancho
+            txt = " ".join(s["txt"] for s, _, _ in segs)
+            AVISOS.append(f"«{txt}» medía {ancho:.0f} px (máx {ANCHO_MAX}): achicada al {f * 100:.0f} %")
+            for s, _, _ in segs:
+                s["tam"] = max(int(s["tam"] * f), 10)
+            segs = [(s, *sprite_seg(s)) for s in li["segs"]]
+            esp = [int(s["tam"] * 0.22) for s, _, _ in segs]
+            ancho = sum(g["w"] for _, _, g in segs) + sum(esp[:-1])
         cap_max = max(g["cap_h"] for _, _, g in segs)
         filas.append((segs, esp, ancho, cap_max, y))
         y += cap_max + max(s["tam"] for s, _, _ in segs) * li.get("aire", 0.2)
@@ -435,6 +468,7 @@ def cuadros(reel, g, fps, limite=None, solo=None):
     bloques = g.get("textos", [])
     for b in bloques:
         b["_segs"] = maquetar(b)
+    revisar_zonas(bloques)
     logo = None
     if g.get("logo"):
         L = g["logo"]
@@ -608,7 +642,7 @@ def duracion(g, fps):
     return sum(int(round(p["dur"] * fps)) for p in g["planos"]) / fps
 
 
-def storyboard(reel, g, fps):
+def storyboard(reel, g, fps, guias=False):
     """Hoja con un cuadro por plano (a 60 % del plano, o en "muestra"), numerado y con el segundo."""
     tiempos, t0 = [], 0.0
     for p in g["planos"]:
@@ -622,7 +656,12 @@ def storyboard(reel, g, fps):
         img = hechos.get(round(t, 3))
         if img is None:
             img = min(hechos.items(), key=lambda kv: abs(kv[0] - t))[1]
-        im = cv2.resize(img.clip(0, 255).astype(np.uint8), (360, 640), interpolation=cv2.INTER_AREA)
+        im = img.clip(0, 255).astype(np.uint8)
+        if guias:                                          # zona segura: márgenes laterales y franjas de interfaz
+            m = (W - ANCHO_MAX) // 2
+            cv2.rectangle(im, (m, ZONA_Y[0]), (W - m, ZONA_Y[1]), (0, 255, 255), 4)
+            cv2.rectangle(im, (850, 1000), (W, ZONA_Y[1]), (0, 0, 255), 3)
+        im = cv2.resize(im, (360, 640), interpolation=cv2.INTER_AREA)
         cv2.rectangle(im, (300, 0), (360, 44), (0, 0, 0), -1)
         cv2.putText(im, str(i + 1), (310, 33), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2, cv2.LINE_AA)
         cv2.rectangle(im, (0, 600), (120, 640), (0, 0, 0), -1)
@@ -632,7 +671,7 @@ def storyboard(reel, g, fps):
     while len(mini) % cols:
         mini.append(np.zeros_like(mini[0]))
     filas = [np.hstack(mini[r:r + cols]) for r in range(0, len(mini), cols)]
-    destino = Path(reel) / "salida" / f'{g["nombre"]}_storyboard.jpg'
+    destino = Path(reel) / "salida" / f'{g["nombre"]}_storyboard{"_guias" if guias else ""}.jpg'
     cv2.imwrite(str(destino), np.vstack(filas), [cv2.IMWRITE_JPEG_QUALITY, 88])
     print(destino)
 
@@ -664,6 +703,7 @@ def main():
     ap.add_argument("guion")
     ap.add_argument("--storyboard", action="store_true")
     ap.add_argument("--prueba", type=float)
+    ap.add_argument("--guias", action="store_true", help="dibuja la zona segura en el storyboard (autorrevisión)")
     a = ap.parse_args()
     g = json.loads((Path(a.reel) / "trabajo" / a.guion).read_text())
     # fps del lote = los que más se repiten entre los planos (no los del primero: un clip de celular trae 600/1)
@@ -672,9 +712,13 @@ def main():
                     sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps"]) for p in g["planos"]).most_common(1)[0][0]
     info = {"fps_txt": info[0], "fps": info[1]}
     if a.storyboard:
-        storyboard(a.reel, g, info["fps"])
+        storyboard(a.reel, g, info["fps"], guias=a.guias)
     else:
         render(a.reel, g, info["fps"], info["fps_txt"], a.prueba)
+    for x in dict.fromkeys(AVISOS):
+        print("AVISO zona segura:", x)
+    if not AVISOS:
+        print("zona segura OK: todos los textos dentro de los márgenes")
 
 
 if __name__ == "__main__":

@@ -121,3 +121,8 @@ Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What 
    TOF-4 v3 (Sebas): Izzy caminando 1,2 s (no más); IMPORTANT/TO YOU a la cintura (y 1060); carteles en 3 cortes como MOF-3 (BONE 13,9 · MUSCLE 8,2 · NERVE 4,4), el paneo acelerado no le gustó; YOUR SPINE IS PART una sola vez desde la correa de la cabeza; música Jonas Blue (drop 1:46,9).
    **Estabilizador: medir SIEMPRE antes y después** (What to expect): en tomas donde las personas llenan el cuadro (evaluación C7775) vid.stab sigue a la gente y EMPEORA el temblor (5,5 → 6,4); ahí se deja como viene. En "face down" (C7776) sí mejoró (5,1 → 2,6).
    **What to expect B ronda 2** (Sebas: sin estabilizador, tramo más quieto de cada clip): evaluación desde 1,0 s (temblor 6,5 → 2,8) con la voz entrando 0,66 s antes sobre el saludo (sincronía intacta); saludo +0,5 s y voz del saludo cortada antes de "here". "Face down": no hay tramo quieto mientras habla de frente → va como viene.
+   **AUTORREVISIÓN antes de mandar** (Sebas): `anuncio.py` achica sola cualquier línea de más de 900 px y avisa si un
+   texto sale del alto seguro (250-1590) o toca la columna de botones (x > 850 con y > 1000). Storyboard con
+   `--guias` para revisarlo yo. Verificar también la sincronía voz-imagen con números (desfase 0 ms en cada toma donde
+   se ve hablar a alguien). NADA de voz adelantada ni cortada para ganar estabilidad: la sincronía manda.
+   **Siempre storyboard antes de renderizar**, también en las versiones B.
