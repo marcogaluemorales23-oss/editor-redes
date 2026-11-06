@@ -469,6 +469,10 @@ def cuadros(reel, g, fps, limite=None, solo=None):
                                 p.get("x", 0.5) if vertical else 0.5).astype(np.float32)
             if g.get("grado") == "cine":
                 img = graduar(img, g.get("grado_k", 1.0)).astype(np.float32)
+            if g.get("saturacion") or g.get("exposicion"):     # retoque fino (Sebas: "un poquitico" más de color y luz)
+                img *= 1 + g.get("exposicion", 0.0)
+                gris = img.mean(2, keepdims=True)
+                img = np.clip(gris + (img - gris) * (1 + g.get("saturacion", 0.0)), 0, 255)
             if p.get("desenfoque"):
                 a, b = p["desenfoque"]
                 r = suave((k / fps - a) / (b - a))
