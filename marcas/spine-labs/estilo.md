@@ -127,3 +127,4 @@ Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What 
    se ve hablar a alguien). NADA de voz adelantada ni cortada para ganar estabilidad: la sincronía manda.
    **Siempre storyboard antes de renderizar**, también en las versiones B.
    **Respuestas del paciente** (Sebas, What to expect B): si el paciente habla lejos del micrófono ("It does" de Izzy), va en su propio tramo de voz (se normaliza aparte y queda al nivel de la doctora). Revisar que la frase siguiente no arranque con la cola cortada de otra ("...there"): empezar en la primera palabra limpia.
+   What to expect B: el audio de C7782 sigue hasta 10,46 s (Izzy "It does" + doctora "And what happens is you end up just..."), toma de la máquina +1,3 s (misma toma, sincronía 0 ms) y piernas +1,1 s; video 39,5 s. Nunca cortar el audio justo después de la respuesta de alguien: dejar respirar la frase.
