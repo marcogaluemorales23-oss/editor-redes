@@ -594,11 +594,11 @@ def mezclar_audio(reel, g, dur, destino):
                         f"volume={ganancia:.2f}dB,alimiter=limit={limite:.3f}:attack=1:release=60:level=disabled",
                         "-ar", "48000", str(destino)], check=True)
         i, tp = medir(str(destino))
-        ok_i, ok_tp = abs(i + 14) < 0.3, tp <= -2.5        # margen: el AAC sube el pico ~1 dB (BOF-2 salió a -0,6)
+        ok_i, ok_tp = abs(i + 14) < 0.3, tp <= -3.2        # margen: el AAC sube el pico ~1 dB (BOF-2 salió a -0,6)
         if ok_i and ok_tp:
             break
         if not ok_tp:
-            limite *= 10 ** ((-2.5 - tp - 0.3) / 20)
+            limite *= 10 ** ((-3.2 - tp - 0.3) / 20)
         ganancia += -14 - i
 
 
