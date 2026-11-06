@@ -110,3 +110,4 @@ Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What 
    (96 BPM, 3 tiempos por toma ≈ 1,9 s). ANOTR le sonó "ranchera" en ese tramo; Jonas Blue no convenció.
    Texto que no tape letreros que se mueven en la toma (BOF-1: el bloque bajó a y 1250 para que el letrero suba libre).
    BOF-1 v3 (Sebas): la apertura son DOS tomas de C7732: acercamiento al logo (0,9 s, zoom 1,12→1,42, estabilizado) y corte al paciente entrando (6,1 s).
+   BOF-1 v4: el estabilizador dejaba un salto al final de la toma del logo; se usa el tramo 100 % quieto de C7732 (2,0-3,2 s) sin estabilizar (logo 2 tiempos + entrada 4 tiempos). Antes de estabilizar, buscar SIEMPRE un tramo quieto.
