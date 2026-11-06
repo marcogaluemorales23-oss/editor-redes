@@ -126,3 +126,4 @@ Orden de re-edición: BOF-1, MOF-3, BOF-2, BOF-3, TOF-4, What to expect A, What 
    `--guias` para revisarlo yo. Verificar también la sincronía voz-imagen con números (desfase 0 ms en cada toma donde
    se ve hablar a alguien). NADA de voz adelantada ni cortada para ganar estabilidad: la sincronía manda.
    **Siempre storyboard antes de renderizar**, también en las versiones B.
+   **Respuestas del paciente** (Sebas, What to expect B): si el paciente habla lejos del micrófono ("It does" de Izzy), va en su propio tramo de voz (se normaliza aparte y queda al nivel de la doctora). Revisar que la frase siguiente no arranque con la cola cortada de otra ("...there"): empezar en la primera palabra limpia.
