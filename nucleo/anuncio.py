@@ -450,14 +450,17 @@ def estabilizar(reel, crudo, p):
         largo = p["dur"] + (p["desde"] - ini) + 1.0
     carpeta = Path(reel) / "trabajo" / "estab"
     carpeta.mkdir(exist_ok=True)
-    nombre = f'{p["clip"]}_{ini:.2f}_{largo:.2f}_{suave}'
+    tripode = bool(p.get("tripode"))                 # toma SIN personas (fachada): imagen fija, como en trípode
+    nombre = f'{p["clip"]}_{ini:.2f}_{largo:.2f}_{suave}{"_tripode" if tripode else ""}'
     destino, trf = carpeta / f"{nombre}.MP4", carpeta / f"{nombre}.trf"
     if not destino.exists():
         base = ["ffmpeg", "-nostdin", "-v", "error", "-y", "-ss", f"{ini:.3f}", "-t", f"{largo:.3f}", "-i", str(crudo)]
         escala = "scale=1440:-2:flags=lanczos"         # 1440 de ancho: sobra para entregar en 1080 y es 2x más rápido
-        subprocess.run(base + ["-vf", f"{escala},vidstabdetect=shakiness=6:accuracy=15:result={trf}",
+        det = ":tripod=1" if tripode else ""
+        subprocess.run(base + ["-vf", f"{escala},vidstabdetect=shakiness=6:accuracy=15{det}:result={trf}",
                                "-f", "null", "-"], check=True)
-        subprocess.run(base + ["-vf", f"{escala},vidstabtransform=input={trf}:smoothing={suave}:optzoom=1:"
+        modo = "tripod=1" if tripode else f"smoothing={suave}"
+        subprocess.run(base + ["-vf", f"{escala},vidstabtransform=input={trf}:{modo}:optzoom=1:"
                                f"interpol=bicubic,unsharp=5:5:0.4", "-an", "-c:v", "libx264", "-preset", "fast",
                                "-crf", "14", "-pix_fmt", "yuv420p", str(destino)], check=True)
     return destino, dict(p, desde=round(p["desde"] - ini, 3))
