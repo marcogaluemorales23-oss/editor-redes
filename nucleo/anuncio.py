@@ -561,9 +561,12 @@ def mezclar_audio(reel, g, dur, destino):
     A = g.get("audio", {})
     entradas, cadenas, voces, ventanas = [], [], [], []
     for j, v in enumerate(A.get("voz", [])):
+        largo = v["hasta"] - v["desde"]
+        if A.get("voz_archivo"):                             # la voz viene ya limpia: solo las ventanas (ducking)
+            ventanas.append((v["en"], v["en"] + largo))
+            continue
         crudo = str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')
         entradas += ["-i", crudo]
-        largo = v["hasta"] - v["desde"]
         limpia = (f'aformat=channel_layouts=mono,highpass=f=80,afftdn=nf=-30,'
                   f'acompressor=threshold=-24dB:ratio=3:attack=8:release=120')
         nivel = lufs(["-ss", str(v["desde"]), "-t", str(largo), "-i", crudo], limpia)
@@ -576,7 +579,14 @@ def mezclar_audio(reel, g, dur, destino):
         voces.append(f"[v{j}]")
         ventanas.append((v["en"], v["en"] + largo))
     pistas = []
-    if voces:
+    if A.get("voz_archivo"):                                 # voz ya limpiada por Sebas (pista entera del video)
+        arch = str(Path(reel) / "trabajo" / A["voz_archivo"])
+        entradas += ["-i", arch]
+        nivel = lufs(["-i", arch], "aformat=channel_layouts=mono")
+        cadenas.append(f'[{len(entradas)//2 - 1}:a]aformat=channel_layouts=mono,volume={VOZ_LUFS - nivel:.2f}dB,'
+                       f'alimiter=limit=0.9:level=disabled,apad=whole_dur={dur},atrim=0:{dur}[voz]')
+        voces = ["[voz]"]
+    elif voces:
         cadenas.append(f'{"".join(voces)}amix=inputs={len(voces)}:normalize=0,atrim=0:{dur}[voz]')
     M = A.get("musica")
     if M:
@@ -676,6 +686,25 @@ def storyboard(reel, g, fps, guias=False):
     print(destino)
 
 
+def exportar_voz(reel, g, dur, destino):
+    """Pista de voz sola, del largo del video y en su lugar exacto (para que Sebas la limpie en Premiere y la devuelva
+    como "voz_archivo"). Cada tramo nivelado a VOZ_LUFS, SIN reducción de ruido ni compresión (la hace él)."""
+    entradas, cadenas, voces = [], [], []
+    for j, v in enumerate(g["audio"]["voz"]):
+        crudo = str(Path(reel) / "crudos" / f'{v["clip"]}.MP4')
+        entradas += ["-i", crudo]
+        largo = v["hasta"] - v["desde"]
+        nivel = lufs(["-ss", str(v["desde"]), "-t", str(largo), "-i", crudo], "aformat=channel_layouts=mono")
+        cadenas.append(f'[{j}:a]atrim={v["desde"]}:{v["hasta"]},asetpts=PTS-STARTPTS,aformat=channel_layouts=mono,'
+                       f'volume={VOZ_LUFS - nivel + v.get("db", 0):.2f}dB,alimiter=limit=0.9:level=disabled,'
+                       f'afade=t=in:d=0.04,afade=t=out:st={max(largo - 0.06, 0)}:d=0.06,'
+                       f'{retrasar(v["en"])},apad=whole_dur={dur}[v{j}]')
+        voces.append(f"[v{j}]")
+    cadenas.append(f'{"".join(voces)}amix=inputs={len(voces)}:normalize=0,atrim=0:{dur}[voz]')
+    subprocess.run(["ffmpeg", "-nostdin", "-v", "error", "-y", *entradas, "-filter_complex", ";".join(cadenas),
+                    "-map", "[voz]", "-ar", "48000", "-c:a", "pcm_s24le", str(destino)], check=True)
+
+
 def render(reel, g, fps, fps_txt, limite=None):
     dur = duracion(g, fps) if not limite else min(limite, duracion(g, fps))
     sal = Path(reel) / "salida"
@@ -704,6 +733,7 @@ def main():
     ap.add_argument("--storyboard", action="store_true")
     ap.add_argument("--prueba", type=float)
     ap.add_argument("--guias", action="store_true", help="dibuja la zona segura en el storyboard (autorrevisión)")
+    ap.add_argument("--voz", action="store_true", help="exporta solo la pista de voz (salida/<nombre>_VOZ.wav)")
     a = ap.parse_args()
     g = json.loads((Path(a.reel) / "trabajo" / a.guion).read_text())
     # fps del lote = los que más se repiten entre los planos (no los del primero: un clip de celular trae 600/1)
@@ -711,6 +741,12 @@ def main():
     info = Counter((sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps_txt"],
                     sonda(Path(a.reel) / "crudos" / f'{p["clip"]}.MP4')["fps"]) for p in g["planos"]).most_common(1)[0][0]
     info = {"fps_txt": info[0], "fps": info[1]}
+    if a.voz:
+        dur = sum(round(p["dur"] * info["fps"]) / info["fps"] for p in g["planos"])
+        destino = Path(a.reel) / "salida" / f'{g["nombre"]}_VOZ.wav'
+        exportar_voz(a.reel, g, dur, destino)
+        print(destino, f"{dur:.2f}s")
+        return
     if a.storyboard:
         storyboard(a.reel, g, info["fps"], guias=a.guias)
     else:
