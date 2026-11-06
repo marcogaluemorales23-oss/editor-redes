@@ -592,6 +592,10 @@ def mezclar_audio(reel, g, dur, destino):
     M = A.get("musica")
     if M:
         musica = str(Path(reel) / "trabajo" / M["archivo"])
+        largo_m = float(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0",
+                                        musica], capture_output=True, text=True).stdout)
+        if M.get("desde", 0) + dur > largo_m:              # Sam: la canción se acababa a los 45 s del video
+            print(f"AVISO música: se acaba en el segundo {largo_m - M.get('desde', 0):.1f} del video (dura {dur:.1f})")
         entradas += ["-i", musica]
         idx = len(entradas) // 2 - 1
         eq = M.get("eq", "anull")
